@@ -1,4 +1,64 @@
 // Package rotato is a simple spinner library for Go.
+//
+// Examples:
+//
+// -------- SIMPLE:
+//
+//	r := rotato.New(
+//		rotato.WithSpinnerColor(rotato.ColorBrightGreen),
+//		rotato.WithPrefix("Simple Task #1"),
+//		rotato.WithDoneColorMesg(rotato.ColorBrightGreen, rotato.ColorStyleItalic),
+//	)
+//	r.Start()
+//
+//	// working...
+//	time.Sleep(2 * time.Second)
+//	r.Done("Task Completed!")
+//
+// -------- COLORS, STYLES:
+//
+//	r := rotato.New(
+//		rotato.WithSymbolsCircles3(),
+//		rotato.WithSpinnerColor(rotato.ColorBrightOrange),
+//		rotato.WithMesg("Connecting..."),
+//		rotato.WithPrefix("S3 Backup"),
+//	)
+//	r.Start()
+//	time.Sleep(2 * time.Second)
+//
+//	// connected
+//	r.UpdateSymbols(rotato.WithSymbols(rotato.ColorBrightGreen + "✓"))
+//	r.UpdateMesg("Connected!")
+//	r.UpdateMesgColor(rotato.ColorBrightGreen, rotato.ColorStyleItalic)
+//
+//	// updating
+//	time.Sleep(1 * time.Second)
+//	r.UpdateMesgColor(rotato.ColorGray)
+//	r.UpdateSymbols(rotato.WithSymbolsBarBlock())
+//	for i := 0; i < 15; i++ {
+//		r.UpdateMesg(randomString(12) + ".zip")
+//		time.Sleep(200 * time.Millisecond)
+//	}
+//
+//	// end
+//	r.Done("Backup completed!")
+//
+// -------- FAILING:
+//
+//	r := rotato.New(
+//		rotato.WithMesg("Trying to connect..."),
+//		rotato.WithPrefix("AWS Server"),
+//		rotato.WithFailColorMesg(rotato.ColorBrightRed, rotato.ColorStyleBlink),
+//	)
+//	r.Start()
+//	// trying to connect
+//	time.Sleep(2 * time.Second)
+//	// fail
+//	if true {
+//		r.Fail("Connection Failed!")
+//	}
+//
+//	--------------------------------
 package rotato
 
 import (
