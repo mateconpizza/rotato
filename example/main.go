@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/haaag/rotato"
+	"github.com/mateconpizza/rotato"
 )
 
 var (

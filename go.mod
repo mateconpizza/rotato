@@ -1,3 +1,3 @@
-module github.com/haaag/rotato
+module github.com/mateconpizza/rotato
 
 go 1.21

@@ -2,9 +2,9 @@
 <img align="right" width="320px" src="assets/rotato-logo.png" alt="Rotato Logo">
 <h1><b><span style="font-size: 1.2em">🌀</span> Rotato</b></h1>
 
-![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/haaag/rotato)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mateconpizza/rotato)
 ![Linux](https://img.shields.io/badge/-Linux-grey?logo=linux)
-[![Go Reference](https://pkg.go.dev/badge/github.com/haaag/rotato.svg)](https://pkg.go.dev/github.com/haaag/rotato)
+[![Go Reference](https://pkg.go.dev/badge/github.com/mateconpizza/rotato.svg)](https://pkg.go.dev/github.com/mateconpizza/rotato)
 
 Lightweight and highly customizable spinner library for Go, designed to enhance your command-line applications with visually appealing progress indicators. With **42** spinners to choose from, you can easily integrate dynamic loading animations into your projects.
 
@@ -23,21 +23,21 @@ You can check out the spinners with the following commands:
 
 ```sh
 # simple demo.
-go run github.com/haaag/rotato/example@latest -demo
+go run github.com/mateconpizza/rotato/example@latest -demo
 
 # all registered rotatos.
-go run github.com/haaag/rotato/example@latest -all
+go run github.com/mateconpizza/rotato/example@latest -all
 ```
 
 ## 📦 Installation
 
 ```sh
-go get github.com/haaag/rotato@latest
+go get github.com/mateconpizza/rotato@latest
 ```
 
 ## 🚀 Example
 
-There is a example in the [example](https://github.com/haaag/rotato/blob/master/example/main.go) folder.
+There is a example in the [example](https://github.com/mateconpizza/rotato/blob/master/example/main.go) folder.
 
 ```go
 r := rotato.New(
@@ -48,7 +48,7 @@ r := rotato.New(
 )
 r.Start()
 // do some stuff
-repo := git.New("https://github.com/haaag/rotato")
+repo := git.New("https://github.com/mateconpizza/rotato")
 r.UpdateMesg("Syncing Repo...")
 if err := repo.Sync(); err != nil {
     r.Fail("Sync Failed!")
