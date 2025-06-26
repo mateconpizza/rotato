@@ -88,14 +88,14 @@ func showSymbols() {
 
 	exitMesg := rotato.ColorGray + rotato.ColorStyleItalic + "(Press Ctrl+C to exit)" + rotato.ColorReset
 	for _, symbol := range allSymbols {
-		sp := rotato.New(
+		r := rotato.New(
 			rotato.WithMesg(exitMesg),
 			rotato.WithPrefix(symbol.s+strings.Repeat(" ", maxLen-len(symbol.s))),
 			symbol.o,
 		)
-		sp.Start()
+		r.Start()
 		time.Sleep(2 * time.Second)
-		sp.Done(strings.Join(sp.Symbols(), ""))
+		r.Done(strings.Join(r.Symbols(), ""))
 	}
 }
 

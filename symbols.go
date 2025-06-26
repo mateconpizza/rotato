@@ -5,8 +5,8 @@ var defaultSymbols = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "
 // WithSymbols returns an option function that sets the spinner unicode
 // animation.
 func WithSymbols(symbols ...string) Option {
-	return func(sp *Spinner) {
-		sp.symbols = symbols
+	return func(r *Rotato) {
+		r.symbols = symbols
 	}
 }
 
@@ -15,8 +15,8 @@ func WithSymbols(symbols ...string) Option {
 //
 //	"░", "▒", "▒", "░", "▓".
 func WithSymbolsBlock() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"░", "▒", "▒", "░", "▓"}
+	return func(r *Rotato) {
+		r.symbols = []string{"░", "▒", "▒", "░", "▓"}
 	}
 }
 
@@ -25,8 +25,8 @@ func WithSymbolsBlock() Option {
 //
 //	"█▒▒▒▒▒▒▒▒▒", "███▒▒▒▒▒▒▒", "█████▒▒▒▒▒", "███████▒▒▒", "██████████".
 func WithSymbolsBarBlock() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"█▒▒▒▒▒▒▒▒▒", "███▒▒▒▒▒▒▒", "█████▒▒▒▒▒", "███████▒▒▒", "██████████"}
+	return func(r *Rotato) {
+		r.symbols = []string{"█▒▒▒▒▒▒▒▒▒", "███▒▒▒▒▒▒▒", "█████▒▒▒▒▒", "███████▒▒▒", "██████████"}
 	}
 }
 
@@ -35,8 +35,8 @@ func WithSymbolsBarBlock() Option {
 //
 //	"[|       ]", "[||      ]", "[|||     ]", "[||||    ]", "[|||||   ]", "[||||||  ]", "[||||||| ]", "[||||||||]".
 func WithSymbolsBarBlock2() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{
+	return func(r *Rotato) {
+		r.symbols = []string{
 			"[       ]",
 			"[|      ]",
 			"[||     ]",
@@ -54,8 +54,8 @@ func WithSymbolsBarBlock2() Option {
 //
 //	"[=       ]", "[==      ]", "[===     ]", "[====    ]", "[=====   ]", "[======  ]", "[======= ]", "[========]".
 func WithSymbolsBarBlock3() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{
+	return func(r *Rotato) {
+		r.symbols = []string{
 			"[       ]",
 			"[=      ]",
 			"[==     ]",
@@ -74,8 +74,8 @@ func WithSymbolsBarBlock3() Option {
 //	"|", "||", "|||", "||||", "|||||", "||||||", "|||||||", "||||||||",
 //	"|||||||", "||||||", "|||||", "||||", "|||", "||", "|".
 func WithSymbolsBarBlock4() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{
+	return func(r *Rotato) {
+		r.symbols = []string{
 			"|",
 			"||",
 			"|||",
@@ -102,8 +102,8 @@ func WithSymbolsBarBlock4() Option {
 //	"[-----*--]", "[------*-]", "[-------*]", "[------*-]", "[-----*--]".
 //	"[----*---]", "[---*----]", "[--*-----]", "[-*------]", "[*-------]".
 func WithSymbolsBarBlock5() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{
+	return func(r *Rotato) {
+		r.symbols = []string{
 			"[*-------]",
 			"[-*------]",
 			"[--*-----]",
@@ -129,8 +129,8 @@ func WithSymbolsBarBlock5() Option {
 //	"·-----", "-·----", "--·---", "---·--", "----·-", "-----·",
 //	"----·-", "---·--", "--·---", "-·----", "·-----",
 func WithSymbolsBarBlock6() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{
+	return func(r *Rotato) {
+		r.symbols = []string{
 			"·-----",
 			"-·----",
 			"--·---",
@@ -151,9 +151,9 @@ func WithSymbolsBarBlock6() Option {
 //
 //	"", "", "", "", "", "", "".
 func WithSymbolsBlockPretty() Option {
-	return func(sp *Spinner) {
+	return func(r *Rotato) {
 		//  
-		sp.symbols = []string{"", "", "", "", "", "", ""}
+		r.symbols = []string{"", "", "", "", "", "", ""}
 	}
 }
 
@@ -162,8 +162,8 @@ func WithSymbolsBlockPretty() Option {
 //
 //	"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷".
 func WithSymbolsDots() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"}
+	return func(r *Rotato) {
+		r.symbols = []string{"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"}
 	}
 }
 
@@ -172,8 +172,8 @@ func WithSymbolsDots() Option {
 //
 //	"  . . . .", ".   . . .", ". .   . .", ". . .   .", ". . . .  ", ". . . . .".
 func WithSymbolsDots2() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{
+	return func(r *Rotato) {
+		r.symbols = []string{
 			"  . . . .",
 			".   . . .",
 			". .   . .",
@@ -189,8 +189,8 @@ func WithSymbolsDots2() Option {
 //
 //	"⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆".
 func WithSymbolsDots3() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆"}
+	return func(r *Rotato) {
+		r.symbols = []string{"⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆"}
 	}
 }
 
@@ -199,8 +199,8 @@ func WithSymbolsDots3() Option {
 //
 //	"⠁", "⠂", "⠄", "⡀", "⢀", "⠠", "⠐", "⠈".
 func WithSymbolsDots4() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"⠁", "⠂", "⠄", "⡀", "⢀", "⠠", "⠐", "⠈"}
+	return func(r *Rotato) {
+		r.symbols = []string{"⠁", "⠂", "⠄", "⡀", "⢀", "⠠", "⠐", "⠈"}
 	}
 }
 
@@ -209,8 +209,8 @@ func WithSymbolsDots4() Option {
 //
 //	"⠁", "⠁", "⠉", "⠙", "⠚", "⠒", "⠂", "⠂", "⠒".
 func WithSymbolsDots5() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{
+	return func(r *Rotato) {
+		r.symbols = []string{
 			"⠁",
 			"⠁",
 			"⠉",
@@ -249,8 +249,8 @@ func WithSymbolsDots5() Option {
 //
 //	"⠂", "-", "–", "—", "–", "-".
 func WithSymbolsLines() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"⠂", "-", "–", "—", "–", "-"}
+	return func(r *Rotato) {
+		r.symbols = []string{"⠂", "-", "–", "—", "–", "-"}
 	}
 }
 
@@ -259,8 +259,8 @@ func WithSymbolsLines() Option {
 //
 //	"⢄", "⢂", "⢁", "⡀", "⠈", "⠘", "⠸".
 func WithSymbolsWave() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"⢄", "⢂", "⢁", "⡀", "⠈", "⠘", "⠸"}
+	return func(r *Rotato) {
+		r.symbols = []string{"⢄", "⢂", "⢁", "⡀", "⠈", "⠘", "⠸"}
 	}
 }
 
@@ -269,8 +269,8 @@ func WithSymbolsWave() Option {
 //
 //	"▉", "▊", "▋", "▌", "▍", "▎", "▏".
 func WithSymbolsGrow() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"▉", "▊", "▋", "▌", "▍", "▎", "▏"}
+	return func(r *Rotato) {
+		r.symbols = []string{"▉", "▊", "▋", "▌", "▍", "▎", "▏"}
 	}
 }
 
@@ -279,8 +279,8 @@ func WithSymbolsGrow() Option {
 //
 //	"▁", "▃", "▄", "▅", "▆", "▇", "▆", "▅", "▄", "▃".
 func WithSymbolsGrowVert() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"▁", "▃", "▄", "▅", "▆", "▇", "▆", "▅", "▄", "▃"}
+	return func(r *Rotato) {
+		r.symbols = []string{"▁", "▃", "▄", "▅", "▆", "▇", "▆", "▅", "▄", "▃"}
 	}
 }
 
@@ -289,8 +289,8 @@ func WithSymbolsGrowVert() Option {
 //
 //	"🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘".
 func WithSymbolsMoon() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"}
+	return func(r *Rotato) {
+		r.symbols = []string{"🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"}
 	}
 }
 
@@ -299,8 +299,8 @@ func WithSymbolsMoon() Option {
 //
 //	"|", "/", "-", "\\".
 func WithSymbolsPipe() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"|", "/", "-", "\\"}
+	return func(r *Rotato) {
+		r.symbols = []string{"|", "/", "-", "\\"}
 	}
 }
 
@@ -309,8 +309,8 @@ func WithSymbolsPipe() Option {
 //
 //	"┤", "┘", "┴", "└", "├", "┌", "┬", "┐".
 func WithSymbolsPipe2() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"┤", "┘", "┴", "└", "├", "┌", "┬", "┐"}
+	return func(r *Rotato) {
+		r.symbols = []string{"┤", "┘", "┴", "└", "├", "┌", "┬", "┐"}
 	}
 }
 
@@ -319,8 +319,8 @@ func WithSymbolsPipe2() Option {
 //
 //	"▖", "▘", "▝", "▗".
 func WithSymbolsSquare() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"▖", "▘", "▝", "▗"}
+	return func(r *Rotato) {
+		r.symbols = []string{"▖", "▘", "▝", "▗"}
 	}
 }
 
@@ -329,8 +329,8 @@ func WithSymbolsSquare() Option {
 //
 //	"", "", "", "", "".
 func WithSymbolsSquare2() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"", "", "", "", ""}
+	return func(r *Rotato) {
+		r.symbols = []string{"", "", "", "", ""}
 	}
 }
 
@@ -339,8 +339,8 @@ func WithSymbolsSquare2() Option {
 //
 //	"🕛", "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚".
 func WithSymbolsClock() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"🕛", "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚"}
+	return func(r *Rotato) {
+		r.symbols = []string{"🕛", "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚"}
 	}
 }
 
@@ -349,8 +349,8 @@ func WithSymbolsClock() Option {
 //
 //	"◇", "◈", "⬟", "⬞".
 func WithSymbolsDiamond() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"◇", "◈", "⬟", "⬞"}
+	return func(r *Rotato) {
+		r.symbols = []string{"◇", "◈", "⬟", "⬞"}
 	}
 }
 
@@ -359,8 +359,8 @@ func WithSymbolsDiamond() Option {
 //
 //	"", "", "", "".
 func WithSymbolsDiamond2() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"", "", "", ""}
+	return func(r *Rotato) {
+		r.symbols = []string{"", "", "", ""}
 	}
 }
 
@@ -369,8 +369,8 @@ func WithSymbolsDiamond2() Option {
 //
 //	"+", "x".
 func WithSymbolsPlusCross() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"+", "x"}
+	return func(r *Rotato) {
+		r.symbols = []string{"+", "x"}
 	}
 }
 
@@ -379,8 +379,8 @@ func WithSymbolsPlusCross() Option {
 //
 //	"<", "<<", "<<<", "-", ">", ">>", ">>>".
 func WithSymbolsArrows() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"<", "<<", "<<<", "-", ">", ">>", ">>>"}
+	return func(r *Rotato) {
+		r.symbols = []string{"<", "<<", "<<<", "-", ">", ">>", ">>>"}
 	}
 }
 
@@ -389,8 +389,8 @@ func WithSymbolsArrows() Option {
 //
 //	">   ", ">>  ", ">>> ", ">>>>".
 func WithSymbolsArrows2() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{">   ", ">>  ", ">>> ", ">>>>"}
+	return func(r *Rotato) {
+		r.symbols = []string{">   ", ">>  ", ">>> ", ">>>>"}
 	}
 }
 
@@ -399,8 +399,8 @@ func WithSymbolsArrows2() Option {
 //
 //	"▹▹▹▹▹", "▸▹▹▹▹", "▹▸▹▹▹", "▹▹▸▹▹", "▹▹▹▸▹", "▹▹▹▹▸".
 func WithSymbolsArrows3() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"▹▹▹▹▹", "▸▹▹▹▹", "▹▸▹▹▹", "▹▹▸▹▹", "▹▹▹▸▹", "▹▹▹▹▸"}
+	return func(r *Rotato) {
+		r.symbols = []string{"▹▹▹▹▹", "▸▹▹▹▹", "▹▸▹▹▹", "▹▹▸▹▹", "▹▹▹▸▹", "▹▹▹▹▸"}
 	}
 }
 
@@ -409,8 +409,8 @@ func WithSymbolsArrows3() Option {
 //
 //	"←", "↖", "↑", "↗", "→", "↘", "↓", "↙".
 func WithSymbolsArrows4() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"←", "↖", "↑", "↗", "→", "↘", "↓", "↙"}
+	return func(r *Rotato) {
+		r.symbols = []string{"←", "↖", "↑", "↗", "→", "↘", "↓", "↙"}
 	}
 }
 
@@ -419,8 +419,8 @@ func WithSymbolsArrows4() Option {
 //
 //	"o", "O", "@", "*".
 func WithSymbolsCircles() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"o", "O", "@", "*"}
+	return func(r *Rotato) {
+		r.symbols = []string{"o", "O", "@", "*"}
 	}
 }
 
@@ -429,8 +429,8 @@ func WithSymbolsCircles() Option {
 //
 //	".", "o", "O", "°", "O", "o", ".".
 func WithSymbolsCircles2() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{".", "o", "O", "°", "O", "o", "."}
+	return func(r *Rotato) {
+		r.symbols = []string{".", "o", "O", "°", "O", "o", "."}
 	}
 }
 
@@ -439,8 +439,8 @@ func WithSymbolsCircles2() Option {
 //
 //	"●", "●", "●", "●".
 func WithSymbolsCircles3() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"●", "●", "●", "●"}
+	return func(r *Rotato) {
+		r.symbols = []string{"●", "●", "●", "●"}
 	}
 }
 
@@ -449,8 +449,8 @@ func WithSymbolsCircles3() Option {
 //
 //	"", "", "", "".
 func WithSymbolsCircles4() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"", "", "", ""}
+	return func(r *Rotato) {
+		r.symbols = []string{"", "", "", ""}
 	}
 }
 
@@ -459,8 +459,8 @@ func WithSymbolsCircles4() Option {
 //
 //	"", "", "", "".
 func WithSymbolsCircles5() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"", "", "", "", ""}
+	return func(r *Rotato) {
+		r.symbols = []string{"", "", "", "", ""}
 	}
 }
 
@@ -469,8 +469,8 @@ func WithSymbolsCircles5() Option {
 //
 //	"", "", "", "", "".
 func WithSymbolsCircles6() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"", "", "", "", "", ""}
+	return func(r *Rotato) {
+		r.symbols = []string{"", "", "", "", "", ""}
 	}
 }
 
@@ -479,8 +479,8 @@ func WithSymbolsCircles6() Option {
 //
 //	"", "", "", "", "", "".
 func WithSymbolsCircles7() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"", "", "", "", "", ""}
+	return func(r *Rotato) {
+		r.symbols = []string{"", "", "", "", "", ""}
 	}
 }
 
@@ -489,8 +489,8 @@ func WithSymbolsCircles7() Option {
 //
 //	"[    ]", "[=   ]", "[==  ]", "[=== ]", "[ ===]", "[  ==]", "[   =]".
 func WithSymbolsBounce() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{
+	return func(r *Rotato) {
+		r.symbols = []string{
 			"[    ]",
 			"[=   ]",
 			"[==  ]",
@@ -515,8 +515,8 @@ func WithSymbolsBounce() Option {
 //
 //	"( ●    )", "(  ●   )", "(   ●  )", "(    ● )", "(     ●)".
 func WithSymbolsBounceBall() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{
+	return func(r *Rotato) {
+		r.symbols = []string{
 			"( ●    )",
 			"(  ●   )",
 			"(   ●  )",
@@ -536,8 +536,8 @@ func WithSymbolsBounceBall() Option {
 //
 //	"■", "□", "▪", "▫".
 func WithSymbolsToggle() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"■", "□", "▪", "▫"}
+	return func(r *Rotato) {
+		r.symbols = []string{"■", "□", "▪", "▫"}
 	}
 }
 
@@ -546,8 +546,8 @@ func WithSymbolsToggle() Option {
 //
 //	"=", "*", "-".
 func WithSymbolsToggle2() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"=", "*", "-"}
+	return func(r *Rotato) {
+		r.symbols = []string{"=", "*", "-"}
 	}
 }
 
@@ -556,8 +556,8 @@ func WithSymbolsToggle2() Option {
 //
 //	"◉", "◎".
 func WithSymbolsToggle3() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{"◉", "◎"}
+	return func(r *Rotato) {
+		r.symbols = []string{"◉", "◎"}
 	}
 }
 
@@ -566,8 +566,8 @@ func WithSymbolsToggle3() Option {
 //
 //	"loading....".
 func WithSymbolsLoading() Option {
-	return func(sp *Spinner) {
-		sp.symbols = []string{
+	return func(r *Rotato) {
+		r.symbols = []string{
 			"l      ",
 			"lo     ",
 			"loa    ",

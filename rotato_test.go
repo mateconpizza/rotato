@@ -10,12 +10,12 @@ import (
 func TestSpinnerOutput(t *testing.T) {
 	var buf bytes.Buffer
 	mesg := "Testing"
-	sp := New(WithWriter(&buf), WithMesg(mesg), WithDoneMesg("Done"))
-	sp.frequency = 10 * time.Millisecond
+	r := New(WithWriter(&buf), WithMesg(mesg), WithDoneMesg("Done"))
+	r.frequency = 10 * time.Millisecond
 
-	sp.Start()
+	r.Start()
 	time.Sleep(50 * time.Millisecond)
-	sp.Done()
+	r.Done()
 
 	output := buf.String()
 	if output == "" {
@@ -30,21 +30,21 @@ func TestSpinnerOutput(t *testing.T) {
 // running.
 func TestSpinnerState(t *testing.T) {
 	var buf bytes.Buffer
-	sp := New(
+	r := New(
 		WithWriter(&buf),
 		WithSpinnerFrequency(10*time.Millisecond),
 		WithSymbols([]string{"-", "\\", "|", "/"}...),
 		WithDoneMesg("Stopped"),
 	)
-	sp.Start()
+	r.Start()
 	time.Sleep(20 * time.Millisecond)
 	// verify that the spinner state is true.
-	if !sp.isActive {
+	if !r.isActive {
 		t.Error("expected spinner to be running")
 	}
 	// verify that the spinner state is false.
-	sp.Done()
-	if sp.isActive {
+	r.Done()
+	if r.isActive {
 		t.Error("expected spinner to be stopped after calling Stop()")
 	}
 }
@@ -54,18 +54,18 @@ func TestSpinnerState(t *testing.T) {
 func TestSpinnerMessageUpdate(t *testing.T) {
 	var buf bytes.Buffer
 
-	sp := New(
+	r := New(
 		WithWriter(&buf),
 		WithSpinnerFrequency(10*time.Millisecond),
 		WithMesg("Initial"),
 		WithDoneMesg("Done"),
 	)
-	sp.Start()
+	r.Start()
 	time.Sleep(20 * time.Millisecond)
 	// Update the message.
-	sp.UpdateMesg("Updated")
+	r.UpdateMesg("Updated")
 	time.Sleep(50 * time.Millisecond)
-	sp.Done()
+	r.Done()
 
 	out := buf.String()
 	if !strings.Contains(out, "Updated") {
@@ -75,9 +75,9 @@ func TestSpinnerMessageUpdate(t *testing.T) {
 
 func TestFailMesg(t *testing.T) {
 	var buf bytes.Buffer
-	sp := New(WithWriter(&buf))
-	sp.Start()
-	sp.Fail("Failed")
+	r := New(WithWriter(&buf))
+	r.Start()
+	r.Fail("Failed")
 	out := buf.String()
 	if !strings.Contains(out, "Failed") {
 		t.Errorf("expected spinner output to contain 'Failed', got %q", out)

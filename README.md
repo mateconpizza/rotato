@@ -21,11 +21,13 @@ Lightweight and highly customizable spinner library for Go, designed to enhance 
 
 You can check out the spinners with the following commands:
 
+- Simple demo.
 ```sh
-# simple demo.
 go run github.com/mateconpizza/rotato/example@latest -demo
+```
 
-# all registered rotatos.
+- All registered rotatos.
+```sh
 go run github.com/mateconpizza/rotato/example@latest -all
 ```
 

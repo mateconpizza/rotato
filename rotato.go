@@ -117,112 +117,112 @@ var (
 
 // WithMesg returns an option function that sets the spinner message.
 func WithMesg(s string) Option {
-	return func(sp *Spinner) {
-		sp.message = s
+	return func(r *Rotato) {
+		r.message = s
 	}
 }
 
 // WithMesgColor returns an option function that sets the spinner message
 // color.
 func WithMesgColor(color ...string) Option {
-	return func(sp *Spinner) {
-		sp.messageColor = strings.Join(color, "")
+	return func(r *Rotato) {
+		r.messageColor = strings.Join(color, "")
 	}
 }
 
 // WithPrefix returns an option function that sets the spinner prefix.
 func WithPrefix(prefix string) Option {
-	return func(sp *Spinner) {
-		sp.prefixMesg = prefix
+	return func(r *Rotato) {
+		r.prefixMesg = prefix
 	}
 }
 
 // WithPrefixColor returns an option function that sets the spinner color
 // prefix.
 func WithPrefixColor(color ...string) Option {
-	return func(sp *Spinner) {
-		sp.prefixColor = strings.Join(color, "")
+	return func(r *Rotato) {
+		r.prefixColor = strings.Join(color, "")
 	}
 }
 
 // WithDoneMesg returns an option function that sets the spinner done message.
 func WithDoneMesg(mesg string) Option {
-	return func(sp *Spinner) {
-		sp.doneMessage = mesg
+	return func(r *Rotato) {
+		r.doneMessage = mesg
 	}
 }
 
 // WithDoneSymbol returns an option function that sets the spinner stop symbol.
 func WithDoneSymbol(symbol string) Option {
-	return func(sp *Spinner) {
-		sp.doneSymbol = symbol
+	return func(r *Rotato) {
+		r.doneSymbol = symbol
 	}
 }
 
 // WithDoneColorMesg returns an option function that sets the done message
 // color.
 func WithDoneColorMesg(color ...string) Option {
-	return func(sp *Spinner) {
-		sp.doneMessageColor = strings.Join(color, "")
+	return func(r *Rotato) {
+		r.doneMessageColor = strings.Join(color, "")
 	}
 }
 
 // WithFailSymbol returns an option function that sets the spinner fail symbol.
 func WithFailSymbol(symbol string) Option {
-	return func(sp *Spinner) {
-		sp.failSymbol = symbol
+	return func(r *Rotato) {
+		r.failSymbol = symbol
 	}
 }
 
 // WithFailColorMesg returns an option function that sets the fail message
 // color.
 func WithFailColorMesg(color ...string) Option {
-	return func(sp *Spinner) {
-		sp.failMessageColor = strings.Join(color, "")
+	return func(r *Rotato) {
+		r.failMessageColor = strings.Join(color, "")
 	}
 }
 
 // WithSpinnerColor returns an option function that sets the spinner color.
 func WithSpinnerColor(color ...string) Option {
-	return func(sp *Spinner) {
-		sp.spinnerColor = strings.Join(color, "")
+	return func(r *Rotato) {
+		r.spinnerColor = strings.Join(color, "")
 	}
 }
 
 // WithSpinnerFrequency returns an option function that sets the spinner frequency.
 func WithSpinnerFrequency(d time.Duration) Option {
-	return func(sp *Spinner) {
-		sp.frequency = d
+	return func(r *Rotato) {
+		r.frequency = d
 	}
 }
 
 // WithDelimiter returns an option function that sets the spinner delimiter.
 func WithDelimiter(s string) Option {
-	return func(sp *Spinner) {
-		sp.delimiter = s
+	return func(r *Rotato) {
+		r.delimiter = s
 	}
 }
 
 // WithDelimiterColor returns an option function that sets the spinner color
 // delimiter, only visible with `prefix`.
 func WithDelimiterColor(color ...string) Option {
-	return func(sp *Spinner) {
-		sp.delimiterColor = strings.Join(color, "")
+	return func(r *Rotato) {
+		r.delimiterColor = strings.Join(color, "")
 	}
 }
 
 // WithWriter returns an option function that sets the spinner writer.
 func WithWriter(w io.Writer) Option {
-	return func(sp *Spinner) {
-		sp.Writer = w
+	return func(r *Rotato) {
+		r.Writer = w
 	}
 }
 
 // Option is an option function for the spinner.
-type Option func(*Spinner)
+type Option func(*Rotato)
 
-// Spinner represents a CLI spinner animation.
-type Spinner struct {
+// Rotato represents a CLI spinner animation.
+type Rotato struct {
 	Writer           io.Writer     // Output writer
 	delimiter        string        // Delimiter between prefix and spinner symbol
 	delimiterColor   string        // Delimiter color
@@ -248,218 +248,218 @@ type Spinner struct {
 }
 
 // render displays the current frame and message of the spinner.
-func (sp *Spinner) render(current int) {
-	mesg := sp.currentMessage()
-	frameFormatted := sp.currentFrame(current)
+func (r *Rotato) render(current int) {
+	mesg := r.currentMessage()
+	frameFormatted := r.currentFrame(current)
 
-	if sp.prefixMesg != "" {
-		sp.parsePrefix(frameFormatted, mesg)
+	if r.prefixMesg != "" {
+		r.parsePrefix(frameFormatted, mesg)
 		return
 	}
-	sp.display(fmt.Sprintf("%s %s", frameFormatted, mesg))
+	r.display(fmt.Sprintf("%s %s", frameFormatted, mesg))
 }
 
 // Start starts the spinning animation in a goroutine.
-func (sp *Spinner) Start() {
-	if !isInteractive(sp) {
-		sp.mu.Lock()
-		defer sp.mu.Unlock()
+func (r *Rotato) Start() {
+	if !isInteractive(r) {
+		r.mu.Lock()
+		defer r.mu.Unlock()
 
-		if sp.isActive {
+		if r.isActive {
 			return
 		}
 
-		sp.isActive = true
+		r.isActive = true
 		// add prefix
-		if sp.prefixMesg != "" {
-			sp.message = fmt.Sprintf("%s%s%s", sp.prefixMesg, sp.delimiter, sp.message)
+		if r.prefixMesg != "" {
+			r.message = fmt.Sprintf("%s%s%s", r.prefixMesg, r.delimiter, r.message)
 		}
-		sp.display(sp.message)
+		r.display(r.message)
 
 		return
 	}
 
-	hideCursor(sp.Writer)
-	sp.mu.Lock()
-	defer sp.mu.Unlock()
+	hideCursor(r.Writer)
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
-	if sp.isActive {
+	if r.isActive {
 		return
 	}
 
-	sp.isActive = true
-	if isRedirected(sp.Writer) {
-		sp.render(0)
+	r.isActive = true
+	if isRedirected(r.Writer) {
+		r.render(0)
 		return
 	}
 
-	ticker := time.NewTicker(sp.frequency)
+	ticker := time.NewTicker(r.frequency)
 	go func() {
 		defer ticker.Stop()
 
 		for i := 0; ; i++ {
 			select {
-			case <-sp.doneChan:
+			case <-r.doneChan:
 				return
 			case <-ticker.C:
-				sp.mu.Lock()
-				if !sp.isActive {
-					sp.mu.Unlock()
+				r.mu.Lock()
+				if !r.isActive {
+					r.mu.Unlock()
 					return
 				}
-				sp.render(i)
-				sp.mu.Unlock()
+				r.render(i)
+				r.mu.Unlock()
 			}
 		}
 	}()
 }
 
 // Done stops the spinner animation.
-func (sp *Spinner) Done(mesg ...string) {
-	if !sp.isActive {
+func (r *Rotato) Done(mesg ...string) {
+	if !r.isActive {
 		return
 	}
-	defer showCursor(sp.Writer)
+	defer showCursor(r.Writer)
 
-	sp.stopSpinner()
+	r.stopSpinner()
 
 	var finalMesg string
 	switch {
 	case len(mesg) > 0:
 		finalMesg = strings.Join(mesg, " ")
-	case sp.doneMessage != "":
-		finalMesg = sp.doneMessage
+	case r.doneMessage != "":
+		finalMesg = r.doneMessage
 	default:
 		fmt.Print(clearChars)
 		return
 	}
 
-	sp.displayMessage(sp.doneSymbol, sp.doneMessageColor, finalMesg)
+	r.displayMessage(r.doneSymbol, r.doneMessageColor, finalMesg)
 }
 
 // Fail fails the spinner animation.
-func (sp *Spinner) Fail(mesg ...string) {
-	if !sp.isActive {
+func (r *Rotato) Fail(mesg ...string) {
+	if !r.isActive {
 		return
 	}
-	sp.stopSpinner()
+	r.stopSpinner()
 	if len(mesg) == 0 {
 		mesg = append(mesg, "Failed")
 	}
-	sp.displayMessage(sp.failSymbol, sp.failMessageColor, mesg...)
+	r.displayMessage(r.failSymbol, r.failMessageColor, mesg...)
 }
 
 // Symbols returns the spinner symbols.
-func (sp *Spinner) Symbols() []string {
-	return sp.symbols
+func (r *Rotato) Symbols() []string {
+	return r.symbols
 }
 
 // UpdateMesg changes the message shown next to the spinner.
-func (sp *Spinner) UpdateMesg(mesg string) {
-	sp.messageUpdate.Lock()
-	sp.message = mesg
-	sp.messageUpdate.Unlock()
-	if !isInteractive(sp) {
-		_, _ = fmt.Fprintf(sp.Writer, "%s\n", mesg)
+func (r *Rotato) UpdateMesg(mesg string) {
+	r.messageUpdate.Lock()
+	r.message = mesg
+	r.messageUpdate.Unlock()
+	if !isInteractive(r) {
+		_, _ = fmt.Fprintf(r.Writer, "%s\n", mesg)
 	}
 }
 
 // UpdateMesgColor changes the color of the message.
-func (sp *Spinner) UpdateMesgColor(color ...string) {
-	sp.messageColor = strings.Join(color, "")
+func (r *Rotato) UpdateMesgColor(color ...string) {
+	r.messageColor = strings.Join(color, "")
 }
 
 // UpdatePrefix changes the prefix shown next to the spinner.
-func (sp *Spinner) UpdatePrefix(mesg string) {
-	sp.prefixMu.Lock()
-	sp.prefixMesg = mesg
-	sp.prefixMu.Unlock()
+func (r *Rotato) UpdatePrefix(mesg string) {
+	r.prefixMu.Lock()
+	r.prefixMesg = mesg
+	r.prefixMu.Unlock()
 }
 
 // UpdatePrefixColor changes the color of the prefix.
-func (sp *Spinner) UpdatePrefixColor(color ...string) {
-	sp.prefixColor = strings.Join(color, "")
+func (r *Rotato) UpdatePrefixColor(color ...string) {
+	r.prefixColor = strings.Join(color, "")
 }
 
 // UpdateDoneMesgColor changes the done message shown next to the spinner.
-func (sp *Spinner) UpdateDoneMesgColor(mesg ...string) {
-	sp.doneMessageColor = strings.Join(mesg, "")
+func (r *Rotato) UpdateDoneMesgColor(mesg ...string) {
+	r.doneMessageColor = strings.Join(mesg, "")
 }
 
 // UpdateSpinnerColor changes the color of the spinner.
-func (sp *Spinner) UpdateSpinnerColor(color ...string) {
-	sp.spinnerColor = strings.Join(color, "")
+func (r *Rotato) UpdateSpinnerColor(color ...string) {
+	r.spinnerColor = strings.Join(color, "")
 }
 
 // UpdateSymbols updates the spinner symbols.
-func (sp *Spinner) UpdateSymbols(opt Option) {
-	sp.mu.Lock()
-	opt(sp)
-	sp.mu.Unlock()
+func (r *Rotato) UpdateSymbols(opt Option) {
+	r.mu.Lock()
+	opt(r)
+	r.mu.Unlock()
 }
 
 // currentMessage safely constructs and returns the current message.
-func (sp *Spinner) currentMessage() string {
-	if sp.message == "" {
+func (r *Rotato) currentMessage() string {
+	if r.message == "" {
 		return ""
 	}
-	sp.messageUpdate.RLock()
-	defer sp.messageUpdate.RUnlock()
+	r.messageUpdate.RLock()
+	defer r.messageUpdate.RUnlock()
 
-	return sp.messageColor + sp.message + ColorReset
+	return r.messageColor + r.message + ColorReset
 }
 
 // currentFrame returns the spinner frame for the given iteration.
-func (sp *Spinner) currentFrame(i int) string {
-	if len(sp.symbols) == 0 {
+func (r *Rotato) currentFrame(i int) string {
+	if len(r.symbols) == 0 {
 		return ""
 	}
-	sp.frameIdx = i % len(sp.symbols)
-	sp.frame = sp.symbols[sp.frameIdx]
+	r.frameIdx = i % len(r.symbols)
+	r.frame = r.symbols[r.frameIdx]
 
-	return sp.spinnerColor + sp.frame + ColorReset
+	return r.spinnerColor + r.frame + ColorReset
 }
 
 // parsePrefix updates the spinner prefix.
-func (sp *Spinner) parsePrefix(frame, mesg string) {
-	sp.prefixMu.RLock()
-	prefix := sp.prefixColor + sp.prefixMesg + ColorReset
-	sp.prefixMu.RUnlock()
-	del := sp.delimiterColor + sp.delimiter + ColorReset
+func (r *Rotato) parsePrefix(frame, mesg string) {
+	r.prefixMu.RLock()
+	prefix := r.prefixColor + r.prefixMesg + ColorReset
+	r.prefixMu.RUnlock()
+	del := r.delimiterColor + r.delimiter + ColorReset
 
-	sp.display(fmt.Sprintf("%s%s%s %s", prefix, del, frame, mesg))
+	r.display(fmt.Sprintf("%s%s%s %s", prefix, del, frame, mesg))
 }
 
 // display writes the given string to the output.
-func (sp *Spinner) display(s string) {
-	if isRedirected(sp.Writer) {
-		_, _ = fmt.Fprint(sp.Writer, removeANSI(s))
+func (r *Rotato) display(s string) {
+	if isRedirected(r.Writer) {
+		_, _ = fmt.Fprint(r.Writer, removeANSI(s))
 		return
 	}
-	_, _ = fmt.Fprintf(sp.Writer, "%s%s", clearChars, s)
+	_, _ = fmt.Fprintf(r.Writer, "%s%s", clearChars, s)
 }
 
 // stopSpinner handles the common logic for stopping the spinner.
-func (sp *Spinner) stopSpinner() {
-	sp.mu.Lock()
-	defer sp.mu.Unlock()
+func (r *Rotato) stopSpinner() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
-	if !sp.isActive {
+	if !r.isActive {
 		return
 	}
 
-	sp.isActive = false
+	r.isActive = false
 
-	if !isInteractive(sp) {
+	if !isInteractive(r) {
 		return
 	}
 
-	defer showCursor(sp.Writer)
-	sp.doneChan <- struct{}{}
+	defer showCursor(r.Writer)
+	r.doneChan <- struct{}{}
 }
 
 // displayMessage formats and displays a message with optional prefix and color.
-func (sp *Spinner) displayMessage(symbol, color string, mesg ...string) {
+func (r *Rotato) displayMessage(symbol, color string, mesg ...string) {
 	if len(mesg) == 0 {
 		return
 	}
@@ -467,18 +467,18 @@ func (sp *Spinner) displayMessage(symbol, color string, mesg ...string) {
 	s := strings.Join(mesg, " ")
 	s = color + s + "\n"
 
-	if !isInteractive(sp) {
-		sp.display(s)
+	if !isInteractive(r) {
+		r.display(s)
 		return
 	}
 
-	if sp.prefixMesg != "" {
-		sp.parsePrefix(symbol, s)
+	if r.prefixMesg != "" {
+		r.parsePrefix(symbol, s)
 		fmt.Print(ColorReset)
 		return
 	}
 
-	sp.display(symbol + " " + s + ColorReset)
+	r.display(symbol + " " + s + ColorReset)
 }
 
 // removeANSI removes ANSI codes from a given string.
@@ -488,8 +488,8 @@ func removeANSI(s string) string {
 }
 
 // New returns a new spinner.
-func New(opt ...Option) *Spinner {
-	sp := &Spinner{
+func New(opt ...Option) *Rotato {
+	r := &Rotato{
 		frequency:  100 * time.Millisecond,
 		delimiter:  nbsp,
 		isActive:   false,
@@ -503,12 +503,12 @@ func New(opt ...Option) *Spinner {
 		Writer:     os.Stdout,
 	}
 	for _, fn := range opt {
-		fn(sp)
+		fn(r)
 	}
 
 	setupInterruptHandler(context.Background(), func() {
-		showCursor(sp.Writer)
+		showCursor(r.Writer)
 	})
 
-	return sp
+	return r
 }
