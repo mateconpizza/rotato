@@ -145,6 +145,13 @@ func WithPrefixColor(color ...string) Option {
 	}
 }
 
+// WithDoneMesg returns an option function that sets the spinner done message.
+func WithDoneMesg(mesg string) Option {
+	return func(sp *Spinner) {
+		sp.doneMessage = mesg
+	}
+}
+
 // WithDoneSymbol returns an option function that sets the spinner stop symbol.
 func WithDoneSymbol(symbol string) Option {
 	return func(sp *Spinner) {
@@ -219,6 +226,7 @@ type Spinner struct {
 	Writer           io.Writer     // Output writer
 	delimiter        string        // Delimiter between prefix and spinner symbol
 	delimiterColor   string        // Delimiter color
+	doneMessage      string        // Done channel message
 	doneChan         chan struct{} // Channel for stopping the spinner
 	doneMessageColor string        // Done channel message color
 	doneSymbol       string        // Done channel symbol
@@ -308,12 +316,25 @@ func (sp *Spinner) Start() {
 
 // Done stops the spinner animation.
 func (sp *Spinner) Done(mesg ...string) {
+	if !sp.isActive {
+		return
+	}
+	defer showCursor(sp.Writer)
+
 	sp.stopSpinner()
-	if len(mesg) == 0 {
+
+	var finalMesg string
+	switch {
+	case len(mesg) > 0:
+		finalMesg = strings.Join(mesg, " ")
+	case sp.doneMessage != "":
+		finalMesg = sp.doneMessage
+	default:
 		fmt.Print(clearChars)
 		return
 	}
-	sp.displayMessage(sp.doneSymbol, sp.doneMessageColor, mesg...)
+
+	sp.displayMessage(sp.doneSymbol, sp.doneMessageColor, finalMesg)
 }
 
 // Fail fails the spinner animation.

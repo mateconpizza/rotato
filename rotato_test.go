@@ -10,12 +10,12 @@ import (
 func TestSpinnerOutput(t *testing.T) {
 	var buf bytes.Buffer
 	mesg := "Testing"
-	sp := New(WithWriter(&buf), WithMesg(mesg))
+	sp := New(WithWriter(&buf), WithMesg(mesg), WithDoneMesg("Done"))
 	sp.frequency = 10 * time.Millisecond
 
 	sp.Start()
 	time.Sleep(50 * time.Millisecond)
-	sp.Done("Done")
+	sp.Done()
 
 	output := buf.String()
 	if output == "" {
@@ -34,6 +34,7 @@ func TestSpinnerState(t *testing.T) {
 		WithWriter(&buf),
 		WithSpinnerFrequency(10*time.Millisecond),
 		WithSymbols([]string{"-", "\\", "|", "/"}...),
+		WithDoneMesg("Stopped"),
 	)
 	sp.Start()
 	time.Sleep(20 * time.Millisecond)
@@ -42,7 +43,7 @@ func TestSpinnerState(t *testing.T) {
 		t.Error("expected spinner to be running")
 	}
 	// verify that the spinner state is false.
-	sp.Done("Stopped")
+	sp.Done()
 	if sp.isActive {
 		t.Error("expected spinner to be stopped after calling Stop()")
 	}
@@ -57,13 +58,14 @@ func TestSpinnerMessageUpdate(t *testing.T) {
 		WithWriter(&buf),
 		WithSpinnerFrequency(10*time.Millisecond),
 		WithMesg("Initial"),
+		WithDoneMesg("Done"),
 	)
 	sp.Start()
 	time.Sleep(20 * time.Millisecond)
 	// Update the message.
 	sp.UpdateMesg("Updated")
 	time.Sleep(50 * time.Millisecond)
-	sp.Done("Done")
+	sp.Done()
 
 	out := buf.String()
 	if !strings.Contains(out, "Updated") {
