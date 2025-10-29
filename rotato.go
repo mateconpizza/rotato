@@ -72,49 +72,6 @@ import (
 	"time"
 )
 
-// nbsp represents a non-breaking space character.
-const nbsp = "\u00A0"
-
-var (
-	// normal colors.
-	ColorBlack   = "\x1b[30m"
-	ColorBlue    = "\x1b[34m"
-	ColorCyan    = "\x1b[36m"
-	ColorGray    = "\x1b[90m"
-	ColorGreen   = "\x1b[32m"
-	ColorMagenta = "\x1b[95m"
-	ColorOrange  = "\x1b[33m"
-	ColorPurple  = "\x1b[35m"
-	ColorRed     = "\x1b[31m"
-	ColorWhite   = "\x1b[37m"
-	ColorYellow  = "\x1b[93m"
-
-	// bright colors.
-	ColorBrightBlack   = "\x1b[90m"
-	ColorBrightBlue    = "\x1b[94m"
-	ColorBrightCyan    = "\x1b[96m"
-	ColorBrightGray    = "\x1b[37m"
-	ColorBrightGreen   = "\x1b[92m"
-	ColorBrightMagenta = "\x1b[95m"
-	ColorBrightOrange  = "\x1b[38;5;214m"
-	ColorBrightPurple  = "\x1b[38;5;135m"
-	ColorBrightRed     = "\x1b[91m"
-	ColorBrightWhite   = "\x1b[97m"
-	ColorBrightYellow  = "\x1b[93m"
-
-	// styles.
-	ColorStyleBold          = "\x1b[1m"
-	ColorStyleDim           = "\x1b[2m"
-	ColorStyleInverse       = "\x1b[7m"
-	ColorStyleItalic        = "\x1b[3m"
-	ColorStyleStrikethrough = "\x1b[9m"
-	ColorStyleUnderline     = "\x1b[4m"
-	ColorStyleBlink         = "\x1b[5m"
-
-	// reset.
-	ColorReset = "\x1b[0m"
-)
-
 // WithMesg returns an option function that sets the spinner message.
 func WithMesg(s string) Option {
 	return func(r *Rotato) {
@@ -124,9 +81,9 @@ func WithMesg(s string) Option {
 
 // WithMesgColor returns an option function that sets the spinner message
 // color.
-func WithMesgColor(color ...string) Option {
+func WithMesgColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.messageColor = strings.Join(color, "")
+		r.messageColor = joinColors(c...)
 	}
 }
 
@@ -139,9 +96,9 @@ func WithPrefix(prefix string) Option {
 
 // WithPrefixColor returns an option function that sets the spinner color
 // prefix.
-func WithPrefixColor(color ...string) Option {
+func WithPrefixColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.prefixColor = strings.Join(color, "")
+		r.prefixColor = joinColors(c...)
 	}
 }
 
@@ -161,9 +118,9 @@ func WithDoneSymbol(symbol string) Option {
 
 // WithDoneColorMesg returns an option function that sets the done message
 // color.
-func WithDoneColorMesg(color ...string) Option {
+func WithDoneColorMesg(c ...Color) Option {
 	return func(r *Rotato) {
-		r.doneMessageColor = strings.Join(color, "")
+		r.doneMessageColor = joinColors(c...)
 	}
 }
 
@@ -176,16 +133,16 @@ func WithFailSymbol(symbol string) Option {
 
 // WithFailColorMesg returns an option function that sets the fail message
 // color.
-func WithFailColorMesg(color ...string) Option {
+func WithFailColorMesg(c ...Color) Option {
 	return func(r *Rotato) {
-		r.failMessageColor = strings.Join(color, "")
+		r.failMessageColor = joinColors(c...)
 	}
 }
 
 // WithSpinnerColor returns an option function that sets the spinner color.
-func WithSpinnerColor(color ...string) Option {
+func WithSpinnerColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.spinnerColor = strings.Join(color, "")
+		r.spinnerColor = joinColors(c...)
 	}
 }
 
@@ -205,9 +162,9 @@ func WithDelimiter(s string) Option {
 
 // WithDelimiterColor returns an option function that sets the spinner color
 // delimiter, only visible with `prefix`.
-func WithDelimiterColor(color ...string) Option {
+func WithDelimiterColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.delimiterColor = strings.Join(color, "")
+		r.delimiterColor = joinColors(c...)
 	}
 }
 
@@ -365,8 +322,8 @@ func (r *Rotato) UpdateMesg(mesg string) {
 }
 
 // UpdateMesgColor changes the color of the message.
-func (r *Rotato) UpdateMesgColor(color ...string) {
-	r.messageColor = strings.Join(color, "")
+func (r *Rotato) UpdateMesgColor(c ...Color) {
+	r.messageColor = joinColors(c...)
 }
 
 // UpdatePrefix changes the prefix shown next to the spinner.
@@ -406,7 +363,7 @@ func (r *Rotato) currentMessage() string {
 	r.messageUpdate.RLock()
 	defer r.messageUpdate.RUnlock()
 
-	return r.messageColor + r.message + ColorReset
+	return r.messageColor + r.message + string(ColorReset)
 }
 
 // currentFrame returns the spinner frame for the given iteration.
@@ -417,15 +374,15 @@ func (r *Rotato) currentFrame(i int) string {
 	r.frameIdx = i % len(r.symbols)
 	r.frame = r.symbols[r.frameIdx]
 
-	return r.spinnerColor + r.frame + ColorReset
+	return r.spinnerColor + r.frame + string(ColorReset)
 }
 
 // parsePrefix updates the spinner prefix.
 func (r *Rotato) parsePrefix(frame, mesg string) {
 	r.prefixMu.RLock()
-	prefix := r.prefixColor + r.prefixMesg + ColorReset
+	prefix := r.prefixColor + r.prefixMesg + string(ColorReset)
 	r.prefixMu.RUnlock()
-	del := r.delimiterColor + r.delimiter + ColorReset
+	del := r.delimiterColor + r.delimiter + string(ColorReset)
 
 	r.display(fmt.Sprintf("%s%s%s %s", prefix, del, frame, mesg))
 }
@@ -474,11 +431,16 @@ func (r *Rotato) displayMessage(symbol, color string, mesg ...string) {
 
 	if r.prefixMesg != "" {
 		r.parsePrefix(symbol, s)
-		fmt.Print(ColorReset)
+		fmt.Print(string(ColorReset))
 		return
 	}
 
-	r.display(symbol + " " + s + ColorReset)
+	var result string
+	if symbol != "" {
+		result = symbol + " "
+	}
+
+	r.display(result + s + string(ColorReset))
 }
 
 // removeANSI removes ANSI codes from a given string.
@@ -491,7 +453,7 @@ func removeANSI(s string) string {
 func New(opt ...Option) *Rotato {
 	r := &Rotato{
 		frequency:  100 * time.Millisecond,
-		delimiter:  nbsp,
+		delimiter:  NBSP,
 		isActive:   false,
 		message:    "Loading...",
 		mu:         &sync.RWMutex{},

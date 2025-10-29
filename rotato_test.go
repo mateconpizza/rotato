@@ -92,7 +92,7 @@ func TestRemoveANSI(t *testing.T) {
 	}{
 		{
 			name:  "Simple ANSI codes",
-			input: ColorRed + ColorStyleBold + "Hello" + ColorReset,
+			input: Colorize("Hello", ColorRed, ColorStyleBold),
 			want:  "Hello",
 		},
 		{
@@ -102,17 +102,17 @@ func TestRemoveANSI(t *testing.T) {
 		},
 		{
 			name:  "Multiple ANSI sequences",
-			input: "Text " + ColorRed + "Red" + ColorReset + " and " + ColorGreen + "Green" + ColorReset,
+			input: "Text " + Colorize("Red", ColorRed) + " and " + Colorize("Green", ColorGreen),
 			want:  "Text Red and Green",
 		},
 		{
 			name:  "ANSI only",
-			input: ColorBlue + ColorStyleBold + "Blue Bold Text" + ColorReset,
+			input: Colorize("Blue Bold Text", ColorBlue, ColorStyleBold),
 			want:  "Blue Bold Text",
 		},
 		{
 			name:  "Empty ANSI",
-			input: ColorBlue,
+			input: string(ColorBlue),
 			want:  "",
 		},
 	}

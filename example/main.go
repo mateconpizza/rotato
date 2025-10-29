@@ -86,7 +86,7 @@ func showSymbols() {
 		maxLen = max(maxLen, len(symbol.s))
 	}
 
-	exitMesg := rotato.ColorGray + rotato.ColorStyleItalic + "(Press Ctrl+C to exit)" + rotato.ColorReset
+	exitMesg := rotato.Colorize("(Press Ctrl+C to exit)", rotato.ColorGray, rotato.ColorStyleItalic)
 	for _, symbol := range allSymbols {
 		r := rotato.New(
 			rotato.WithMesg(exitMesg),
@@ -94,7 +94,9 @@ func showSymbols() {
 			symbol.o,
 		)
 		r.Start()
+
 		time.Sleep(2 * time.Second)
+
 		r.Done(strings.Join(r.Symbols(), ""))
 	}
 }
@@ -107,7 +109,9 @@ func spSimple() {
 		rotato.WithDoneColorMesg(rotato.ColorBrightGreen, rotato.ColorStyleItalic),
 	)
 	r.Start()
+
 	time.Sleep(2 * time.Second)
+
 	r.Done("Task Completed!")
 }
 
@@ -115,16 +119,18 @@ func spSimple() {
 func spConnection() {
 	r := rotato.New(
 		rotato.WithSymbolsCircles3(),
-		rotato.WithSpinnerColor(rotato.ColorBrightOrange),
+		rotato.WithSpinnerColor(rotato.ColorOrange),
 		rotato.WithMesg("Connecting..."),
 		rotato.WithPrefix("S3 Backup"),
 	)
 	r.Start()
 	time.Sleep(2 * time.Second)
+
 	// connected
-	r.UpdateSymbols(rotato.WithSymbols(rotato.ColorBrightGreen + "✓"))
+	r.UpdateSymbols(rotato.WithSymbols(rotato.Colorize("✓", rotato.ColorBrightGreen)))
 	r.UpdateMesg("Connected!")
 	r.UpdateMesgColor(rotato.ColorBrightGreen, rotato.ColorStyleItalic)
+
 	// updating
 	time.Sleep(1 * time.Second)
 	r.UpdateMesgColor(rotato.ColorGray)
@@ -133,6 +139,7 @@ func spConnection() {
 		r.UpdateMesg(randomString(12) + ".zip")
 		time.Sleep(200 * time.Millisecond)
 	}
+
 	// end
 	r.Done("Backup completed!")
 }
@@ -145,8 +152,10 @@ func spFail() {
 		rotato.WithFailColorMesg(rotato.ColorBrightRed, rotato.ColorStyleBlink),
 	)
 	r.Start()
+
 	// trying to connect
 	time.Sleep(2 * time.Second)
+
 	// fail
 	if true {
 		r.Fail("Connection Failed!")

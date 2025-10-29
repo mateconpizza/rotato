@@ -9,9 +9,9 @@ import (
 	"syscall"
 )
 
-// clearChars represents a sequence of characters used to clear the current
-// line in the terminal.
-const clearChars = "\r\033[K\r"
+// NBSP represents a non-breaking space character.
+const NBSP = "\u00A0"
+
 
 // nonInteractive indicates whether the terminal is non-interactive.
 var nonInteractive = false
@@ -49,14 +49,14 @@ func setupInterruptHandler(ctx context.Context, onInterrupt func()) {
 // hideCursor hides the cursor.
 func hideCursor(output io.Writer) {
 	if !isRedirected(output) {
-		fmt.Print("\r\033[?25l\r")
+		fmt.Print(CursorHide)
 	}
 }
 
 // showCursor shows the cursor.
 func showCursor(output io.Writer) {
 	if !isRedirected(output) {
-		fmt.Print("\r\033[?25h\r")
+		fmt.Print(CursorShow)
 	}
 }
 
