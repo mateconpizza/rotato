@@ -62,7 +62,6 @@
 package rotato
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"os"
@@ -467,10 +466,6 @@ func New(opt ...Option) *Rotato {
 	for _, fn := range opt {
 		fn(r)
 	}
-
-	setupInterruptHandler(context.Background(), func() {
-		showCursor(r.Writer)
-	})
 
 	return r
 }

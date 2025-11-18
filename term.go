@@ -1,17 +1,14 @@
 package rotato
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"os"
-	"os/signal"
 	"syscall"
 )
 
 // NBSP represents a non-breaking space character.
 const NBSP = "\u00A0"
-
 
 // nonInteractive indicates whether the terminal is non-interactive.
 var nonInteractive = false
@@ -19,31 +16,6 @@ var nonInteractive = false
 // SetNonInteractive sets the terminal to non-interactive mode.
 func SetNonInteractive() {
 	nonInteractive = true
-}
-
-// setupInterruptHandler handles interruptions.
-func setupInterruptHandler(ctx context.Context, onInterrupt func()) {
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(
-		sigChan,
-		os.Interrupt,    // Ctrl+C (SIGINT)
-		syscall.SIGTERM, // Process termination
-	)
-	go func() {
-		select {
-		case <-sigChan:
-			if onInterrupt != nil {
-				onInterrupt()
-			}
-			// Unregister the signal channel before exiting.
-			signal.Stop(sigChan)
-			os.Exit(1)
-		case <-ctx.Done():
-			// Unregister the signal channel when context is canceled.
-			signal.Stop(sigChan)
-			return
-		}
-	}()
 }
 
 // hideCursor hides the cursor.
