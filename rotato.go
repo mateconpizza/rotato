@@ -138,6 +138,12 @@ func WithFailColorMesg(c ...Color) Option {
 	}
 }
 
+func WithFailColorSymbol(c ...Color) Option {
+	return func(r *Rotato) {
+		r.failSymbolColor = joinColors(c...)
+	}
+}
+
 // WithSpinnerColor returns an option function that sets the spinner color.
 func WithSpinnerColor(c ...Color) Option {
 	return func(r *Rotato) {
@@ -174,33 +180,56 @@ func WithWriter(w io.Writer) Option {
 	}
 }
 
+func WithForceInteractive() Option {
+	return func(r *Rotato) {
+		r.forceInteractive = true
+	}
+}
+
 // Option is an option function for the spinner.
 type Option func(*Rotato)
 
 // Rotato represents a CLI spinner animation.
 type Rotato struct {
-	Writer           io.Writer     // Output writer
-	delimiter        string        // Delimiter between prefix and spinner symbol
-	delimiterColor   string        // Delimiter color
+	// Output
+	Writer io.Writer // Output writer
+
+	// for Testing
+	forceInteractive bool
+
+	// Spinner animation
+	symbols      []string      // Spinner symbols
+	frame        string        // Current spinner frame
+	frameIdx     int           // Current spinner frame index
+	frequency    time.Duration // Spinner animation frequency
+	spinnerColor string        // Spinner color
+
+	// Messages
+	message      string // Spinner message
+	messageColor string // Spinner message color
+	prefixMesg   string // Prefix message
+	prefixColor  string // Prefix message color
+
+	// Delimiter
+	delimiter      string // Delimiter between prefix and spinner symbol
+	delimiterColor string // Delimiter color
+
+	// Completion states
 	doneMessage      string        // Done channel message
-	doneChan         chan struct{} // Channel for stopping the spinner
 	doneMessageColor string        // Done channel message color
 	doneSymbol       string        // Done channel symbol
-	failMessageColor string        // Fail message color
-	failSymbol       string        // Fail symbol
-	frame            string        // Current spinner frame
-	frameIdx         int           // Current spinner frame index
-	frequency        time.Duration // Spinner animation frequency
-	isActive         bool          // State of the spinner
-	message          string        // Spinner message
-	messageColor     string        // Spinner message color
-	messageUpdate    sync.RWMutex  // Mutex for message update
-	mu               *sync.RWMutex // Mutex for different spinner states
-	prefixColor      string        // Prefix message color
-	prefixMesg       string        // Prefix message
-	prefixMu         sync.RWMutex  // Synchronization mechanism for prefix updates.
-	spinnerColor     string        // Spinner color
-	symbols          []string      // Spinner symbols
+	doneChan         chan struct{} // Channel for stopping the spinner
+
+	// Failure state
+	failMessageColor string // Fail message color
+	failSymbol       string // Fail symbol
+	failSymbolColor  string // Fail symbol color
+
+	// State and synchronization
+	isActive      bool          // State of the spinner
+	mu            *sync.RWMutex // Mutex for different spinner states
+	messageUpdate sync.RWMutex  // Mutex for message update
+	prefixMu      sync.RWMutex  // Synchronization mechanism for prefix updates
 }
 
 // render displays the current frame and message of the spinner.
@@ -217,7 +246,7 @@ func (r *Rotato) render(current int) {
 
 // Start starts the spinning animation in a goroutine.
 func (r *Rotato) Start() {
-	if !isInteractive(r) {
+	if !isInteractive(r) && !r.forceInteractive {
 		r.mu.Lock()
 		defer r.mu.Unlock()
 
@@ -226,7 +255,7 @@ func (r *Rotato) Start() {
 		}
 
 		r.isActive = true
-		// add prefix
+
 		if r.prefixMesg != "" {
 			r.message = fmt.Sprintf("%s%s%s", r.prefixMesg, r.delimiter, r.message)
 		}
@@ -406,7 +435,7 @@ func (r *Rotato) stopSpinner() {
 
 	r.isActive = false
 
-	if !isInteractive(r) {
+	if !isInteractive(r) && !r.forceInteractive {
 		return
 	}
 
@@ -423,7 +452,7 @@ func (r *Rotato) displayMessage(symbol, color string, mesg ...string) {
 	s := strings.Join(mesg, " ")
 	s = color + s + "\n"
 
-	if !isInteractive(r) {
+	if !isInteractive(r) && !r.forceInteractive {
 		r.display(s)
 		return
 	}
