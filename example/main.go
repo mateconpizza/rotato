@@ -1,9 +1,15 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"fmt"
+	"log/slog"
 	"math/rand"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/mateconpizza/rotato"
@@ -80,7 +86,7 @@ func randomString(n int) string {
 }
 
 // showSymbols shows all registered symbols in the rotato package.
-func showSymbols() {
+func showSymbols(ctx context.Context) {
 	maxLen := 0
 	for _, symbol := range allSymbols {
 		maxLen = max(maxLen, len(symbol.s))
@@ -91,40 +97,60 @@ func showSymbols() {
 		r := rotato.New(
 			rotato.WithMesg(exitMesg),
 			rotato.WithPrefix(symbol.s+strings.Repeat(" ", maxLen-len(symbol.s))),
+			rotato.WithContext(ctx),
 			symbol.o,
 		)
 		r.Start()
 
-		time.Sleep(2 * time.Second)
+		select {
+		case <-time.After(2 * time.Second):
+			// Proceed to next step
+		case <-ctx.Done():
+			r.Fail("Aborted by User!")
+			return
+		}
 
 		r.Done(strings.Join(r.Symbols(), ""))
 	}
 }
 
 // spSimple simulates a simple task with colors.
-func spSimple() {
+func spSimple(ctx context.Context) {
 	r := rotato.New(
 		rotato.WithSpinnerColor(rotato.ColorBrightGreen),
 		rotato.WithPrefix("Simple Task #1"),
 		rotato.WithDoneColorMesg(rotato.ColorBrightGreen, rotato.ColorStyleItalic),
+		rotato.WithContext(ctx),
 	)
 	r.Start()
 
-	time.Sleep(2 * time.Second)
-
-	r.Done("Task Completed!")
+	select {
+	case <-time.After(2 * time.Second):
+		r.Done("Task Completed!")
+	case <-ctx.Done():
+		r.Fail("Task Aborted by User!")
+		return
+	}
 }
 
 // spConnection simulates a connection process, processing files.
-func spConnection() {
+func spConnection(ctx context.Context) {
 	r := rotato.New(
 		rotato.WithSymbolsCircles3(),
 		rotato.WithSpinnerColor(rotato.ColorOrange),
 		rotato.WithMesg("Connecting..."),
 		rotato.WithPrefix("S3 Backup"),
+		rotato.WithContext(ctx),
 	)
 	r.Start()
-	time.Sleep(2 * time.Second)
+
+	select {
+	case <-time.After(2 * time.Second):
+		// Proceed to next step
+	case <-ctx.Done():
+		r.Fail("Connection Aborted by User!")
+		return
+	}
 
 	// connected
 	r.UpdateSymbols(rotato.WithSymbols(rotato.Colorize("✓", rotato.ColorBrightGreen)))
@@ -132,12 +158,26 @@ func spConnection() {
 	r.UpdateMesgColor(rotato.ColorBrightGreen, rotato.ColorStyleItalic)
 
 	// updating
-	time.Sleep(1 * time.Second)
+	select {
+	case <-time.After(1 * time.Second):
+		// Proceed to next step
+	case <-ctx.Done():
+		r.Fail("Backup Process Aborted!")
+		return
+	}
+
 	r.UpdateMesgColor(rotato.ColorGray)
 	r.UpdateSymbols(rotato.WithSymbolsBarBlock())
 	for i := 0; i < 15; i++ {
 		r.UpdateMesg(randomString(12) + ".zip")
-		time.Sleep(200 * time.Millisecond)
+
+		select {
+		case <-time.After(200 * time.Millisecond):
+			// Proceed to next iteration
+		case <-ctx.Done():
+			r.Fail(fmt.Sprintf("Transfer Aborted! %d files processed.", i))
+			return
+		}
 	}
 
 	// end
@@ -145,16 +185,23 @@ func spConnection() {
 }
 
 // spFail simulates a failed connection process.
-func spFail() {
+func spFail(ctx context.Context) {
 	r := rotato.New(
 		rotato.WithMesg("Trying to connect..."),
 		rotato.WithPrefix("AWS Server"),
 		rotato.WithFailColorMesg(rotato.ColorBrightRed, rotato.ColorStyleBlink),
+		rotato.WithContext(ctx),
 	)
 	r.Start()
 
 	// trying to connect
-	time.Sleep(2 * time.Second)
+	select {
+	case <-time.After(2 * time.Second):
+		// Proceed to next step
+	case <-ctx.Done():
+		r.Fail("Connection Aborted by User!")
+		return
+	}
 
 	// fail
 	if true {
@@ -167,13 +214,16 @@ func main() {
 		rotato.SetNonInteractive()
 	}
 
+	ctx, cancel := signalContext(context.Background())
+	defer cancel()
+
 	switch {
 	case demoAll:
-		showSymbols()
+		showSymbols(ctx)
 	case simpleDemo:
-		spSimple()
-		spConnection()
-		spFail()
+		spSimple(ctx)
+		spConnection(ctx)
+		spFail(ctx)
 	default:
 		flag.PrintDefaults()
 	}
@@ -184,4 +234,34 @@ func init() {
 	flag.BoolVar(&demoAll, "all", false, "show all rotatos")
 	flag.BoolVar(&nonInteractiveFlag, "ni", false, "term non-interactive mode")
 	flag.Parse()
+}
+
+// signalContext returns a context that is canceled when an interrupt or
+// termination signal is received.
+func signalContext(parent context.Context) (context.Context, context.CancelFunc) {
+	ctx, cancel := context.WithCancel(parent)
+
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals,
+		os.Interrupt,    // Ctrl+C (SIGINT)
+		syscall.SIGTERM, // Process termination
+		syscall.SIGHUP,  // Terminal closed
+	)
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			return // parent canceled
+		case s := <-signals:
+			slog.Debug("received signal", "signal", s)
+			fmt.Println()
+			fmt.Printf("action aborted with signal %s", s)
+			cancel()
+		}
+	}()
+
+	return ctx, func() {
+		signal.Stop(signals)
+		cancel() // normal cancel
+	}
 }
