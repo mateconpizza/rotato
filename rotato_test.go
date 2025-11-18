@@ -145,18 +145,12 @@ func TestContext(t *testing.T) {
 		WithFrequency(10*time.Millisecond),
 	)
 
-	t.Logf("isInteractive: %v", isInteractive(r))
-	t.Logf("forceInteractive: %v", r.forceInteractive)
-
 	r.Start()
 	time.Sleep(50 * time.Millisecond)
 	cancel()
 	time.Sleep(50 * time.Millisecond)
 
-	r.mu.RLock()
-	isActive := r.isActive
-	r.mu.RUnlock()
-
+	isActive := r.IsRunning()
 	if isActive {
 		t.Fatalf("spinner should be inactive after context cancellation: %v", isActive)
 	}
@@ -179,7 +173,7 @@ func TestContextCancelThenDone(t *testing.T) {
 	cancel()
 	time.Sleep(50 * time.Millisecond)
 
-	if r.isActive {
+	if r.IsRunning() {
 		t.Fatal("spinner should be inactive after context cancellation")
 	}
 
@@ -206,9 +200,7 @@ func TestContextTimeoutStopsSpinner(t *testing.T) {
 	r.Start()
 	time.Sleep(timeout + 50*time.Millisecond)
 
-	r.mu.RLock()
-	isActive := r.isActive
-	r.mu.RUnlock()
+	isActive := r.IsRunning()
 
 	if isActive {
 		t.Fatalf("spinner should be inactive after context timeout: %v", isActive)
@@ -232,9 +224,7 @@ func TestStartWithPreCancelledContext(t *testing.T) {
 	r.Start()
 	time.Sleep(5 * time.Millisecond)
 
-	r.mu.RLock()
-	isActive := r.isActive
-	r.mu.RUnlock()
+	isActive := r.IsRunning()
 
 	if isActive {
 		t.Fatalf("spinner should not become active with pre-cancelled context")
@@ -243,5 +233,60 @@ func TestStartWithPreCancelledContext(t *testing.T) {
 	output := buf.String()
 	if output != "" {
 		t.Errorf("expected message to be empty")
+	}
+}
+
+func TestContextCancelled(t *testing.T) {
+	var buf bytes.Buffer
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	r := New(
+		WithWriter(&buf),
+		WithContext(ctx),
+		WithForceInteractive(),
+		WithContextDoneHandler(func(r *Rotato, err error) {
+			r.Fail(err.Error())
+		}),
+	)
+	r.Start()
+
+	time.Sleep(20 * time.Millisecond)
+
+	want := context.Canceled.Error()
+	r.writerMu.Lock()
+	got := buf.String()
+	r.writerMu.Unlock()
+
+	if !strings.Contains(got, want) {
+		t.Fatalf("expected: %s, got: %s", want, got)
+	}
+}
+
+func TestContextDeadlineExceeded(t *testing.T) {
+	var buf bytes.Buffer
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	defer cancel()
+
+	r := New(
+		WithWriter(&buf),
+		WithPrefix("CtxDeadlineExceeded"),
+		WithContext(ctx),
+		WithForceInteractive(),
+		WithContextDoneHandler(func(r *Rotato, err error) {
+			r.Fail(err.Error())
+		}),
+	)
+	r.Start()
+
+	time.Sleep(20 * time.Millisecond)
+
+	want := context.DeadlineExceeded.Error()
+	r.writerMu.Lock()
+	got := buf.String()
+	r.writerMu.Unlock()
+
+	if !strings.Contains(got, want) {
+		t.Fatalf("expected %s, got %s", want, got)
 	}
 }

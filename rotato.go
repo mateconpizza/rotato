@@ -193,16 +193,24 @@ func WithForceInteractive() Option {
 	}
 }
 
+func WithContextDoneHandler(handler func(*Rotato, error)) Option {
+	return func(r *Rotato) {
+		r.ctxDoneHandler = handler
+	}
+}
+
 // Option is an option function for the spinner.
 type Option func(*Rotato)
 
 // Rotato represents a CLI spinner animation.
 type Rotato struct {
 	// Output
-	Writer io.Writer // Output writer
+	Writer   io.Writer // Output writer
+	writerMu sync.Mutex
 
 	// Context
-	ctx context.Context
+	ctx            context.Context
+	ctxDoneHandler func(r *Rotato, err error)
 
 	// for Testing
 	forceInteractive bool
@@ -215,10 +223,14 @@ type Rotato struct {
 	spinnerColor string        // Spinner color
 
 	// Messages
-	message      string // Spinner message
-	messageColor string // Spinner message color
-	prefixMesg   string // Prefix message
-	prefixColor  string // Prefix message color
+	message       string       // Spinner message
+	messageUpdate sync.RWMutex // Mutex for message update
+	messageColor  string       // Spinner message color
+
+	// Prefix messages
+	prefixMesg  string       // Prefix message
+	prefixMu    sync.RWMutex // Synchronization mechanism for prefix updates
+	prefixColor string       // Prefix message color
 
 	// Delimiter
 	delimiter      string // Delimiter between prefix and spinner symbol
@@ -235,11 +247,9 @@ type Rotato struct {
 	failSymbol       string // Fail symbol
 	failSymbolColor  string // Fail symbol color
 
-	// State and synchronization
-	isActive      bool          // State of the spinner
-	mu            *sync.RWMutex // Mutex for different spinner states
-	messageUpdate sync.RWMutex  // Mutex for message update
-	prefixMu      sync.RWMutex  // Synchronization mechanism for prefix updates
+	// Active state
+	isActive bool         // State of the spinner
+	activeMu sync.RWMutex // Mutex for different spinner states
 }
 
 // render displays the current frame and message of the spinner.
@@ -256,15 +266,9 @@ func (r *Rotato) render(current int) {
 
 // Start starts the spinning animation in a goroutine.
 func (r *Rotato) Start() {
-	select {
-	case <-r.ctx.Done():
-		return
-	default:
-	}
-
 	if !isInteractive(r) && !r.forceInteractive {
-		r.mu.Lock()
-		defer r.mu.Unlock()
+		r.activeMu.Lock()
+		defer r.activeMu.Unlock()
 
 		if r.isActive {
 			return
@@ -281,13 +285,13 @@ func (r *Rotato) Start() {
 	}
 
 	hideCursor(r.Writer)
-	r.mu.Lock()
+	r.activeMu.Lock()
 	if r.isActive {
-		r.mu.Unlock()
+		r.activeMu.Unlock()
 		return
 	}
 	r.isActive = true
-	r.mu.Unlock()
+	r.activeMu.Unlock()
 
 	if isRedirected(r.Writer) && !r.forceInteractive {
 		r.render(0)
@@ -302,16 +306,20 @@ func (r *Rotato) Start() {
 			case <-r.doneChan:
 				return
 			case <-r.ctx.Done():
+				if r.ctxDoneHandler != nil {
+					r.ctxDoneHandler(r, r.ctx.Err())
+				}
+
 				r.stopSpinner()
 				return
 			case <-ticker.C:
-				r.mu.Lock()
+				r.activeMu.Lock()
 				if !r.isActive {
-					r.mu.Unlock()
+					r.activeMu.Unlock()
 					return
 				}
 				r.render(i)
-				r.mu.Unlock()
+				r.activeMu.Unlock()
 			}
 		}
 	}()
@@ -399,9 +407,9 @@ func (r *Rotato) UpdateSpinnerColor(color ...string) {
 
 // UpdateSymbols updates the spinner symbols.
 func (r *Rotato) UpdateSymbols(opt Option) {
-	r.mu.Lock()
+	r.activeMu.Lock()
 	opt(r)
-	r.mu.Unlock()
+	r.activeMu.Unlock()
 }
 
 // currentMessage safely constructs and returns the current message.
@@ -438,6 +446,9 @@ func (r *Rotato) parsePrefix(frame, mesg string) {
 
 // display writes the given string to the output.
 func (r *Rotato) display(s string) {
+	r.writerMu.Lock()
+	defer r.writerMu.Unlock()
+
 	if isRedirected(r.Writer) {
 		_, _ = fmt.Fprint(r.Writer, removeANSI(s))
 		return
@@ -448,8 +459,8 @@ func (r *Rotato) display(s string) {
 
 // stopSpinner handles the common logic for stopping the spinner.
 func (r *Rotato) stopSpinner() {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	r.activeMu.Lock()
+	defer r.activeMu.Unlock()
 
 	if !r.isActive {
 		return
@@ -493,6 +504,12 @@ func (r *Rotato) displayMessage(symbol, color string, mesg ...string) {
 	r.display(result + s + string(ColorReset))
 }
 
+func (r *Rotato) IsRunning() bool {
+	r.activeMu.RLock()
+	defer r.activeMu.RUnlock()
+	return r.isActive
+}
+
 // removeANSI removes ANSI codes from a given string.
 func removeANSI(s string) string {
 	re := regexp.MustCompile(`\x1b\[[0-9;]*m`)
@@ -506,7 +523,6 @@ func New(opt ...Option) *Rotato {
 		delimiter:  NBSP,
 		isActive:   false,
 		message:    "Loading...",
-		mu:         &sync.RWMutex{},
 		prefixMesg: "",
 		doneChan:   make(chan struct{}, 1),
 		doneSymbol: "✓",
