@@ -13,7 +13,7 @@ func WithSymbols(symbols ...string) Option {
 // WithSymbolsBlock returns an option function that sets the spinner unicode
 // animation with blocks.
 //
-//	"░", "▒", "▒", "░", "▓".
+//	░ ▒ ▒ ░ ▓
 func WithSymbolsBlock() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"░", "▒", "▒", "░", "▓"}
@@ -23,7 +23,7 @@ func WithSymbolsBlock() Option {
 // WithSymbolsBarBlock returns an option function that sets the spinner
 // unicode animation with bars.
 //
-//	"█▒▒▒▒▒▒▒▒▒", "███▒▒▒▒▒▒▒", "█████▒▒▒▒▒", "███████▒▒▒", "██████████".
+//	█▒▒▒▒▒▒▒▒▒ ███▒▒▒▒▒▒▒ █████▒▒▒▒▒ ███████▒▒▒ ██████████
 func WithSymbolsBarBlock() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"█▒▒▒▒▒▒▒▒▒", "███▒▒▒▒▒▒▒", "█████▒▒▒▒▒", "███████▒▒▒", "██████████"}
@@ -33,7 +33,7 @@ func WithSymbolsBarBlock() Option {
 // WithSymbolsBarBlock2 returns an option function that sets the spinner
 // unicode animation with bars.
 //
-//	"[|       ]", "[||      ]", "[|||     ]", "[||||    ]", "[|||||   ]", "[||||||  ]", "[||||||| ]", "[||||||||]".
+//	[|       ] [||      ] [|||     ] [||||    ] [|||||   ] [||||||  ] [||||||| ] [||||||||].
 func WithSymbolsBarBlock2() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{
@@ -52,7 +52,7 @@ func WithSymbolsBarBlock2() Option {
 // WithSymbolsBarBlock3 returns an option function that sets the spinner
 // unicode animation with bars.
 //
-//	"[=       ]", "[==      ]", "[===     ]", "[====    ]", "[=====   ]", "[======  ]", "[======= ]", "[========]".
+//	[=       ] [==      ] [===     ] [====    ] [=====   ] [======  ] [======= ] [========]
 func WithSymbolsBarBlock3() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{
@@ -71,8 +71,8 @@ func WithSymbolsBarBlock3() Option {
 // WithSymbolsBarBlock4 returns an option function that sets the spinner
 // unicode animation with bars.
 //
-//	"|", "||", "|||", "||||", "|||||", "||||||", "|||||||", "||||||||",
-//	"|||||||", "||||||", "|||||", "||||", "|||", "||", "|".
+//	| || ||| |||| ||||| |||||| ||||||| ||||||||
+//	||||||| |||||| ||||| |||| ||| || |
 func WithSymbolsBarBlock4() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{
@@ -98,9 +98,9 @@ func WithSymbolsBarBlock4() Option {
 // WithSymbolsBarBlock5 returns an option function that sets the spinner
 // unicode animation with bars.
 //
-//	"[*-------]", "[-*------]", "[--*-----]", "[---*----]", "[----*---]".
-//	"[-----*--]", "[------*-]", "[-------*]", "[------*-]", "[-----*--]".
-//	"[----*---]", "[---*----]", "[--*-----]", "[-*------]", "[*-------]".
+//	[*-------] [-*------] [--*-----] [---*----] [----*---]
+//	[-----*--] [------*-] [-------*] [------*-] [-----*--]
+//	[----*---] [---*----] [--*-----] [-*------] [*-------]
 func WithSymbolsBarBlock5() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{
@@ -126,8 +126,7 @@ func WithSymbolsBarBlock5() Option {
 // WithSymbolsBarBlock6 returns an option function that sets the spinner
 // unicode animation with bars.
 //
-//	"·-----", "-·----", "--·---", "---·--", "----·-", "-----·",
-//	"----·-", "---·--", "--·---", "-·----", "·-----",
+//	·----- -·---- --·--- ---·-- ----·- -----· ----·- ---·-- --·--- -·---- ·-----
 func WithSymbolsBarBlock6() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{
@@ -149,7 +148,7 @@ func WithSymbolsBarBlock6() Option {
 // WithSymbolsBlockPretty returns an option function that sets the spinner
 // unicode animation with pretty blocks.
 //
-//	"", "", "", "", "", "", "".
+//	      
 func WithSymbolsBlockPretty() Option {
 	return func(r *Rotato) {
 		//  
@@ -160,7 +159,7 @@ func WithSymbolsBlockPretty() Option {
 // WithSymbolsDots returns an option function that sets the spinner unicode
 // animation with braille patterns.
 //
-//	"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷".
+//	⣾ ⣽ ⣻ ⢿ ⡿ ⣟ ⣯ ⣷
 func WithSymbolsDots() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"}
@@ -170,7 +169,12 @@ func WithSymbolsDots() Option {
 // WithSymbolsDots2 returns an option function that sets the spinner unicode
 // animation with dots.
 //
-//	"  . . . .", ".   . . .", ". .   . .", ". . .   .", ". . . .  ", ". . . . .".
+//	'  . . . .'
+//	'.   . . .'
+//	'. .   . .'
+//	'. . .   .'
+//	'. . . .  '
+//	'. . . . .'
 func WithSymbolsDots2() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{
@@ -187,7 +191,7 @@ func WithSymbolsDots2() Option {
 // WithSymbolsDots3 returns an option function that sets the spinner unicode
 // animation with dots.
 //
-//	"⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆".
+//	⠄ ⠆ ⠇ ⠋ ⠙ ⠸ ⠰ ⠠ ⠰ ⠸ ⠙ ⠋ ⠇ ⠆
 func WithSymbolsDots3() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆"}
@@ -197,7 +201,7 @@ func WithSymbolsDots3() Option {
 // WithSymbolsDots4 returns an option function that sets the spinner unicode
 // animation with dots.
 //
-//	"⠁", "⠂", "⠄", "⡀", "⢀", "⠠", "⠐", "⠈".
+//	⠁ ⠂ ⠄ ⡀ ⢀ ⠠ ⠐ ⠈
 func WithSymbolsDots4() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"⠁", "⠂", "⠄", "⡀", "⢀", "⠠", "⠐", "⠈"}
@@ -207,38 +211,12 @@ func WithSymbolsDots4() Option {
 // WithSymbolsDots5 returns an option function that sets the spinner unicode
 // animation with dots.
 //
-//	"⠁", "⠁", "⠉", "⠙", "⠚", "⠒", "⠂", "⠂", "⠒".
+//	⠁⠁⠉⠙⠚⠒⠂⠂⠒⠲⠴⠤⠄⠄⠤⠠⠠⠤⠦⠖⠒⠐⠐⠒⠓⠋⠉⠈⠈
 func WithSymbolsDots5() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{
-			"⠁",
-			"⠁",
-			"⠉",
-			"⠙",
-			"⠚",
-			"⠒",
-			"⠂",
-			"⠂",
-			"⠒",
-			"⠲",
-			"⠴",
-			"⠤",
-			"⠄",
-			"⠄",
-			"⠤",
-			"⠠",
-			"⠠",
-			"⠤",
-			"⠦",
-			"⠖",
-			"⠒",
-			"⠐",
-			"⠐",
-			"⠒",
-			"⠓",
-			"⠋",
-			"⠉",
-			"⠈",
+			"⠁", "⠁", "⠉", "⠙", "⠚", "⠒", "⠂", "⠂", "⠒", "⠲", "⠴", "⠤", "⠄", "⠄",
+			"⠤", "⠠", "⠠", "⠤", "⠦", "⠖", "⠒", "⠐", "⠐", "⠒", "⠓", "⠋", "⠉", "⠈",
 			"⠈",
 		}
 	}
@@ -247,7 +225,7 @@ func WithSymbolsDots5() Option {
 // WithSymbolsLines returns an option function that sets the spinner unicode
 // animation with lines.
 //
-//	"⠂", "-", "–", "—", "–", "-".
+//	⠂ - – — – -
 func WithSymbolsLines() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"⠂", "-", "–", "—", "–", "-"}
@@ -257,7 +235,7 @@ func WithSymbolsLines() Option {
 // WithSymbolsWave returns an option function that sets the spinner unicode
 // animation with wave patterns.
 //
-//	"⢄", "⢂", "⢁", "⡀", "⠈", "⠘", "⠸".
+//	⢄ ⢂ ⢁ ⡀ ⠈ ⠘ ⠸
 func WithSymbolsWave() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"⢄", "⢂", "⢁", "⡀", "⠈", "⠘", "⠸"}
@@ -267,7 +245,7 @@ func WithSymbolsWave() Option {
 // WithSymbolsGrow returns an option function that sets the spinner unicode
 // animation with growing bars.
 //
-//	"▉", "▊", "▋", "▌", "▍", "▎", "▏".
+//	▉ ▊ ▋ ▌ ▍ ▎ ▏
 func WithSymbolsGrow() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"▉", "▊", "▋", "▌", "▍", "▎", "▏"}
@@ -277,7 +255,7 @@ func WithSymbolsGrow() Option {
 // WithSymbolsGrowVert returns an option function that sets the spinner unicode
 // animation with growing bars.
 //
-//	"▁", "▃", "▄", "▅", "▆", "▇", "▆", "▅", "▄", "▃".
+//	▁ ▃ ▄ ▅ ▆ ▇ ▆ ▅ ▄ ▃
 func WithSymbolsGrowVert() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"▁", "▃", "▄", "▅", "▆", "▇", "▆", "▅", "▄", "▃"}
@@ -287,7 +265,7 @@ func WithSymbolsGrowVert() Option {
 // WithSymbolsMoon returns an option function that sets the spinner unicode
 // animation with moon phases.
 //
-//	"🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘".
+//	🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
 func WithSymbolsMoon() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"}
@@ -297,7 +275,7 @@ func WithSymbolsMoon() Option {
 // WithSymbolsPipe returns an option function that sets the spinner unicode
 // animation with pipe characters.
 //
-//	"|", "/", "-", "\\".
+//	| / - \\
 func WithSymbolsPipe() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"|", "/", "-", "\\"}
@@ -307,7 +285,7 @@ func WithSymbolsPipe() Option {
 // WithSymbolsPipe2 returns an option function that sets the spinner unicode
 // animation with pipe characters.
 //
-//	"┤", "┘", "┴", "└", "├", "┌", "┬", "┐".
+//	┤ ┘ ┴ └ ├ ┌ ┬ ┐
 func WithSymbolsPipe2() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"┤", "┘", "┴", "└", "├", "┌", "┬", "┐"}
@@ -317,7 +295,7 @@ func WithSymbolsPipe2() Option {
 // WithSymbolsSquare returns an option function that sets the spinner unicode
 // animation with square segments.
 //
-//	"▖", "▘", "▝", "▗".
+//	▖ ▘ ▝ ▗
 func WithSymbolsSquare() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"▖", "▘", "▝", "▗"}
@@ -327,7 +305,7 @@ func WithSymbolsSquare() Option {
 // WithSymbolsSquare2 returns an option function that sets the spinner unicode
 // animation with square segments.
 //
-//	"", "", "", "", "".
+//	    
 func WithSymbolsSquare2() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"", "", "", "", ""}
@@ -337,7 +315,7 @@ func WithSymbolsSquare2() Option {
 // WithSymbolsClock returns an option function that sets the spinner unicode
 // animation with clock symbols.
 //
-//	"🕛", "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚".
+//	🕛 🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚
 func WithSymbolsClock() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"🕛", "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚"}
@@ -347,7 +325,7 @@ func WithSymbolsClock() Option {
 // WithSymbolsDiamond returns an option function that sets the spinner unicode
 // animation with diamond symbols.
 //
-//	"◇", "◈", "⬟", "⬞".
+//	◇ ◈ ⬟ ⬞
 func WithSymbolsDiamond() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"◇", "◈", "⬟", "⬞"}
@@ -357,7 +335,7 @@ func WithSymbolsDiamond() Option {
 // WithSymbolsDiamond2 returns an option function that sets the spinner unicode
 // animation with diamond symbols.
 //
-//	"", "", "", "".
+//	   
 func WithSymbolsDiamond2() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"", "", "", ""}
@@ -367,7 +345,7 @@ func WithSymbolsDiamond2() Option {
 // WithSymbolsPlusCross returns an option function that sets the spinner unicode
 // animation with plus and cross symbols.
 //
-//	"+", "x".
+//   - x
 func WithSymbolsPlusCross() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"+", "x"}
@@ -377,7 +355,7 @@ func WithSymbolsPlusCross() Option {
 // WithSymbolsArrows returns an option function that sets the spinner unicode
 // animation with arrows.
 //
-//	"<", "<<", "<<<", "-", ">", ">>", ">>>".
+//	< << <<< - > >> >>>
 func WithSymbolsArrows() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"<", "<<", "<<<", "-", ">", ">>", ">>>"}
@@ -387,7 +365,7 @@ func WithSymbolsArrows() Option {
 // WithSymbolsArrows2 returns an option function that sets the spinner unicode
 // animation with arrows.
 //
-//	">   ", ">>  ", ">>> ", ">>>>".
+//	>    >>   >>>  >>>>
 func WithSymbolsArrows2() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{">   ", ">>  ", ">>> ", ">>>>"}
@@ -397,7 +375,7 @@ func WithSymbolsArrows2() Option {
 // WithSymbolsArrows3 returns an option function that sets the spinner unicode
 // animation with arrows.
 //
-//	"▹▹▹▹▹", "▸▹▹▹▹", "▹▸▹▹▹", "▹▹▸▹▹", "▹▹▹▸▹", "▹▹▹▹▸".
+//	▹▹▹▹▹ ▸▹▹▹▹ ▹▸▹▹▹ ▹▹▸▹▹ ▹▹▹▸▹ ▹▹▹▹▸
 func WithSymbolsArrows3() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"▹▹▹▹▹", "▸▹▹▹▹", "▹▸▹▹▹", "▹▹▸▹▹", "▹▹▹▸▹", "▹▹▹▹▸"}
@@ -407,7 +385,7 @@ func WithSymbolsArrows3() Option {
 // WithSymbolsArrows4 returns an option function that sets the spinner unicode
 // animation with arrows.
 //
-//	"←", "↖", "↑", "↗", "→", "↘", "↓", "↙".
+//	← ↖ ↑ ↗ → ↘ ↓ ↙
 func WithSymbolsArrows4() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"←", "↖", "↑", "↗", "→", "↘", "↓", "↙"}
@@ -417,7 +395,7 @@ func WithSymbolsArrows4() Option {
 // WithSymbolsCircles returns an option function that sets the spinner unicode
 // animation with circles
 //
-//	"o", "O", "@", "*".
+//	o O @ *
 func WithSymbolsCircles() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"o", "O", "@", "*"}
@@ -427,7 +405,7 @@ func WithSymbolsCircles() Option {
 // WithSymbolsCircles2 returns an option function that sets the spinner unicode
 // animation with circles.
 //
-//	".", "o", "O", "°", "O", "o", ".".
+//	. o O ° O o .
 func WithSymbolsCircles2() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{".", "o", "O", "°", "O", "o", "."}
@@ -437,7 +415,7 @@ func WithSymbolsCircles2() Option {
 // WithSymbolsCircles3 returns an option function that sets the spinner unicode
 // animation with circles.
 //
-//	"●", "●", "●", "●".
+//	● ● ● ●
 func WithSymbolsCircles3() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"●", "●", "●", "●"}
@@ -447,7 +425,7 @@ func WithSymbolsCircles3() Option {
 // WithSymbolsCircles4 returns an option function that sets the spinner unicode
 // animation with circles.
 //
-//	"", "", "", "".
+//	   
 func WithSymbolsCircles4() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"", "", "", ""}
@@ -457,7 +435,7 @@ func WithSymbolsCircles4() Option {
 // WithSymbolsCircles5 returns an option function that sets the spinner unicode
 // animation with circles.
 //
-//	"", "", "", "".
+//	   
 func WithSymbolsCircles5() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"", "", "", "", ""}
@@ -467,7 +445,7 @@ func WithSymbolsCircles5() Option {
 // WithSymbolsCircles6 returns an option function that sets the spinner unicode
 // animation with circles.
 //
-//	"", "", "", "", "".
+//	    
 func WithSymbolsCircles6() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"", "", "", "", "", ""}
@@ -477,7 +455,7 @@ func WithSymbolsCircles6() Option {
 // WithSymbolsCircles7 returns an option function that sets the spinner unicode
 // animation with circles.
 //
-//	"", "", "", "", "", "".
+//	     
 func WithSymbolsCircles7() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"", "", "", "", "", ""}
@@ -487,7 +465,7 @@ func WithSymbolsCircles7() Option {
 // WithSymbolsBounce returns an option function that sets the spinner unicode
 // animation with circles.
 //
-//	"[    ]", "[=   ]", "[==  ]", "[=== ]", "[ ===]", "[  ==]", "[   =]".
+//	[    ] [=   ] [==  ] [=== ] [ ===] [  ==] [   =]
 func WithSymbolsBounce() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{
@@ -513,7 +491,7 @@ func WithSymbolsBounce() Option {
 // WithSymbolsBounceBall returns an option function that sets the spinner unicode
 // animation with circles.
 //
-//	"( ●    )", "(  ●   )", "(   ●  )", "(    ● )", "(     ●)".
+//	( ●    ) (  ●   ) (   ●  ) (    ● ) (     ●)
 func WithSymbolsBounceBall() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{
@@ -534,7 +512,7 @@ func WithSymbolsBounceBall() Option {
 // WithSymbolsToggle returns an option function that sets the spinner unicode
 // animation with toggle symbols.
 //
-//	"■", "□", "▪", "▫".
+//	■ □ ▪ ▫
 func WithSymbolsToggle() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"■", "□", "▪", "▫"}
@@ -544,7 +522,7 @@ func WithSymbolsToggle() Option {
 // WithSymbolsToggle2 returns an option function that sets the spinner unicode
 // animation with toggle symbols.
 //
-//	"=", "*", "-".
+//	= * -
 func WithSymbolsToggle2() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"=", "*", "-"}
@@ -554,7 +532,7 @@ func WithSymbolsToggle2() Option {
 // WithSymbolsToggle3 returns an option function that sets the spinner unicode
 // animation with toggle symbols.
 //
-//	"◉", "◎".
+//	◉ ◎
 func WithSymbolsToggle3() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{"◉", "◎"}
@@ -564,7 +542,7 @@ func WithSymbolsToggle3() Option {
 // WithSymbolsLoading returns an option function that sets the spinner unicode
 // animation with loading symbols.
 //
-//	"loading....".
+//	loading....
 func WithSymbolsLoading() Option {
 	return func(r *Rotato) {
 		r.symbols = []string{
@@ -580,5 +558,338 @@ func WithSymbolsLoading() Option {
 			"loading...",
 			"loading....",
 		}
+	}
+}
+
+// WithSymbolsTriangles returns an option function that sets the spinner
+// unicode animation with rotating triangles.
+//
+//	▲ ▶ ▼ ◀
+func WithSymbolsTriangles() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"▲", "▶", "▼", "◀"}
+	}
+}
+
+// WithSymbolsCubes returns an option function that sets the spinner
+// unicode animation with cube rotation.
+//
+//	▖ ▘ ▝ ▗
+func WithSymbolsCubes() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"▖", "▘", "▝", "▗"}
+	}
+}
+
+// WithSymbolsThinking returns an option function that sets the spinner
+// animation with growing question marks.
+//
+//	? ?? ??? ???? ?????
+func WithSymbolsThinking() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"?", "??", "???", "????", "?????"}
+	}
+}
+
+// WithSymbolsPingPong returns an option function that sets the spinner
+// animation with expanding and contracting brackets.
+//
+//	<     > <    > <   > <  > < > <>< < > <  > <   > <    >
+func WithSymbolsPingPong() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"<     >", "<    >", "<   >", "<  >", "< >", "<><", "< >", "<  >", "<   >", "<    >"}
+	}
+}
+
+// WithSymbolsTimer returns an option function that sets the spinner
+// animation with counting timer.
+//
+//	00:00 00:01 00:02 00:03 00:04 00:05
+func WithSymbolsTimer() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"00:00", "00:01", "00:02", "00:03", "00:04", "00:05"}
+	}
+}
+
+// WithSymbolsMatrix returns an option function that sets the spinner
+// unicode animation with matrix-style loading.
+//
+//	╔═══╗ ║▓▓▓║ ║░▓▓║ ║░░▓║ ║░░░║ ╚═══╝
+func WithSymbolsMatrix() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{
+			"╔═══╗",
+			"║▓▓▓║",
+			"║░▓▓║",
+			"║░░▓║",
+			"║░░░║",
+			"╚═══╝",
+		}
+	}
+}
+
+// WithSymbolsHex returns an option function that sets the spinner
+// animation with hexadecimal counting.
+//
+//	0x0 0x1 0x2 0x3 0x4 0x5 0x6 0x7 0x8 0x9 0xA 0xB 0xC 0xD 0xE 0xF
+func WithSymbolsHex() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{
+			"0x0", "0x1", "0x2", "0x3",
+			"0x4", "0x5", "0x6", "0x7",
+			"0x8", "0x9", "0xA", "0xB",
+			"0xC", "0xD", "0xE", "0xF",
+		}
+	}
+}
+
+// WithSymbolsPacman returns an option function that sets the spinner
+// unicode animation with pacman movement.
+//
+//	ᗧ··· ·ᗧ·· ··ᗧ· ···ᗧ
+func WithSymbolsPacman() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{
+			"ᗧ···",
+			"·ᗧ··",
+			"··ᗧ·",
+			"···ᗧ",
+		}
+	}
+}
+
+// WithSymbolsBoxFill returns an option function that sets the spinner
+// animation with progressively filling box.
+//
+//	[          ] [■         ] [■■        ] [■■■       ] [■■■■      ]
+//	[■■■■■ ] [■■■■■■    ] [■■■■■■■   ] [■■■■■■■■  ] [■■■■■■■■■ ] [■■■■■■■■■■]
+func WithSymbolsBoxFill() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{
+			"[          ]",
+			"[■         ]",
+			"[■■        ]",
+			"[■■■       ]",
+			"[■■■■      ]",
+			"[■■■■■     ]",
+			"[■■■■■■    ]",
+			"[■■■■■■■   ]",
+			"[■■■■■■■■  ]",
+			"[■■■■■■■■■ ]",
+			"[■■■■■■■■■■]",
+		}
+	}
+}
+
+// WithSymbolsSnail returns an option function that sets the spinner
+// animation with growing snail trail.
+//
+//	@ @- @-- @--- @---- @-----
+func WithSymbolsSnail() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{
+			"@     ",
+			"@-    ",
+			"@--   ",
+			"@---  ",
+			"@---- ",
+			"@-----",
+		}
+	}
+}
+
+// WithSymbolsWorm returns an option function that sets the spinner
+// animation with growing and shrinking worm.
+//
+//	~ ~~ ~~~ ~~~~ ~~~~~ ~~~~ ~~~ ~~ ~
+func WithSymbolsWorm() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{
+			"~",
+			"~~",
+			"~~~",
+			"~~~~",
+			"~~~~~",
+			"~~~~",
+			"~~~",
+			"~~",
+			"~",
+		}
+	}
+}
+
+// WithSymbolsWorm2 returns an option function that sets the spinner
+// animation with growing and shrinking worm.
+//
+//	~ ~~ ~~~ ~~~~ ~~~~~ ~~~~ ~~~ ~~ ~
+func WithSymbolsWorm2() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{
+			"~    ",
+			"~~   ",
+			"~~~  ",
+			"~~~~ ",
+			"~~~~~",
+			"~~~~ ",
+			"~~~  ",
+			"~~   ",
+			"~    ",
+		}
+	}
+}
+
+// WithSymbolsMathOps returns an option function that sets the spinner
+// unicode animation with mathematical operators.
+//
+//   - - × ÷ = ≠ ≈ ≤ ≥
+func WithSymbolsMathOps() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"+", "-", "×", "÷", "=", "≠", "≈", "≤", "≥"}
+	}
+}
+
+// WithSymbolsGreek returns an option function that sets the spinner
+// unicode animation with Greek letters.
+//
+//	α β γ δ ε ζ η θ
+func WithSymbolsGreek() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"α", "β", "γ", "δ", "ε", "ζ", "η", "θ"}
+	}
+}
+
+// WithSymbolsCorners returns an option function that sets the spinner
+// unicode animation with box corners.
+//
+//	┌ ┐ └ ┘
+func WithSymbolsCorners() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"┌", "┐", "└", "┘"}
+	}
+}
+
+// WithSymbolsBox returns an option function that sets the spinner
+// unicode animation with opening and closing box.
+//
+//	╔════╗ ║    ║ ╚════╝
+func WithSymbolsBox() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{
+			"╔════╗",
+			"║    ║",
+			"╚════╝",
+		}
+	}
+}
+
+// WithSymbolsSlash returns an option function that sets the spinner
+// animation with increasing forward slashes.
+//
+//	/ // /// //// /////
+func WithSymbolsSlash() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"/    ", "//   ", "///  ", "//// ", "/////"}
+	}
+}
+
+// WithSymbolsBackslash returns an option function that sets the spinner
+// animation with increasing backslashes.
+//
+//	\ \\ \\\ \\\\ \\\\\
+func WithSymbolsBackslash() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"\\    ", "\\\\   ", "\\\\\\  ", "\\\\\\\\ ", "\\\\\\\\\\"}
+	}
+}
+
+// WithSymbolsMarquee returns an option function that sets the spinner
+// animation with moving marquee arrow.
+//
+//	[          ] [ >        ] [  >       ] [   >      ] [    >     ]
+//	[     >    ] [      >   ] [       >  ] [        > ] [         >]
+func WithSymbolsMarquee() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{
+			"[          ]",
+			"[ >        ]",
+			"[  >       ]",
+			"[   >      ]",
+			"[    >     ]",
+			"[     >    ]",
+			"[      >   ]",
+			"[       >  ]",
+			"[        > ]",
+			"[         >]",
+		}
+	}
+}
+
+// WithSymbolsEyes returns an option function that sets the spinner
+// unicode animation with blinking eyes.
+//
+//	◉◉ ●● ○○ ●●
+func WithSymbolsEyes() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"◉◉", "●●", "○○", "●●"}
+	}
+}
+
+// WithSymbolsBlink returns an option function that sets the spinner
+// unicode animation with blinking dots.
+//
+//	◉ ◉ - - ◉ ◉
+func WithSymbolsBlink() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"◉ ◉", "- -", "◉ ◉"}
+	}
+}
+
+// WithSymbolsGradient returns an option function that sets the spinner
+// unicode animation with density gradient.
+//
+//	░ ▒ ▓ █ ▓ ▒
+func WithSymbolsGradient() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"░", "▒", "▓", "█", "▓", "▒"}
+	}
+}
+
+// WithSymbolsFade returns an option function that sets the spinner
+// unicode animation with fading block.
+//
+//	█ ▓ ▒ ░   ░ ▒ ▓
+func WithSymbolsFade() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"█", "▓", "▒", "░", " ", "░", "▒", "▓"}
+	}
+}
+
+// WithSymbolsMath returns an option function that sets the spinner
+// unicode animation with mathematical symbols.
+//
+//	∀ ∃ ∈ ∉ ∋ ∌ ⊆ ⊂ ⊄ ⊇ ⊃ ⊅
+func WithSymbolsMath() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"∀", "∃", "∈", "∉", "∋", "∌", "⊆", "⊂", "⊄", "⊇", "⊃", "⊅"}
+	}
+}
+
+// WithSymbolsCurrency returns an option function that sets the spinner
+// unicode animation with currency symbols.
+//
+//	$ € £ ¥ ₿ ₹
+func WithSymbolsCurrency() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"$", "€", "£", "¥", "₿", "₹"}
+	}
+}
+
+// WithSymbolsGeometric returns an option function that sets the spinner
+// unicode animation with geometric shapes.
+//
+//	△ ◊ ◈ ◇ ○ ● ◐ ◑ ◒ ◓
+func WithSymbolsGeometric() Option {
+	return func(r *Rotato) {
+		r.symbols = []string{"△", "◊", "◈", "◇", "○", "●", "◐", "◑", "◒", "◓"}
 	}
 }
