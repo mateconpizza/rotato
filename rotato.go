@@ -62,6 +62,7 @@
 package rotato
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -151,8 +152,8 @@ func WithSpinnerColor(c ...Color) Option {
 	}
 }
 
-// WithSpinnerFrequency returns an option function that sets the spinner frequency.
-func WithSpinnerFrequency(d time.Duration) Option {
+// WithFrequency returns an option function that sets the spinner frequency.
+func WithFrequency(d time.Duration) Option {
 	return func(r *Rotato) {
 		r.frequency = d
 	}
@@ -180,6 +181,12 @@ func WithWriter(w io.Writer) Option {
 	}
 }
 
+func WithContext(ctx context.Context) Option {
+	return func(r *Rotato) {
+		r.ctx = ctx
+	}
+}
+
 func WithForceInteractive() Option {
 	return func(r *Rotato) {
 		r.forceInteractive = true
@@ -193,6 +200,9 @@ type Option func(*Rotato)
 type Rotato struct {
 	// Output
 	Writer io.Writer // Output writer
+
+	// Context
+	ctx context.Context
 
 	// for Testing
 	forceInteractive bool
@@ -246,6 +256,12 @@ func (r *Rotato) render(current int) {
 
 // Start starts the spinning animation in a goroutine.
 func (r *Rotato) Start() {
+	select {
+	case <-r.ctx.Done():
+		return
+	default:
+	}
+
 	if !isInteractive(r) && !r.forceInteractive {
 		r.mu.Lock()
 		defer r.mu.Unlock()
@@ -266,14 +282,14 @@ func (r *Rotato) Start() {
 
 	hideCursor(r.Writer)
 	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	if r.isActive {
+		r.mu.Unlock()
 		return
 	}
-
 	r.isActive = true
-	if isRedirected(r.Writer) {
+	r.mu.Unlock()
+
+	if isRedirected(r.Writer) && !r.forceInteractive {
 		r.render(0)
 		return
 	}
@@ -281,10 +297,12 @@ func (r *Rotato) Start() {
 	ticker := time.NewTicker(r.frequency)
 	go func() {
 		defer ticker.Stop()
-
 		for i := 0; ; i++ {
 			select {
 			case <-r.doneChan:
+				return
+			case <-r.ctx.Done():
+				r.stopSpinner()
 				return
 			case <-ticker.C:
 				r.mu.Lock()
@@ -327,10 +345,13 @@ func (r *Rotato) Fail(mesg ...string) {
 	if !r.isActive {
 		return
 	}
+
 	r.stopSpinner()
+
 	if len(mesg) == 0 {
 		mesg = append(mesg, "Failed")
 	}
+
 	r.displayMessage(r.failSymbol, r.failMessageColor, mesg...)
 }
 
@@ -421,6 +442,7 @@ func (r *Rotato) display(s string) {
 		_, _ = fmt.Fprint(r.Writer, removeANSI(s))
 		return
 	}
+
 	_, _ = fmt.Fprintf(r.Writer, "%s%s", clearChars, s)
 }
 
@@ -494,6 +516,10 @@ func New(opt ...Option) *Rotato {
 	}
 	for _, fn := range opt {
 		fn(r)
+	}
+
+	if r.ctx == nil {
+		r.ctx = context.Background()
 	}
 
 	return r

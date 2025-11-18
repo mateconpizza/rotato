@@ -2,6 +2,7 @@ package rotato
 
 import (
 	"bytes"
+	"context"
 	"strings"
 	"testing"
 	"time"
@@ -10,8 +11,12 @@ import (
 func TestSpinnerOutput(t *testing.T) {
 	var buf bytes.Buffer
 	mesg := "Testing"
-	r := New(WithWriter(&buf), WithMesg(mesg), WithDoneMesg("Done"))
-	r.frequency = 10 * time.Millisecond
+	r := New(
+		WithWriter(&buf),
+		WithMesg(mesg),
+		WithDoneMesg("Done"),
+		WithFrequency(10*time.Millisecond),
+	)
 
 	r.Start()
 	time.Sleep(50 * time.Millisecond)
@@ -32,7 +37,7 @@ func TestSpinnerState(t *testing.T) {
 	var buf bytes.Buffer
 	r := New(
 		WithWriter(&buf),
-		WithSpinnerFrequency(10*time.Millisecond),
+		WithFrequency(10*time.Millisecond),
 		WithSymbols([]string{"-", "\\", "|", "/"}...),
 		WithDoneMesg("Stopped"),
 	)
@@ -56,7 +61,7 @@ func TestSpinnerMessageUpdate(t *testing.T) {
 
 	r := New(
 		WithWriter(&buf),
-		WithSpinnerFrequency(10*time.Millisecond),
+		WithFrequency(10*time.Millisecond),
 		WithMesg("Initial"),
 		WithDoneMesg("Done"),
 	)
@@ -124,5 +129,119 @@ func TestRemoveANSI(t *testing.T) {
 				t.Errorf("removeANSI(%q) = %q; want %q", tt.input, got, tt.want)
 			}
 		})
+	}
+}
+
+func TestContext(t *testing.T) {
+	var buf bytes.Buffer
+	mesg := "Testing"
+	ctx, cancel := context.WithCancel(context.Background())
+	r := New(
+		WithWriter(&buf),
+		WithMesg(mesg),
+		WithDoneMesg("Done"),
+		WithContext(ctx),
+		WithForceInteractive(),
+		WithFrequency(10*time.Millisecond),
+	)
+
+	t.Logf("isInteractive: %v", isInteractive(r))
+	t.Logf("forceInteractive: %v", r.forceInteractive)
+
+	r.Start()
+	time.Sleep(50 * time.Millisecond)
+	cancel()
+	time.Sleep(50 * time.Millisecond)
+
+	r.mu.RLock()
+	isActive := r.isActive
+	r.mu.RUnlock()
+
+	if isActive {
+		t.Fatalf("spinner should be inactive after context cancellation: %v", isActive)
+	}
+}
+
+func TestContextCancelThenDone(t *testing.T) {
+	var buf bytes.Buffer
+	ctx, cancel := context.WithCancel(context.Background())
+	r := New(
+		WithWriter(&buf),
+		WithMesg("Running..."),
+		WithDoneMesg("Completed"),
+		WithContext(ctx),
+		WithForceInteractive(),
+		WithFrequency(10*time.Millisecond),
+	)
+
+	r.Start()
+	time.Sleep(50 * time.Millisecond)
+	cancel()
+	time.Sleep(50 * time.Millisecond)
+
+	if r.isActive {
+		t.Fatal("spinner should be inactive after context cancellation")
+	}
+
+	output := buf.String()
+	if !strings.Contains(output, "Running...") || !strings.Contains(output, r.symbols[0]) {
+		t.Errorf("Expected final output to contain completion message after cancel, got:\n%s", output)
+	}
+}
+
+func TestContextTimeoutStopsSpinner(t *testing.T) {
+	var buf bytes.Buffer
+	timeout := 10 * time.Millisecond
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	r := New(
+		WithWriter(&buf),
+		WithMesg("Timing out..."),
+		WithContext(ctx),
+		WithForceInteractive(),
+		WithFrequency(5*time.Millisecond),
+	)
+
+	r.Start()
+	time.Sleep(timeout + 50*time.Millisecond)
+
+	r.mu.RLock()
+	isActive := r.isActive
+	r.mu.RUnlock()
+
+	if isActive {
+		t.Fatalf("spinner should be inactive after context timeout: %v", isActive)
+	}
+}
+
+func TestStartWithPreCancelledContext(t *testing.T) {
+	var buf bytes.Buffer
+	mesg := "Test Message"
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	r := New(
+		WithWriter(&buf),
+		WithMesg(mesg),
+		WithContext(ctx),
+		WithFrequency(5*time.Millisecond),
+		WithForceInteractive(),
+	)
+
+	r.Start()
+	time.Sleep(5 * time.Millisecond)
+
+	r.mu.RLock()
+	isActive := r.isActive
+	r.mu.RUnlock()
+
+	if isActive {
+		t.Fatalf("spinner should not become active with pre-cancelled context")
+	}
+
+	output := buf.String()
+	if output != "" {
+		t.Errorf("expected message to be empty")
 	}
 }
