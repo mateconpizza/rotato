@@ -236,6 +236,24 @@ func TestStartWithPreCancelledContext(t *testing.T) {
 	}
 }
 
+func TestMesgDecorator(t *testing.T) {
+	prefix := "prefix::"
+	suffix := "::suffix"
+
+	r := New(
+		WithMesgDecorator(func(mesg string) string {
+			return prefix + mesg + suffix
+		}),
+	)
+
+	result := r.decorateMessage("hello")
+	expected := prefix + "hello" + suffix
+
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
 func TestContextCancelled(t *testing.T) {
 	var buf bytes.Buffer
 	ctx, cancel := context.WithCancel(context.Background())
