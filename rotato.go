@@ -193,11 +193,23 @@ func WithForceInteractive() Option {
 	}
 }
 
+// WithMesgDecorator appends a decorator to transform the spinner message
+// before display.
+func WithMesgDecorator(fn mesgDecorator) Option {
+	return func(r *Rotato) {
+		r.decorators = append(r.decorators, fn)
+	}
+}
+
+// WithContextDoneHandler sets a handler invoked when the context is done.
 func WithContextDoneHandler(handler func(*Rotato, error)) Option {
 	return func(r *Rotato) {
 		r.ctxDoneHandler = handler
 	}
 }
+
+// mesgDecorator defines a function that transforms a message string.
+type mesgDecorator func(mesg string) string
 
 // Option is an option function for the spinner.
 type Option func(*Rotato)
@@ -247,6 +259,9 @@ type Rotato struct {
 	failSymbol       string // Fail symbol
 	failSymbolColor  string // Fail symbol color
 
+	// decorators holds message decorator functions applied before display.
+	decorators []mesgDecorator
+
 	// Active state
 	isActive bool         // State of the spinner
 	activeMu sync.RWMutex // Mutex for different spinner states
@@ -255,12 +270,15 @@ type Rotato struct {
 // render displays the current frame and message of the spinner.
 func (r *Rotato) render(current int) {
 	mesg := r.currentMessage()
+	mesg = r.decorateMessage(mesg)
+
 	frameFormatted := r.currentFrame(current)
 
 	if r.prefixMesg != "" {
 		r.parsePrefix(frameFormatted, mesg)
 		return
 	}
+
 	r.display(fmt.Sprintf("%s %s", frameFormatted, mesg))
 }
 
@@ -508,6 +526,13 @@ func (r *Rotato) IsRunning() bool {
 	r.activeMu.RLock()
 	defer r.activeMu.RUnlock()
 	return r.isActive
+}
+
+func (r *Rotato) decorateMessage(mesg string) string {
+	for _, d := range r.decorators {
+		mesg = d(mesg)
+	}
+	return mesg
 }
 
 // removeANSI removes ANSI codes from a given string.
