@@ -236,6 +236,64 @@ func TestStartWithPreCancelledContext(t *testing.T) {
 	}
 }
 
+func TestDisplayMessage(t *testing.T) {
+	tests := []struct {
+		name     string
+		symbol   string
+		color    string
+		msg      []string
+		prefix   string
+		expected string
+	}{
+		{
+			name:     "symbol + message",
+			symbol:   "✓",
+			color:    "",
+			msg:      []string{"done"},
+			expected: "✓ done\n",
+		},
+		{
+			name:     "color applied",
+			symbol:   "✓",
+			color:    "\x1b[32m",
+			msg:      []string{"ok"},
+			expected: "✓ ok\n",
+		},
+		{
+			name:     "no symbol",
+			color:    "",
+			msg:      []string{"hello"},
+			expected: "hello\n",
+		},
+		{
+			name:     "prefix overrides symbol position",
+			symbol:   "✓",
+			color:    "",
+			msg:      []string{"done"},
+			prefix:   "step1",
+			expected: "step1 ✓ done\n",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+
+			r := &Rotato{
+				Writer:     buf,
+				prefixMesg: tt.prefix,
+			}
+
+			r.displayMessage(tt.symbol, tt.color, tt.msg...)
+
+			got := buf.String()
+			if got != tt.expected {
+				t.Fatalf("got %q, want %q", got, tt.expected)
+			}
+		})
+	}
+}
+
 func TestMesgDecorator(t *testing.T) {
 	prefix := "prefix::"
 	suffix := "::suffix"

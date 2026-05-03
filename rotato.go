@@ -124,6 +124,13 @@ func WithDoneColorMesg(c ...Color) Option {
 	}
 }
 
+// WithDoneColorSymbol sets the combined color(s) for the completion symbol.
+func WithDoneColorSymbol(c ...Color) Option {
+	return func(r *Rotato) {
+		r.doneSymbolColor = joinColors(c...)
+	}
+}
+
 // WithFailSymbol returns an option function that sets the spinner fail symbol.
 func WithFailSymbol(symbol string) Option {
 	return func(r *Rotato) {
@@ -252,6 +259,7 @@ type Rotato struct {
 	doneMessage      string        // Done channel message
 	doneMessageColor string        // Done channel message color
 	doneSymbol       string        // Done channel symbol
+	doneSymbolColor  string        // Done symbol color
 	doneChan         chan struct{} // Channel for stopping the spinner
 
 	// Failure state
@@ -363,22 +371,31 @@ func (r *Rotato) Done(mesg ...string) {
 		return
 	}
 
-	r.displayMessage(r.doneSymbol, r.doneMessageColor, finalMesg)
+	symbol := formatSymbol(r.doneSymbol, r.doneSymbolColor)
+
+	r.displayMessage(symbol, r.doneMessageColor, finalMesg)
+}
+
+func formatSymbol(symbol, color string) string {
+	if symbol == "" {
+		return ""
+	}
+	if color == "" {
+		return symbol
+	}
+
+	return color + symbol + string(ColorReset)
 }
 
 // Fail fails the spinner animation.
 func (r *Rotato) Fail(mesg ...string) {
-	if !r.isActive {
-		return
-	}
-
 	r.stopSpinner()
-
 	if len(mesg) == 0 {
 		mesg = append(mesg, "Failed")
 	}
+	symbol := formatSymbol(r.failSymbol, r.failSymbolColor)
 
-	r.displayMessage(r.failSymbol, r.failMessageColor, mesg...)
+	r.displayMessage(symbol, r.failMessageColor, mesg...)
 }
 
 // Symbols returns the spinner symbols.
@@ -500,26 +517,50 @@ func (r *Rotato) displayMessage(symbol, color string, mesg ...string) {
 		return
 	}
 
-	s := strings.Join(mesg, " ")
-	s = color + s + "\n"
+	msg := strings.Join(mesg, " ")
 
-	if !isInteractive(r) && !r.forceInteractive {
-		r.display(s)
-		return
-	}
+	var sb strings.Builder
 
+	// prefix path
 	if r.prefixMesg != "" {
-		r.parsePrefix(symbol, s)
-		fmt.Print(string(ColorReset))
+		r.buildPrefix(&sb, symbol)
+	} else if symbol != "" {
+		sb.WriteString(symbol)
+		sb.WriteByte(' ')
+	}
+
+	// message color
+	if color != "" {
+		sb.WriteString(color)
+	}
+
+	sb.WriteString(msg)
+	sb.WriteByte('\n')
+
+	// single reset at the end
+	sb.WriteString(string(ColorReset))
+
+	// output path
+	if !isInteractive(r) && !r.forceInteractive {
+		r.display(sb.String())
 		return
 	}
 
-	var result string
-	if symbol != "" {
-		result = symbol + " "
+	r.display(sb.String())
+}
+
+func (r *Rotato) buildPrefix(sb *strings.Builder, symbol string) {
+	if r.prefixMesg == "" {
+		return
 	}
 
-	r.display(result + s + string(ColorReset))
+	sb.WriteString(r.prefixMesg)
+	sb.WriteByte(' ')
+
+	if symbol != "" {
+		sb.WriteString(symbol)
+		sb.WriteByte(' ')
+	}
 }
 
 func (r *Rotato) IsRunning() bool {
