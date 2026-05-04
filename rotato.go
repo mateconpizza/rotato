@@ -202,7 +202,7 @@ func WithForceInteractive() Option {
 
 // WithMesgDecorator appends a decorator to transform the spinner message
 // before display.
-func WithMesgDecorator(fn mesgDecorator) Option {
+func WithMesgDecorator(fn MesgDecorator) Option {
 	return func(r *Rotato) {
 		r.decorators = append(r.decorators, fn)
 	}
@@ -215,8 +215,8 @@ func WithContextDoneHandler(handler func(*Rotato, error)) Option {
 	}
 }
 
-// mesgDecorator defines a function that transforms a message string.
-type mesgDecorator func(mesg string) string
+// MesgDecorator defines a function that transforms a message string.
+type MesgDecorator func(mesg string) string
 
 // Option is an option function for the spinner.
 type Option func(*Rotato)
@@ -267,12 +267,12 @@ type Rotato struct {
 	failSymbol       string // Fail symbol
 	failSymbolColor  string // Fail symbol color
 
-	// decorators holds message decorator functions applied before display.
-	decorators []mesgDecorator
-
 	// Active state
 	isActive bool         // State of the spinner
 	activeMu sync.RWMutex // Mutex for different spinner states
+
+	// decorators holds message decorator functions applied before display.
+	decorators []MesgDecorator
 }
 
 // render displays the current frame and message of the spinner.
@@ -353,9 +353,6 @@ func (r *Rotato) Start() {
 
 // Done stops the spinner animation.
 func (r *Rotato) Done(mesg ...string) {
-	if !r.isActive {
-		return
-	}
 	defer showCursor(r.Writer)
 
 	r.stopSpinner()
@@ -367,7 +364,7 @@ func (r *Rotato) Done(mesg ...string) {
 	case r.doneMessage != "":
 		finalMesg = r.doneMessage
 	default:
-		fmt.Print(clearChars)
+		r.display(clearChars)
 		return
 	}
 
@@ -519,8 +516,14 @@ func (r *Rotato) displayMessage(symbol, color string, mesg ...string) {
 
 	msg := strings.Join(mesg, " ")
 
-	var sb strings.Builder
+	if !isInteractive(r) && !r.forceInteractive {
+		// the leading \n moves us off the "Loading..." line
+		// the trailing \n finishes the log entry
+		r.display("\n" + msg + "\n")
+		return
+	}
 
+	var sb strings.Builder
 	// prefix path
 	if r.prefixMesg != "" {
 		r.buildPrefix(&sb, symbol)
@@ -537,26 +540,26 @@ func (r *Rotato) displayMessage(symbol, color string, mesg ...string) {
 	sb.WriteString(msg)
 	sb.WriteByte('\n')
 
-	// single reset at the end
+	// single reset at end
 	sb.WriteString(string(ColorReset))
-
-	// output path
-	if !isInteractive(r) && !r.forceInteractive {
-		r.display(sb.String())
-		return
-	}
 
 	r.display(sb.String())
 }
 
 func (r *Rotato) buildPrefix(sb *strings.Builder, symbol string) {
-	if r.prefixMesg == "" {
-		return
+	// prefix
+	if r.prefixColor != "" {
+		sb.WriteString(r.prefixColor)
+	}
+	sb.WriteString(r.prefixMesg)
+	if r.prefixColor != "" {
+		sb.WriteString(string(ColorReset))
 	}
 
-	sb.WriteString(r.prefixMesg)
-	sb.WriteByte(' ')
+	// delimiter
+	sb.WriteString(r.delimiterColor + r.delimiter + string(ColorReset))
 
+	// symbol
 	if symbol != "" {
 		sb.WriteString(symbol)
 		sb.WriteByte(' ')

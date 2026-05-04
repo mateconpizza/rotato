@@ -238,12 +238,13 @@ func TestStartWithPreCancelledContext(t *testing.T) {
 
 func TestDisplayMessage(t *testing.T) {
 	tests := []struct {
-		name     string
-		symbol   string
-		color    string
-		msg      []string
-		prefix   string
-		expected string
+		name      string
+		symbol    string
+		delimiter string
+		color     string
+		msg       []string
+		prefix    string
+		expected  string
 	}{
 		{
 			name:     "symbol + message",
@@ -253,25 +254,27 @@ func TestDisplayMessage(t *testing.T) {
 			expected: "✓ done\n",
 		},
 		{
-			name:     "color applied",
+			name:     "color applied - ANSI stripped on redirect",
 			symbol:   "✓",
 			color:    "\x1b[32m",
 			msg:      []string{"ok"},
 			expected: "✓ ok\n",
 		},
 		{
-			name:     "no symbol",
-			color:    "",
-			msg:      []string{"hello"},
-			expected: "hello\n",
+			name:      "no symbol",
+			delimiter: "--",
+			color:     "",
+			msg:       []string{"hello"},
+			expected:  "hello\n",
 		},
 		{
-			name:     "prefix overrides symbol position",
-			symbol:   "✓",
-			color:    "",
-			msg:      []string{"done"},
-			prefix:   "step1",
-			expected: "step1 ✓ done\n",
+			name:      "prefix overrides symbol position",
+			symbol:    "✓",
+			color:     "",
+			delimiter: NBSP,
+			msg:       []string{"done"},
+			prefix:    "step1",
+			expected:  "step1" + NBSP + "✓ done\n",
 		},
 	}
 
@@ -279,10 +282,13 @@ func TestDisplayMessage(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			buf := &bytes.Buffer{}
 
-			r := &Rotato{
-				Writer:     buf,
-				prefixMesg: tt.prefix,
-			}
+			r := New(
+				WithWriter(buf),
+				WithDelimiter(tt.delimiter),
+				WithDoneSymbol(tt.symbol),
+				WithPrefix(tt.prefix),
+				WithForceInteractive(), // bypass isInteractive early-return
+			)
 
 			r.displayMessage(tt.symbol, tt.color, tt.msg...)
 
