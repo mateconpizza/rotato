@@ -121,7 +121,7 @@ func showSymbols(ctx context.Context) {
 	exitMesg := rotato.Colorize("(Press Ctrl+C to exit)", rotato.ColorGray, rotato.ColorStyleItalic)
 	for _, symbol := range allSymbols {
 		r := rotato.New(
-			rotato.WithMesg(exitMesg),
+			rotato.WithMessage(exitMesg),
 			rotato.WithPrefix(symbol.s+strings.Repeat(" ", maxLen-len(symbol.s))),
 			rotato.WithContext(ctx),
 			symbol.o,
@@ -145,7 +145,7 @@ func spSimple(ctx context.Context) {
 	r := rotato.New(
 		rotato.WithSpinnerColor(rotato.ColorBrightGreen),
 		rotato.WithPrefix("Simple Task #1"),
-		rotato.WithDoneColorMesg(rotato.ColorBrightGreen, rotato.ColorStyleItalic),
+		rotato.WithDoneMessageColor(rotato.ColorBrightGreen, rotato.ColorStyleItalic),
 		rotato.WithContext(ctx),
 	)
 	r.Start()
@@ -164,7 +164,7 @@ func spConnection(ctx context.Context) {
 	r := rotato.New(
 		rotato.WithSymbolsCircles3(),
 		rotato.WithSpinnerColor(rotato.ColorOrange),
-		rotato.WithMesg("Connecting..."),
+		rotato.WithMessage("Connecting..."),
 		rotato.WithPrefix("S3 Backup"),
 		rotato.WithContext(ctx),
 	)
@@ -213,9 +213,9 @@ func spConnection(ctx context.Context) {
 // spFail simulates a failed connection process.
 func spFail(ctx context.Context) {
 	r := rotato.New(
-		rotato.WithMesg("Trying to connect..."),
+		rotato.WithMessage("Trying to connect..."),
 		rotato.WithPrefix("AWS Server"),
-		rotato.WithFailColorMesg(rotato.ColorBrightRed, rotato.ColorStyleBlink),
+		rotato.WithFailMessageColor(rotato.ColorBrightRed, rotato.ColorStyleBlink),
 		rotato.WithContext(ctx),
 	)
 	r.Start()

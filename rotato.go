@@ -72,18 +72,26 @@ import (
 	"time"
 )
 
-// WithMesg returns an option function that sets the spinner message.
-func WithMesg(s string) Option {
+// WithMessage returns an option function that sets the spinner message.
+func WithMessage(s string) Option {
 	return func(r *Rotato) {
 		r.message = s
 	}
 }
 
-// WithMesgColor returns an option function that sets the spinner message
+// WithMessageColor returns an option function that sets the spinner message
 // color.
-func WithMesgColor(c ...Color) Option {
+func WithMessageColor(c ...Color) Option {
 	return func(r *Rotato) {
 		r.messageColor = joinColors(c...)
+	}
+}
+
+// WithMessageDecorator appends a decorator to transform the spinner message
+// before display.
+func WithMessageDecorator(fn MesgDecorator) Option {
+	return func(r *Rotato) {
+		r.decorators = append(r.decorators, fn)
 	}
 }
 
@@ -102,70 +110,6 @@ func WithPrefixColor(c ...Color) Option {
 	}
 }
 
-// WithDoneMesg returns an option function that sets the spinner done message.
-func WithDoneMesg(mesg string) Option {
-	return func(r *Rotato) {
-		r.doneMessage = mesg
-	}
-}
-
-// WithDoneSymbol returns an option function that sets the spinner stop symbol.
-func WithDoneSymbol(symbol string) Option {
-	return func(r *Rotato) {
-		r.doneSymbol = symbol
-	}
-}
-
-// WithDoneColorMesg returns an option function that sets the done message
-// color.
-func WithDoneColorMesg(c ...Color) Option {
-	return func(r *Rotato) {
-		r.doneMessageColor = joinColors(c...)
-	}
-}
-
-// WithDoneColorSymbol sets the combined color(s) for the completion symbol.
-func WithDoneColorSymbol(c ...Color) Option {
-	return func(r *Rotato) {
-		r.doneSymbolColor = joinColors(c...)
-	}
-}
-
-// WithFailSymbol returns an option function that sets the spinner fail symbol.
-func WithFailSymbol(symbol string) Option {
-	return func(r *Rotato) {
-		r.failSymbol = symbol
-	}
-}
-
-// WithFailColorMesg returns an option function that sets the fail message
-// color.
-func WithFailColorMesg(c ...Color) Option {
-	return func(r *Rotato) {
-		r.failMessageColor = joinColors(c...)
-	}
-}
-
-func WithFailColorSymbol(c ...Color) Option {
-	return func(r *Rotato) {
-		r.failSymbolColor = joinColors(c...)
-	}
-}
-
-// WithSpinnerColor returns an option function that sets the spinner color.
-func WithSpinnerColor(c ...Color) Option {
-	return func(r *Rotato) {
-		r.spinnerColor = joinColors(c...)
-	}
-}
-
-// WithFrequency returns an option function that sets the spinner frequency.
-func WithFrequency(d time.Duration) Option {
-	return func(r *Rotato) {
-		r.frequency = d
-	}
-}
-
 // WithDelimiter returns an option function that sets the spinner delimiter.
 func WithDelimiter(s string) Option {
 	return func(r *Rotato) {
@@ -178,6 +122,72 @@ func WithDelimiter(s string) Option {
 func WithDelimiterColor(c ...Color) Option {
 	return func(r *Rotato) {
 		r.delimiterColor = joinColors(c...)
+	}
+}
+
+// WithSpinnerColor returns an option function that sets the spinner color.
+func WithSpinnerColor(c ...Color) Option {
+	return func(r *Rotato) {
+		r.spinnerColor = joinColors(c...)
+	}
+}
+
+// WithDoneMessage returns an option function that sets the spinner done message.
+func WithDoneMessage(mesg string) Option {
+	return func(r *Rotato) {
+		r.doneMessage = mesg
+	}
+}
+
+// WithDoneSymbol returns an option function that sets the spinner stop symbol.
+func WithDoneSymbol(symbol string) Option {
+	return func(r *Rotato) {
+		r.doneSymbol = symbol
+	}
+}
+
+// WithDoneMessageColor returns an option function that sets the done message
+// color.
+func WithDoneMessageColor(c ...Color) Option {
+	return func(r *Rotato) {
+		r.doneMessageColor = joinColors(c...)
+	}
+}
+
+// WithDoneSymbolColor sets the combined color(s) for the completion symbol.
+func WithDoneSymbolColor(c ...Color) Option {
+	return func(r *Rotato) {
+		r.doneSymbolColor = joinColors(c...)
+	}
+}
+
+// WithFailSymbol returns an option function that sets the spinner fail symbol.
+func WithFailSymbol(symbol string) Option {
+	return func(r *Rotato) {
+		r.failSymbol = symbol
+	}
+}
+
+// WithFailMessageColor returns an option function that sets the fail message
+// color.
+func WithFailMessageColor(c ...Color) Option {
+	return func(r *Rotato) {
+		r.failMessageColor = joinColors(c...)
+	}
+}
+
+// WithFailSymbolColor returns an option function that sets the fail symbol
+// color.
+func WithFailSymbolColor(c ...Color) Option {
+	return func(r *Rotato) {
+		r.failSymbolColor = joinColors(c...)
+	}
+}
+
+// WithFrequency returns an option function that sets the spinner frequency.
+func WithFrequency(d time.Duration) Option {
+	return func(r *Rotato) {
+		r.frequency = d
 	}
 }
 
@@ -452,7 +462,7 @@ func (r *Rotato) currentMessage() string {
 	r.messageUpdate.RLock()
 	defer r.messageUpdate.RUnlock()
 
-	return r.messageColor + r.message + string(ColorReset)
+	return Colorize(r.message, Color(r.messageColor))
 }
 
 // currentFrame returns the spinner frame for the given iteration.

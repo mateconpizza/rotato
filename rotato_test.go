@@ -13,8 +13,8 @@ func TestSpinnerOutput(t *testing.T) {
 	mesg := "Testing"
 	r := New(
 		WithWriter(&buf),
-		WithMesg(mesg),
-		WithDoneMesg("Done"),
+		WithMessage(mesg),
+		WithDoneMessage("Done"),
 		WithFrequency(10*time.Millisecond),
 	)
 
@@ -39,7 +39,7 @@ func TestSpinnerState(t *testing.T) {
 		WithWriter(&buf),
 		WithFrequency(10*time.Millisecond),
 		WithSymbols([]string{"-", "\\", "|", "/"}...),
-		WithDoneMesg("Stopped"),
+		WithDoneMessage("Stopped"),
 	)
 	r.Start()
 	time.Sleep(20 * time.Millisecond)
@@ -62,8 +62,8 @@ func TestSpinnerMessageUpdate(t *testing.T) {
 	r := New(
 		WithWriter(&buf),
 		WithFrequency(10*time.Millisecond),
-		WithMesg("Initial"),
-		WithDoneMesg("Done"),
+		WithMessage("Initial"),
+		WithDoneMessage("Done"),
 	)
 	r.Start()
 	time.Sleep(20 * time.Millisecond)
@@ -138,8 +138,8 @@ func TestContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	r := New(
 		WithWriter(&buf),
-		WithMesg(mesg),
-		WithDoneMesg("Done"),
+		WithMessage(mesg),
+		WithDoneMessage("Done"),
 		WithContext(ctx),
 		WithForceInteractive(),
 		WithFrequency(10*time.Millisecond),
@@ -161,8 +161,8 @@ func TestContextCancelThenDone(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	r := New(
 		WithWriter(&buf),
-		WithMesg("Running..."),
-		WithDoneMesg("Completed"),
+		WithMessage("Running..."),
+		WithDoneMessage("Completed"),
 		WithContext(ctx),
 		WithForceInteractive(),
 		WithFrequency(10*time.Millisecond),
@@ -191,7 +191,7 @@ func TestContextTimeoutStopsSpinner(t *testing.T) {
 
 	r := New(
 		WithWriter(&buf),
-		WithMesg("Timing out..."),
+		WithMessage("Timing out..."),
 		WithContext(ctx),
 		WithForceInteractive(),
 		WithFrequency(5*time.Millisecond),
@@ -215,7 +215,7 @@ func TestStartWithPreCancelledContext(t *testing.T) {
 
 	r := New(
 		WithWriter(&buf),
-		WithMesg(mesg),
+		WithMessage(mesg),
 		WithContext(ctx),
 		WithFrequency(5*time.Millisecond),
 		WithForceInteractive(),
@@ -305,7 +305,7 @@ func TestMesgDecorator(t *testing.T) {
 	suffix := "::suffix"
 
 	r := New(
-		WithMesgDecorator(func(mesg string) string {
+		WithMessageDecorator(func(mesg string) string {
 			return prefix + mesg + suffix
 		}),
 	)
