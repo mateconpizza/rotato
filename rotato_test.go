@@ -13,8 +13,8 @@ func TestSpinnerOutput(t *testing.T) {
 	mesg := "Testing"
 	r := New(
 		WithWriter(&buf),
-		WithMesg(mesg),
-		WithDoneMesg("Done"),
+		WithMessage(mesg),
+		WithDoneMessage("Done"),
 		WithFrequency(10*time.Millisecond),
 	)
 
@@ -39,7 +39,7 @@ func TestSpinnerState(t *testing.T) {
 		WithWriter(&buf),
 		WithFrequency(10*time.Millisecond),
 		WithSymbols([]string{"-", "\\", "|", "/"}...),
-		WithDoneMesg("Stopped"),
+		WithDoneMessage("Stopped"),
 	)
 	r.Start()
 	time.Sleep(20 * time.Millisecond)
@@ -62,8 +62,8 @@ func TestSpinnerMessageUpdate(t *testing.T) {
 	r := New(
 		WithWriter(&buf),
 		WithFrequency(10*time.Millisecond),
-		WithMesg("Initial"),
-		WithDoneMesg("Done"),
+		WithMessage("Initial"),
+		WithDoneMessage("Done"),
 	)
 	r.Start()
 	time.Sleep(20 * time.Millisecond)
@@ -138,8 +138,8 @@ func TestContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	r := New(
 		WithWriter(&buf),
-		WithMesg(mesg),
-		WithDoneMesg("Done"),
+		WithMessage(mesg),
+		WithDoneMessage("Done"),
 		WithContext(ctx),
 		WithForceInteractive(),
 		WithFrequency(10*time.Millisecond),
@@ -161,8 +161,8 @@ func TestContextCancelThenDone(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	r := New(
 		WithWriter(&buf),
-		WithMesg("Running..."),
-		WithDoneMesg("Completed"),
+		WithMessage("Running..."),
+		WithDoneMessage("Completed"),
 		WithContext(ctx),
 		WithForceInteractive(),
 		WithFrequency(10*time.Millisecond),
@@ -191,7 +191,7 @@ func TestContextTimeoutStopsSpinner(t *testing.T) {
 
 	r := New(
 		WithWriter(&buf),
-		WithMesg("Timing out..."),
+		WithMessage("Timing out..."),
 		WithContext(ctx),
 		WithForceInteractive(),
 		WithFrequency(5*time.Millisecond),
@@ -215,7 +215,7 @@ func TestStartWithPreCancelledContext(t *testing.T) {
 
 	r := New(
 		WithWriter(&buf),
-		WithMesg(mesg),
+		WithMessage(mesg),
 		WithContext(ctx),
 		WithFrequency(5*time.Millisecond),
 		WithForceInteractive(),
@@ -238,12 +238,13 @@ func TestStartWithPreCancelledContext(t *testing.T) {
 
 func TestDisplayMessage(t *testing.T) {
 	tests := []struct {
-		name     string
-		symbol   string
-		color    string
-		msg      []string
-		prefix   string
-		expected string
+		name      string
+		symbol    string
+		delimiter string
+		color     string
+		msg       []string
+		prefix    string
+		expected  string
 	}{
 		{
 			name:     "symbol + message",
@@ -253,25 +254,27 @@ func TestDisplayMessage(t *testing.T) {
 			expected: "✓ done\n",
 		},
 		{
-			name:     "color applied",
+			name:     "color applied - ANSI stripped on redirect",
 			symbol:   "✓",
 			color:    "\x1b[32m",
 			msg:      []string{"ok"},
 			expected: "✓ ok\n",
 		},
 		{
-			name:     "no symbol",
-			color:    "",
-			msg:      []string{"hello"},
-			expected: "hello\n",
+			name:      "no symbol",
+			delimiter: "--",
+			color:     "",
+			msg:       []string{"hello"},
+			expected:  "hello\n",
 		},
 		{
-			name:     "prefix overrides symbol position",
-			symbol:   "✓",
-			color:    "",
-			msg:      []string{"done"},
-			prefix:   "step1",
-			expected: "step1 ✓ done\n",
+			name:      "prefix overrides symbol position",
+			symbol:    "✓",
+			color:     "",
+			delimiter: NBSP,
+			msg:       []string{"done"},
+			prefix:    "step1",
+			expected:  "step1" + NBSP + "✓ done\n",
 		},
 	}
 
@@ -279,10 +282,13 @@ func TestDisplayMessage(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			buf := &bytes.Buffer{}
 
-			r := &Rotato{
-				Writer:     buf,
-				prefixMesg: tt.prefix,
-			}
+			r := New(
+				WithWriter(buf),
+				WithDelimiter(tt.delimiter),
+				WithDoneSymbol(tt.symbol),
+				WithPrefix(tt.prefix),
+				WithForceInteractive(), // bypass isInteractive early-return
+			)
 
 			r.displayMessage(tt.symbol, tt.color, tt.msg...)
 
@@ -299,7 +305,7 @@ func TestMesgDecorator(t *testing.T) {
 	suffix := "::suffix"
 
 	r := New(
-		WithMesgDecorator(func(mesg string) string {
+		WithMessageDecorator(func(mesg string) string {
 			return prefix + mesg + suffix
 		}),
 	)

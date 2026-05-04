@@ -72,18 +72,26 @@ import (
 	"time"
 )
 
-// WithMesg returns an option function that sets the spinner message.
-func WithMesg(s string) Option {
+// WithMessage returns an option function that sets the spinner message.
+func WithMessage(s string) Option {
 	return func(r *Rotato) {
 		r.message = s
 	}
 }
 
-// WithMesgColor returns an option function that sets the spinner message
+// WithMessageColor returns an option function that sets the spinner message
 // color.
-func WithMesgColor(c ...Color) Option {
+func WithMessageColor(c ...Color) Option {
 	return func(r *Rotato) {
 		r.messageColor = joinColors(c...)
+	}
+}
+
+// WithMessageDecorator appends a decorator to transform the spinner message
+// before display.
+func WithMessageDecorator(fn MesgDecorator) Option {
+	return func(r *Rotato) {
+		r.decorators = append(r.decorators, fn)
 	}
 }
 
@@ -102,70 +110,6 @@ func WithPrefixColor(c ...Color) Option {
 	}
 }
 
-// WithDoneMesg returns an option function that sets the spinner done message.
-func WithDoneMesg(mesg string) Option {
-	return func(r *Rotato) {
-		r.doneMessage = mesg
-	}
-}
-
-// WithDoneSymbol returns an option function that sets the spinner stop symbol.
-func WithDoneSymbol(symbol string) Option {
-	return func(r *Rotato) {
-		r.doneSymbol = symbol
-	}
-}
-
-// WithDoneColorMesg returns an option function that sets the done message
-// color.
-func WithDoneColorMesg(c ...Color) Option {
-	return func(r *Rotato) {
-		r.doneMessageColor = joinColors(c...)
-	}
-}
-
-// WithDoneColorSymbol sets the combined color(s) for the completion symbol.
-func WithDoneColorSymbol(c ...Color) Option {
-	return func(r *Rotato) {
-		r.doneSymbolColor = joinColors(c...)
-	}
-}
-
-// WithFailSymbol returns an option function that sets the spinner fail symbol.
-func WithFailSymbol(symbol string) Option {
-	return func(r *Rotato) {
-		r.failSymbol = symbol
-	}
-}
-
-// WithFailColorMesg returns an option function that sets the fail message
-// color.
-func WithFailColorMesg(c ...Color) Option {
-	return func(r *Rotato) {
-		r.failMessageColor = joinColors(c...)
-	}
-}
-
-func WithFailColorSymbol(c ...Color) Option {
-	return func(r *Rotato) {
-		r.failSymbolColor = joinColors(c...)
-	}
-}
-
-// WithSpinnerColor returns an option function that sets the spinner color.
-func WithSpinnerColor(c ...Color) Option {
-	return func(r *Rotato) {
-		r.spinnerColor = joinColors(c...)
-	}
-}
-
-// WithFrequency returns an option function that sets the spinner frequency.
-func WithFrequency(d time.Duration) Option {
-	return func(r *Rotato) {
-		r.frequency = d
-	}
-}
-
 // WithDelimiter returns an option function that sets the spinner delimiter.
 func WithDelimiter(s string) Option {
 	return func(r *Rotato) {
@@ -181,10 +125,76 @@ func WithDelimiterColor(c ...Color) Option {
 	}
 }
 
+// WithSpinnerColor returns an option function that sets the spinner color.
+func WithSpinnerColor(c ...Color) Option {
+	return func(r *Rotato) {
+		r.spinnerColor = joinColors(c...)
+	}
+}
+
+// WithDoneMessage returns an option function that sets the spinner done message.
+func WithDoneMessage(mesg string) Option {
+	return func(r *Rotato) {
+		r.doneMessage = mesg
+	}
+}
+
+// WithDoneSymbol returns an option function that sets the spinner stop symbol.
+func WithDoneSymbol(symbol string) Option {
+	return func(r *Rotato) {
+		r.doneSymbol = symbol
+	}
+}
+
+// WithDoneMessageColor returns an option function that sets the done message
+// color.
+func WithDoneMessageColor(c ...Color) Option {
+	return func(r *Rotato) {
+		r.doneMessageColor = joinColors(c...)
+	}
+}
+
+// WithDoneSymbolColor sets the combined color(s) for the completion symbol.
+func WithDoneSymbolColor(c ...Color) Option {
+	return func(r *Rotato) {
+		r.doneSymbolColor = joinColors(c...)
+	}
+}
+
+// WithFailSymbol returns an option function that sets the spinner fail symbol.
+func WithFailSymbol(symbol string) Option {
+	return func(r *Rotato) {
+		r.failSymbol = symbol
+	}
+}
+
+// WithFailMessageColor returns an option function that sets the fail message
+// color.
+func WithFailMessageColor(c ...Color) Option {
+	return func(r *Rotato) {
+		r.failMessageColor = joinColors(c...)
+	}
+}
+
+// WithFailSymbolColor returns an option function that sets the fail symbol
+// color.
+func WithFailSymbolColor(c ...Color) Option {
+	return func(r *Rotato) {
+		r.failSymbolColor = joinColors(c...)
+	}
+}
+
+// WithFrequency returns an option function that sets the spinner frequency.
+func WithFrequency(d time.Duration) Option {
+	return func(r *Rotato) {
+		r.frequency = d
+	}
+}
+
 // WithWriter returns an option function that sets the spinner writer.
 func WithWriter(w io.Writer) Option {
 	return func(r *Rotato) {
-		r.Writer = w
+		r.writer = w
 	}
 }
 
@@ -202,7 +212,7 @@ func WithForceInteractive() Option {
 
 // WithMesgDecorator appends a decorator to transform the spinner message
 // before display.
-func WithMesgDecorator(fn mesgDecorator) Option {
+func WithMesgDecorator(fn MesgDecorator) Option {
 	return func(r *Rotato) {
 		r.decorators = append(r.decorators, fn)
 	}
@@ -215,8 +225,8 @@ func WithContextDoneHandler(handler func(*Rotato, error)) Option {
 	}
 }
 
-// mesgDecorator defines a function that transforms a message string.
-type mesgDecorator func(mesg string) string
+// MesgDecorator defines a function that transforms a message string.
+type MesgDecorator func(mesg string) string
 
 // Option is an option function for the spinner.
 type Option func(*Rotato)
@@ -224,7 +234,7 @@ type Option func(*Rotato)
 // Rotato represents a CLI spinner animation.
 type Rotato struct {
 	// Output
-	Writer   io.Writer // Output writer
+	writer   io.Writer // Output writer
 	writerMu sync.Mutex
 
 	// Context
@@ -267,12 +277,12 @@ type Rotato struct {
 	failSymbol       string // Fail symbol
 	failSymbolColor  string // Fail symbol color
 
-	// decorators holds message decorator functions applied before display.
-	decorators []mesgDecorator
-
 	// Active state
 	isActive bool         // State of the spinner
 	activeMu sync.RWMutex // Mutex for different spinner states
+
+	// decorators holds message decorator functions applied before display.
+	decorators []MesgDecorator
 }
 
 // render displays the current frame and message of the spinner.
@@ -310,7 +320,7 @@ func (r *Rotato) Start() {
 		return
 	}
 
-	hideCursor(r.Writer)
+	hideCursor(r.writer)
 	r.activeMu.Lock()
 	if r.isActive {
 		r.activeMu.Unlock()
@@ -319,7 +329,7 @@ func (r *Rotato) Start() {
 	r.isActive = true
 	r.activeMu.Unlock()
 
-	if isRedirected(r.Writer) && !r.forceInteractive {
+	if isRedirected(r.writer) && !r.forceInteractive {
 		r.render(0)
 		return
 	}
@@ -353,10 +363,7 @@ func (r *Rotato) Start() {
 
 // Done stops the spinner animation.
 func (r *Rotato) Done(mesg ...string) {
-	if !r.isActive {
-		return
-	}
-	defer showCursor(r.Writer)
+	defer showCursor(r.writer)
 
 	r.stopSpinner()
 
@@ -367,24 +374,13 @@ func (r *Rotato) Done(mesg ...string) {
 	case r.doneMessage != "":
 		finalMesg = r.doneMessage
 	default:
-		fmt.Print(clearChars)
+		r.display(clearChars)
 		return
 	}
 
 	symbol := formatSymbol(r.doneSymbol, r.doneSymbolColor)
 
 	r.displayMessage(symbol, r.doneMessageColor, finalMesg)
-}
-
-func formatSymbol(symbol, color string) string {
-	if symbol == "" {
-		return ""
-	}
-	if color == "" {
-		return symbol
-	}
-
-	return color + symbol + string(ColorReset)
 }
 
 // Fail fails the spinner animation.
@@ -398,6 +394,20 @@ func (r *Rotato) Fail(mesg ...string) {
 	r.displayMessage(symbol, r.failMessageColor, mesg...)
 }
 
+// SetWriter updates the output destination safely.
+func (r *Rotato) SetWriter(w io.Writer) {
+	r.writerMu.Lock()
+	defer r.writerMu.Unlock()
+	r.writer = w
+}
+
+// Writer returns the current output destination.
+func (r *Rotato) Writer() io.Writer {
+	r.writerMu.Lock()
+	defer r.writerMu.Unlock()
+	return r.writer
+}
+
 // Symbols returns the spinner symbols.
 func (r *Rotato) Symbols() []string {
 	return r.symbols
@@ -409,7 +419,7 @@ func (r *Rotato) UpdateMesg(mesg string) {
 	r.message = mesg
 	r.messageUpdate.Unlock()
 	if !isInteractive(r) {
-		_, _ = fmt.Fprintf(r.Writer, "%s\n", mesg)
+		_, _ = fmt.Fprintf(r.writer, "%s\n", mesg)
 	}
 }
 
@@ -426,25 +436,25 @@ func (r *Rotato) UpdatePrefix(mesg string) {
 }
 
 // UpdatePrefixColor changes the color of the prefix.
-func (r *Rotato) UpdatePrefixColor(color ...string) {
-	r.prefixColor = strings.Join(color, "")
+func (r *Rotato) UpdatePrefixColor(c ...Color) {
+	r.prefixColor = joinColors(c...)
 }
 
 // UpdateDoneMesgColor changes the done message shown next to the spinner.
-func (r *Rotato) UpdateDoneMesgColor(mesg ...string) {
-	r.doneMessageColor = strings.Join(mesg, "")
+func (r *Rotato) UpdateDoneMesgColor(c ...Color) {
+	r.doneMessageColor = joinColors(c...)
 }
 
 // UpdateSpinnerColor changes the color of the spinner.
-func (r *Rotato) UpdateSpinnerColor(color ...string) {
-	r.spinnerColor = strings.Join(color, "")
+func (r *Rotato) UpdateSpinnerColor(c ...Color) {
+	r.spinnerColor = joinColors(c...)
 }
 
 // UpdateSymbols updates the spinner symbols.
 func (r *Rotato) UpdateSymbols(opt Option) {
 	r.activeMu.Lock()
+	defer r.activeMu.Unlock()
 	opt(r)
-	r.activeMu.Unlock()
 }
 
 // currentMessage safely constructs and returns the current message.
@@ -455,7 +465,7 @@ func (r *Rotato) currentMessage() string {
 	r.messageUpdate.RLock()
 	defer r.messageUpdate.RUnlock()
 
-	return r.messageColor + r.message + string(ColorReset)
+	return Colorize(r.message, Color(r.messageColor))
 }
 
 // currentFrame returns the spinner frame for the given iteration.
@@ -484,12 +494,12 @@ func (r *Rotato) display(s string) {
 	r.writerMu.Lock()
 	defer r.writerMu.Unlock()
 
-	if isRedirected(r.Writer) {
-		_, _ = fmt.Fprint(r.Writer, removeANSI(s))
+	if isRedirected(r.writer) {
+		_, _ = fmt.Fprint(r.writer, removeANSI(s))
 		return
 	}
 
-	_, _ = fmt.Fprintf(r.Writer, "%s%s", clearChars, s)
+	_, _ = fmt.Fprintf(r.writer, "%s%s", clearChars, s)
 }
 
 // stopSpinner handles the common logic for stopping the spinner.
@@ -507,7 +517,7 @@ func (r *Rotato) stopSpinner() {
 		return
 	}
 
-	defer showCursor(r.Writer)
+	defer showCursor(r.writer)
 	r.doneChan <- struct{}{}
 }
 
@@ -519,8 +529,14 @@ func (r *Rotato) displayMessage(symbol, color string, mesg ...string) {
 
 	msg := strings.Join(mesg, " ")
 
-	var sb strings.Builder
+	if !isInteractive(r) && !r.forceInteractive {
+		// the leading \n moves us off the "Loading..." line
+		// the trailing \n finishes the log entry
+		r.display("\n" + msg + "\n")
+		return
+	}
 
+	var sb strings.Builder
 	// prefix path
 	if r.prefixMesg != "" {
 		r.buildPrefix(&sb, symbol)
@@ -537,26 +553,26 @@ func (r *Rotato) displayMessage(symbol, color string, mesg ...string) {
 	sb.WriteString(msg)
 	sb.WriteByte('\n')
 
-	// single reset at the end
+	// single reset at end
 	sb.WriteString(string(ColorReset))
-
-	// output path
-	if !isInteractive(r) && !r.forceInteractive {
-		r.display(sb.String())
-		return
-	}
 
 	r.display(sb.String())
 }
 
 func (r *Rotato) buildPrefix(sb *strings.Builder, symbol string) {
-	if r.prefixMesg == "" {
-		return
+	// prefix
+	if r.prefixColor != "" {
+		sb.WriteString(r.prefixColor)
+	}
+	sb.WriteString(r.prefixMesg)
+	if r.prefixColor != "" {
+		sb.WriteString(string(ColorReset))
 	}
 
-	sb.WriteString(r.prefixMesg)
-	sb.WriteByte(' ')
+	// delimiter
+	sb.WriteString(r.delimiterColor + r.delimiter + string(ColorReset))
 
+	// symbol
 	if symbol != "" {
 		sb.WriteString(symbol)
 		sb.WriteByte(' ')
@@ -569,11 +585,24 @@ func (r *Rotato) IsRunning() bool {
 	return r.isActive
 }
 
+// decorateMessage applies all message decorators in order.
 func (r *Rotato) decorateMessage(mesg string) string {
 	for _, d := range r.decorators {
 		mesg = d(mesg)
 	}
 	return mesg
+}
+
+// formatSymbol wraps a symbol with color codes if provided.
+func formatSymbol(symbol, color string) string {
+	if symbol == "" {
+		return ""
+	}
+	if color == "" {
+		return symbol
+	}
+
+	return color + symbol + string(ColorReset)
 }
 
 // removeANSI removes ANSI codes from a given string.
@@ -594,7 +623,7 @@ func New(opt ...Option) *Rotato {
 		doneSymbol: "✓",
 		failSymbol: "✗",
 		symbols:    defaultSymbols,
-		Writer:     os.Stdout,
+		writer:     os.Stdout,
 	}
 	for _, fn := range opt {
 		fn(r)

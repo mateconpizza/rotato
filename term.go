@@ -34,7 +34,7 @@ func showCursor(output io.Writer) {
 
 // isInteractive checks if the output is interactive.
 func isInteractive(r *Rotato) bool {
-	return !isRedirected(r.Writer)
+	return !isRedirected(r.writer)
 }
 
 // isRedirected checks if the provided output writer is redirected.
