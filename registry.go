@@ -74,6 +74,7 @@ var (
 	blockbar6      = []string{"·-----", "-·----", "--·---", "---·--", "----·-", "-----·", "----·-", "---·--", "--·---", "-·----", "·-----"}
 	blockbarpretty = []string{"", "", "", "", "", "", ""}
 	boxfill        = []string{"[          ]", "[■         ]", "[■■        ]", "[■■■       ]", "[■■■■      ]", "[■■■■■     ]", "[■■■■■■    ]", "[■■■■■■■   ]", "[■■■■■■■■  ]", "[■■■■■■■■■ ]", "[■■■■■■■■■■]"}
+	boxfillshort   = []string{"[      ]", "[■     ]", "[■■    ]", "[■■■   ]", "[■■■■  ]", "[■■■■■ ]", "[■■■■■■]"}
 
 	// bouncing and motion spinners.
 	bounce     = []string{"[    ]", "[=   ]", "[==  ]", "[=== ]", "[ ===]", "[  ==]", "[   =]", "[    ]", "[   =]", "[  ==]", "[ ===]", "[====]", "[=== ]", "[==  ]", "[=   ]"}
@@ -172,6 +173,7 @@ var registry = []SpinnerStyle{
 	{"blockbar6", blockbar6, GroupBlocks, "WithSymbolsBarBlock6"},
 	{"blockbarpretty", blockbarpretty, GroupBlocks, "WithSymbolsBlockPretty"},
 	{"boxfill", boxfill, GroupBlocks, "WithSymbolsBoxFill"},
+	{"boxfillshort", boxfillshort, GroupBlocks, "WithSymbolsBoxFill"},
 
 	// motion
 	{"bounce", bounce, GroupMotion, "WithSymbolsBounce"},

@@ -1,287 +1,259 @@
+// rotato demo
+//
+//	narrative demo
+//	go run github.com/mateconpizza/rotato/example@latest -demo
+//
+//	all spinners
+//	go run github.com/mateconpizza/rotato/example@latest -all
 package main
 
 import (
 	"context"
 	"flag"
 	"fmt"
-	"log/slog"
 	"math/rand"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
+	"unicode/utf8"
 
 	"github.com/mateconpizza/rotato"
 )
 
+var flags = &Flags{}
+
+type Flags struct {
+	All            bool
+	NonInteractive bool
+	Demo           bool
+}
+
+// Colors.
 var (
-	demoAll            bool
-	nonInteractiveFlag bool
-	simpleDemo         bool
+	greenBold   = rotato.NewColor(rotato.StyleBold, rotato.FgBrightGreen)
+	greenItalic = rotato.NewColor(rotato.FgBrightGreen, rotato.StyleItalic)
 )
 
-type rotatoSymbols struct {
-	s string
-	o rotato.Option
-}
+//nolint:gosec // deterministic demo seed
+var rng = rand.New(rand.NewSource(42))
 
-var allSymbols = []rotatoSymbols{
-	{s: "WithSymbolsBlock", o: rotato.WithSymbolsBlock()},
-	{s: "WithSymbolsBarBlock", o: rotato.WithSymbolsBarBlock()},
-	{s: "WithSymbolsBarBlock2", o: rotato.WithSymbolsBarBlock2()},
-	{s: "WithSymbolsBarBlock3", o: rotato.WithSymbolsBarBlock3()},
-	{s: "WithSymbolsBarBlock4", o: rotato.WithSymbolsBarBlock4()},
-	{s: "WithSymbolsBarBlock5", o: rotato.WithSymbolsBarBlock5()},
-	{s: "WithSymbolsBarBlock6", o: rotato.WithSymbolsBarBlock6()},
-	{s: "WithSymbolsBlockPretty", o: rotato.WithSymbolsBlockPretty()},
-	{s: "WithSymbolsDots", o: rotato.WithSymbolsDots()},
-	{s: "WithSymbolsDots3", o: rotato.WithSymbolsDots3()},
-	{s: "WithSymbolsDots4", o: rotato.WithSymbolsDots4()},
-	{s: "WithSymbolsDots5", o: rotato.WithSymbolsDots5()},
-	{s: "WithSymbolsLines", o: rotato.WithSymbolsLines()},
-	{s: "WithSymbolsWave", o: rotato.WithSymbolsWave()},
-	{s: "WithSymbolsGrow", o: rotato.WithSymbolsGrow()},
-	{s: "WithSymbolsGrowVert", o: rotato.WithSymbolsGrowVert()},
-	{s: "WithSymbolsMoon", o: rotato.WithSymbolsMoon()},
-	{s: "WithSymbolsPipe", o: rotato.WithSymbolsPipe()},
-	{s: "WithSymbolsPipe2", o: rotato.WithSymbolsPipe2()},
-	{s: "WithSymbolsSquare", o: rotato.WithSymbolsSquare()},
-	{s: "WithSymbolsSquare2", o: rotato.WithSymbolsSquare2()},
-	{s: "WithSymbolsClock", o: rotato.WithSymbolsClock()},
-	{s: "WithSymbolsDiamond", o: rotato.WithSymbolsDiamond()},
-	{s: "WithSymbolsDiamond2", o: rotato.WithSymbolsDiamond2()},
-	{s: "WithSymbolsPlusCross", o: rotato.WithSymbolsPlusCross()},
-	{s: "WithSymbolsArrows", o: rotato.WithSymbolsArrows()},
-	{s: "WithSymbolsArrows2", o: rotato.WithSymbolsArrows2()},
-	{s: "WithSymbolsArrows3", o: rotato.WithSymbolsArrows3()},
-	{s: "WithSymbolsArrows4", o: rotato.WithSymbolsArrows4()},
-	{s: "WithSymbolsCircles", o: rotato.WithSymbolsCircles()},
-	{s: "WithSymbolsCircles2", o: rotato.WithSymbolsCircles2()},
-	{s: "WithSymbolsCircles3", o: rotato.WithSymbolsCircles3()},
-	{s: "WithSymbolsCircles4", o: rotato.WithSymbolsCircles4()},
-	{s: "WithSymbolsCircles5", o: rotato.WithSymbolsCircles5()},
-	{s: "WithSymbolsCircles6", o: rotato.WithSymbolsCircles6()},
-	{s: "WithSymbolsCircles7", o: rotato.WithSymbolsCircles7()},
-	{s: "WithSymbolsBounce", o: rotato.WithSymbolsBounce()},
-	{s: "WithSymbolsBounceBall", o: rotato.WithSymbolsBounceBall()},
-	{s: "WithSymbolsToggle", o: rotato.WithSymbolsToggle()},
-	{s: "WithSymbolsToggle2", o: rotato.WithSymbolsToggle2()},
-	{s: "WithSymbolsToggle3", o: rotato.WithSymbolsToggle3()},
-	{s: "WithSymbolsLoading", o: rotato.WithSymbolsLoading()},
-	{s: "WithSymbolsTriangles", o: rotato.WithSymbolsTriangles()},
-	{s: "WithSymbolsCubes", o: rotato.WithSymbolsCubes()},
-	{s: "WithSymbolsThinking", o: rotato.WithSymbolsThinking()},
-	{s: "WithSymbolsPingPong", o: rotato.WithSymbolsPingPong()},
-	{s: "WithSymbolsMatrix", o: rotato.WithSymbolsMatrix()},
-	{s: "WithSymbolsHex", o: rotato.WithSymbolsHex()},
-	{s: "WithSymbolsPacman", o: rotato.WithSymbolsPacman()},
-	{s: "WithSymbolsBoxFill", o: rotato.WithSymbolsBoxFill()},
-	{s: "WithSymbolsSnail", o: rotato.WithSymbolsSnail()},
-	{s: "WithSymbolsWorm", o: rotato.WithSymbolsWorm()},
-	{s: "WithSymbolsMathOps", o: rotato.WithSymbolsMathOps()},
-	{s: "WithSymbolsGreek", o: rotato.WithSymbolsGreek()},
-	{s: "WithSymbolsCorners", o: rotato.WithSymbolsCorners()},
-	{s: "WithSymbolsSlash", o: rotato.WithSymbolsSlash()},
-	{s: "WithSymbolsBackslash", o: rotato.WithSymbolsBackslash()},
-	{s: "WithSymbolsMarquee", o: rotato.WithSymbolsMarquee()},
-	{s: "WithSymbolsFade", o: rotato.WithSymbolsFade()},
-	{s: "WithSymbolsMath", o: rotato.WithSymbolsMath()},
-	{s: "WithSymbolsCurrency", o: rotato.WithSymbolsCurrency()},
-	{s: "WithSymbolsGeometric", o: rotato.WithSymbolsGeometric()},
-}
-
-// randomString returns a random string of length n.
-//
-//nolint:gosec //example
-func randomString(n int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
-	b := make([]byte, n)
+func randFilename() string {
+	const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+	b := make([]byte, 8+rng.Intn(5))
 	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
+		b[i] = chars[rng.Intn(len(chars))]
+	}
+	return string(b) + ".zip"
+}
+
+// pause blocks until d elapses or ctx is cancelled.
+func pause(ctx context.Context, d time.Duration) error {
+	t := time.NewTimer(d)
+	defer t.Stop()
+	select {
+	case <-t.C:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+// sceneSimple shows the most basic spinner usage: start, wait, done.
+func sceneSimple(ctx context.Context) {
+	r := rotato.New(
+		rotato.WithContext(ctx),
+		rotato.WithPrefix("Fetching config"),
+		rotato.WithPrefixColor(rotato.StyleItalic),
+		rotato.WithSpinnerColor(rotato.FgBrightCyan),
+		rotato.WithDoneSymbolColor(greenBold),
+		rotato.WithDoneMessageColor(greenItalic),
+	)
+	r.Start()
+
+	if err := pause(ctx, 2*time.Second); err != nil {
+		r.Fail("Aborted")
+		return
+	}
+	r.Done("config.yaml loaded")
+}
+
+// sceneMultiStep shows how a single spinner can represent a multi-phase task
+// by updating its message and symbol set as work progresses.
+func sceneMultiStep(ctx context.Context) {
+	r := rotato.New(
+		rotato.WithContext(ctx),
+		rotato.WithSymbolsCircles6(),
+		rotato.WithSpinnerColor(rotato.FgOrange),
+		rotato.WithPrefix("S3 backup"),
+		rotato.WithPrefixColor(rotato.StyleBold),
+		rotato.WithMessage("connecting..."),
+		rotato.WithDoneSymbolColor(greenBold),
+		rotato.WithDoneMessageColor(rotato.StyleBold),
+	)
+	r.Start()
+
+	// Phase 1 - connect
+	if err := pause(ctx, 2*time.Second); err != nil {
+		r.Fail("connection aborted")
+		return
 	}
 
-	return string(b)
+	// Phase 2 - confirm connection with a static check mark
+	r.UpdateSymbols(rotato.WithSymbols(greenBold.Sprint("✓")))
+	r.UpdateMesgColor(greenBold)
+	r.UpdateMesg("connected")
+	if err := pause(ctx, 800*time.Millisecond); err != nil {
+		r.Fail("aborted after connect")
+		return
+	}
+
+	// Phase 3 - transfer files
+	r.UpdateSymbols(rotato.WithSymbolsBarBlock())
+	r.UpdateMesgColor(rotato.FgGray)
+	r.UpdatePrefix("S3 uploading")
+	for i := 1; i <= 15; i++ {
+		r.UpdateMesg(fmt.Sprintf("[%d/15] %s", i, randFilename()))
+		if err := pause(ctx, 200*time.Millisecond); err != nil {
+			r.Fail(fmt.Sprintf("transfer aborted after %d files", i-1))
+			return
+		}
+	}
+
+	r.UpdatePrefix("S3")
+	r.Done("15 files uploaded successfully")
 }
 
-// showSymbols shows all registered symbols in the rotato package.
+// sceneError shows the failure path.
+func sceneError(ctx context.Context) {
+	r := rotato.New(
+		rotato.WithContext(ctx),
+		rotato.WithPrefix("AWS Health Check"),
+		rotato.WithSymbolsPipe(),
+		rotato.WithMessage("pinging us-east-1..."),
+		rotato.WithSpinnerColor(rotato.FgBlue),
+		rotato.WithFailSymbolColor(rotato.StyleBold, rotato.FgBrightRed),
+		rotato.WithFailMessageColor(rotato.FgBrightRed),
+	)
+	r.Start()
+
+	if err := pause(ctx, 2*time.Second); err != nil {
+		r.Fail("aborted by user")
+		return
+	}
+
+	// Simulate an endpoint that is down.
+	r.Fail("connection refused (us-east-1:443)")
+}
+
+// sceneCountdown demonstrates a countdown: a graceful shutdown that shows
+// remaining time using the library's own formatting helpers.
+func sceneCountdown(ctx context.Context) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	r := rotato.New(
+		rotato.WithContext(ctx),
+		rotato.WithPrefix("Shutting Down"),
+		rotato.WithMessage("in"),
+		rotato.WithMessageColor(),
+		rotato.WithSymbolsBlockPretty(),
+		rotato.WithDoneMessageColor(rotato.StyleBlink, greenBold),
+		rotato.WithDoneSymbolColor(rotato.StyleBlink, greenBold),
+		rotato.WithMessageDecorator(func(mesg string) string {
+			deadline, ok := ctx.Deadline()
+			if !ok {
+				return mesg
+			}
+			remaining := max(time.Until(deadline).Round(time.Second), 0)
+			return fmt.Sprintf("in %.0fs...", remaining.Seconds())
+		}),
+	)
+	r.Start()
+
+	// Wait for the internal deadline; the spinner stops itself when ctx fires.
+	<-ctx.Done()
+	r.UpdatePrefix("Demo")
+	r.UpdatePrefixColor(rotato.StyleBold)
+	r.Done("goodbye!")
+}
+
+func padRight(s string, width int) string {
+	n := width - utf8.RuneCountInString(s)
+	if n <= 0 {
+		return s
+	}
+	return s + strings.Repeat(" ", n)
+}
+
 func showSymbols(ctx context.Context) {
 	maxLen := 0
-	for _, symbol := range allSymbols {
-		maxLen = max(maxLen, len(symbol.s))
+	for _, s := range rotato.Spinners() {
+		if l := utf8.RuneCountInString(s.Name); l > maxLen {
+			maxLen = l
+		}
 	}
 
-	exitMesg := rotato.FgGray.With(rotato.StyleItalic).Sprint("(Press Ctrl+C to exit)")
-	for _, symbol := range allSymbols {
+	hint := rotato.FgGray.With(rotato.StyleItalic).Sprint("(ctrl+c to exit)")
+
+	for _, sp := range rotato.Spinners() {
 		r := rotato.New(
-			rotato.WithMessage(exitMesg),
-			rotato.WithPrefix(symbol.s+strings.Repeat(" ", maxLen-len(symbol.s))),
 			rotato.WithContext(ctx),
-			symbol.o,
+			rotato.WithPrefix(padRight(sp.Name, maxLen)),
+			rotato.WithSpinnerStyle(sp.Name),
+			rotato.WithMessage(hint),
+			rotato.WithDoneSymbolColor(greenBold),
+			rotato.WithFailSymbolColor(rotato.StyleBold, rotato.FgBrightRed),
 		)
 		r.Start()
 
-		select {
-		case <-time.After(2 * time.Second):
-			// Proceed to next step
-		case <-ctx.Done():
-			r.Fail("Aborted by User!")
+		if err := pause(ctx, 1200*time.Millisecond); err != nil {
+			r.Fail("interrupted")
 			return
 		}
-
-		r.Done(strings.Join(r.Symbols(), ""))
+		r.Done(strings.Join(r.Symbols(), " "))
 	}
 }
 
-// spSimple simulates a simple task with colors.
-func spSimple(ctx context.Context) {
-	r := rotato.New(
-		rotato.WithSpinnerColor(rotato.FgBrightGreen),
-		rotato.WithPrefix("Simple Task #1"),
-		rotato.WithDoneMessageColor(rotato.FgBrightGreen, rotato.StyleItalic),
-		rotato.WithContext(ctx),
-	)
-	r.Start()
-
-	select {
-	case <-time.After(2 * time.Second):
-		r.Done("Task Completed!")
-	case <-ctx.Done():
-		r.Fail("Task Aborted by User!")
-		return
+func runDemo(ctx context.Context) {
+	scenes := []func(context.Context){
+		sceneSimple,    // basic start/done
+		sceneMultiStep, // live updates across phases
+		sceneError,     // failure path
+		sceneCountdown, // graceful shutdown with countdown
 	}
-}
-
-// spConnection simulates a connection process, processing files.
-func spConnection(ctx context.Context) {
-	r := rotato.New(
-		rotato.WithSymbolsCircles3(),
-		rotato.WithSpinnerColor(rotato.FgOrange),
-		rotato.WithMessage("Connecting..."),
-		rotato.WithPrefix("S3 Backup"),
-		rotato.WithContext(ctx),
-	)
-	r.Start()
-
-	select {
-	case <-time.After(2 * time.Second):
-		// Proceed to next step
-	case <-ctx.Done():
-		r.Fail("Connection Aborted by User!")
-		return
-	}
-
-	// connected
-	r.UpdateSymbols(rotato.WithSymbols(rotato.FgBrightGreen.Sprint("✓")))
-	r.UpdateMesg("Connected!")
-	r.UpdateMesgColor(rotato.FgBrightGreen, rotato.StyleItalic)
-
-	// updating
-	select {
-	case <-time.After(1 * time.Second):
-		// Proceed to next step
-	case <-ctx.Done():
-		r.Fail("Backup Process Aborted!")
-		return
-	}
-
-	r.UpdateMesgColor(rotato.FgGray)
-	r.UpdateSymbols(rotato.WithSymbolsBarBlock())
-	for i := 0; i < 15; i++ {
-		r.UpdateMesg(randomString(12) + ".zip")
-
-		select {
-		case <-time.After(200 * time.Millisecond):
-			// Proceed to next iteration
-		case <-ctx.Done():
-			r.Fail(fmt.Sprintf("Transfer Aborted! %d files processed.", i))
+	for _, scene := range scenes {
+		if ctx.Err() != nil {
 			return
 		}
-	}
-
-	// end
-	r.Done("Backup completed!")
-}
-
-// spFail simulates a failed connection process.
-func spFail(ctx context.Context) {
-	r := rotato.New(
-		rotato.WithMessage("Trying to connect..."),
-		rotato.WithPrefix("AWS Server"),
-		rotato.WithFailMessageColor(rotato.FgBrightRed, rotato.StyleBlink),
-		rotato.WithContext(ctx),
-	)
-	r.Start()
-
-	// trying to connect
-	select {
-	case <-time.After(2 * time.Second):
-		// Proceed to next step
-	case <-ctx.Done():
-		r.Fail("Connection Aborted by User!")
-		return
-	}
-
-	// fail
-	if true {
-		r.Fail("Connection Failed!")
+		scene(ctx)
 	}
 }
 
 func main() {
-	if nonInteractiveFlag {
+	if flags.NonInteractive {
 		rotato.SetNonInteractive()
 	}
 
-	ctx, cancel := signalContext(context.Background())
-	defer cancel()
+	ctx, stop := signal.NotifyContext(context.Background(),
+		os.Interrupt, syscall.SIGTERM, syscall.SIGHUP,
+	)
+	defer stop()
 
 	switch {
-	case demoAll:
+	case flags.All:
 		showSymbols(ctx)
-	case simpleDemo:
-		spSimple(ctx)
-		spConnection(ctx)
-		spFail(ctx)
+	case flags.Demo:
+		runDemo(ctx)
 	default:
-		flag.PrintDefaults()
+		flag.Usage()
 	}
 }
 
 func init() {
-	flag.BoolVar(&simpleDemo, "demo", false, "show demo rotatos")
-	flag.BoolVar(&demoAll, "all", false, "show all rotatos")
-	flag.BoolVar(&nonInteractiveFlag, "ni", false, "term non-interactive mode")
+	flag.BoolVar(&flags.All, "all", false, "demo all rotatos")
+	flag.BoolVar(&flags.Demo, "demo", false, "run narrative demo")
+	flag.BoolVar(&flags.NonInteractive, "ni", false, "non-interactive / dumb-terminal mode")
 	flag.Parse()
-}
-
-// signalContext returns a context that is canceled when an interrupt or
-// termination signal is received.
-func signalContext(parent context.Context) (context.Context, context.CancelFunc) {
-	ctx, cancel := context.WithCancel(parent)
-
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals,
-		os.Interrupt,    // Ctrl+C (SIGINT)
-		syscall.SIGTERM, // Process termination
-		syscall.SIGHUP,  // Terminal closed
-	)
-
-	go func() {
-		select {
-		case <-ctx.Done():
-			return // parent canceled
-		case s := <-signals:
-			slog.Debug("received signal", "signal", s)
-			fmt.Println()
-			fmt.Printf("action aborted with signal %s", s)
-			cancel()
-		}
-	}()
-
-	return ctx, func() {
-		signal.Stop(signals)
-		cancel() // normal cancel
-	}
 }

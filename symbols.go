@@ -354,6 +354,12 @@ func WithSymbolsPacman() Option { return setSymbols(pacman) }
 //	[■■■■■ ] [■■■■■■    ] [■■■■■■■   ] [■■■■■■■■  ] [■■■■■■■■■ ] [■■■■■■■■■■]
 func WithSymbolsBoxFill() Option { return setSymbols(boxfill) }
 
+// WithSymbolsBoxFillShort returns an option function that sets the spinner
+// animation with progressively filling box.
+//
+//	[      ] [■     ] [■■    ] [■■■   ] [■■■■  ] [■■■■■ ] [■■■■■■]
+func WithSymbolsBoxFillShort() Option { return setSymbols(boxfillshort) }
+
 // WithSymbolsSnail returns an option function that sets the spinner
 // animation with growing snail trail.
 //
