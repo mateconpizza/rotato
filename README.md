@@ -6,7 +6,7 @@
 ![Linux](https://img.shields.io/badge/-Linux-grey?logo=linux)
 [![Go Reference](https://pkg.go.dev/badge/github.com/mateconpizza/rotato.svg)](https://pkg.go.dev/github.com/mateconpizza/rotato)
 
-Lightweight and highly customizable spinner library for Go, designed to enhance your command-line applications with visually appealing progress indicators. With **42** spinners to choose from, you can easily integrate dynamic loading animations into your projects.
+Lightweight and highly customizable spinner library for Go, designed to enhance your command-line applications with visually appealing progress indicators. With **+70** spinners to choose from, you can easily integrate dynamic loading animations into your projects.
 
 <br>
 </div>

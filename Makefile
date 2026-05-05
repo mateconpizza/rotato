@@ -29,10 +29,10 @@ lint:
 
 # run example
 demo:
-	@go run example/main.go -demo
+	@go run example/demo.go -demo
 
 # run all example
 all:
-	@go run example/main.go -all
+	@go run example/demo.go -all
 
 .PHONY: test testfn lint full
