@@ -112,7 +112,7 @@ func showSymbols(ctx context.Context) {
 		maxLen = max(maxLen, len(symbol.s))
 	}
 
-	exitMesg := rotato.ColorGray.With(rotato.ColorStyleItalic).Sprint("(Press Ctrl+C to exit)")
+	exitMesg := rotato.FgGray.With(rotato.StyleItalic).Sprint("(Press Ctrl+C to exit)")
 	for _, symbol := range allSymbols {
 		r := rotato.New(
 			rotato.WithMessage(exitMesg),
@@ -137,9 +137,9 @@ func showSymbols(ctx context.Context) {
 // spSimple simulates a simple task with colors.
 func spSimple(ctx context.Context) {
 	r := rotato.New(
-		rotato.WithSpinnerColor(rotato.ColorBrightGreen),
+		rotato.WithSpinnerColor(rotato.FgBrightGreen),
 		rotato.WithPrefix("Simple Task #1"),
-		rotato.WithDoneMessageColor(rotato.ColorBrightGreen, rotato.ColorStyleItalic),
+		rotato.WithDoneMessageColor(rotato.FgBrightGreen, rotato.StyleItalic),
 		rotato.WithContext(ctx),
 	)
 	r.Start()
@@ -157,7 +157,7 @@ func spSimple(ctx context.Context) {
 func spConnection(ctx context.Context) {
 	r := rotato.New(
 		rotato.WithSymbolsCircles3(),
-		rotato.WithSpinnerColor(rotato.ColorOrange),
+		rotato.WithSpinnerColor(rotato.FgOrange),
 		rotato.WithMessage("Connecting..."),
 		rotato.WithPrefix("S3 Backup"),
 		rotato.WithContext(ctx),
@@ -173,9 +173,9 @@ func spConnection(ctx context.Context) {
 	}
 
 	// connected
-	r.UpdateSymbols(rotato.WithSymbols(rotato.ColorBrightGreen.Sprint("✓")))
+	r.UpdateSymbols(rotato.WithSymbols(rotato.FgBrightGreen.Sprint("✓")))
 	r.UpdateMesg("Connected!")
-	r.UpdateMesgColor(rotato.ColorBrightGreen, rotato.ColorStyleItalic)
+	r.UpdateMesgColor(rotato.FgBrightGreen, rotato.StyleItalic)
 
 	// updating
 	select {
@@ -186,7 +186,7 @@ func spConnection(ctx context.Context) {
 		return
 	}
 
-	r.UpdateMesgColor(rotato.ColorGray)
+	r.UpdateMesgColor(rotato.FgGray)
 	r.UpdateSymbols(rotato.WithSymbolsBarBlock())
 	for i := 0; i < 15; i++ {
 		r.UpdateMesg(randomString(12) + ".zip")
@@ -209,7 +209,7 @@ func spFail(ctx context.Context) {
 	r := rotato.New(
 		rotato.WithMessage("Trying to connect..."),
 		rotato.WithPrefix("AWS Server"),
-		rotato.WithFailMessageColor(rotato.ColorBrightRed, rotato.ColorStyleBlink),
+		rotato.WithFailMessageColor(rotato.FgBrightRed, rotato.StyleBlink),
 		rotato.WithContext(ctx),
 	)
 	r.Start()

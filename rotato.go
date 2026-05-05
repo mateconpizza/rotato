@@ -5,9 +5,9 @@
 // -------- SIMPLE:
 //
 //	r := rotato.New(
-//		rotato.WithSpinnerColor(rotato.ColorBrightGreen),
+//		rotato.WithSpinnerColor(rotato.FgBrightGreen),
 //		rotato.WithPrefix("Simple Task #1"),
-//		rotato.WithDoneColorMesg(rotato.ColorBrightGreen, rotato.ColorStyleItalic),
+//		rotato.WithDoneMessageColor(rotato.FgBrightGreen, rotato.StyleItalic),
 //	)
 //	r.Start()
 //
@@ -18,22 +18,22 @@
 // -------- COLORS, STYLES:
 //
 //	r := rotato.New(
-//		rotato.WithSymbolsCircles3(),
-//		rotato.WithSpinnerColor(rotato.ColorBrightOrange),
-//		rotato.WithMesg("Connecting..."),
+//		rotato.WithSymbolsCircles3(), // or rotato.WithSpinnerStyle("circle3"),
+//		rotato.WithSpinnerColor(rotato.FgBrightOrange),
+//		rotato.WithMessage("Connecting..."),
 //		rotato.WithPrefix("S3 Backup"),
 //	)
 //	r.Start()
 //	time.Sleep(2 * time.Second)
 //
 //	// connected
-//	r.UpdateSymbols(rotato.WithSymbols(rotato.ColorBrightGreen + "✓"))
+//	r.UpdateSymbols(rotato.WithSymbols(rotato.FgBrightGreen + "✓"))
 //	r.UpdateMesg("Connected!")
-//	r.UpdateMesgColor(rotato.ColorBrightGreen, rotato.ColorStyleItalic)
+//	r.UpdateMesgColor(rotato.FgBrightGreen, rotato.StyleItalic)
 //
 //	// updating
 //	time.Sleep(1 * time.Second)
-//	r.UpdateMesgColor(rotato.ColorGray)
+//	r.UpdateMesgColor(rotato.FgGray)
 //	r.UpdateSymbols(rotato.WithSymbolsBarBlock())
 //	for i := 0; i < 15; i++ {
 //		r.UpdateMesg(randomString(12) + ".zip")
@@ -46,9 +46,9 @@
 // -------- FAILING:
 //
 //	r := rotato.New(
-//		rotato.WithMesg("Trying to connect..."),
+//		rotato.WithMessage("Trying to connect..."),
 //		rotato.WithPrefix("AWS Server"),
-//		rotato.WithFailColorMesg(rotato.ColorBrightRed, rotato.ColorStyleBlink),
+//		rotato.WithFailMessageColor(rotato.FgBrightRed, rotato.StyleBlink),
 //	)
 //	r.Start()
 //	// trying to connect

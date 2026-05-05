@@ -97,7 +97,7 @@ func TestRemoveANSI(t *testing.T) {
 	}{
 		{
 			name:  "Simple ANSI codes",
-			input: ColorRed.With(ColorStyleBold).Sprint("Hello"),
+			input: FgRed.With(StyleBold).Sprint("Hello"),
 			want:  "Hello",
 		},
 		{
@@ -107,17 +107,17 @@ func TestRemoveANSI(t *testing.T) {
 		},
 		{
 			name:  "Multiple ANSI sequences",
-			input: "Text " + ColorRed.Sprint("Red") + " and " + ColorGreen.Sprint("Green"),
+			input: "Text " + FgRed.Sprint("Red") + " and " + FgGreen.Sprint("Green"),
 			want:  "Text Red and Green",
 		},
 		{
 			name:  "ANSI only",
-			input: ColorBlue.With(ColorStyleBold).Sprint("Blue Bold Text"),
+			input: FgBlue.With(StyleBold).Sprint("Blue Bold Text"),
 			want:  "Blue Bold Text",
 		},
 		{
 			name:  "Empty ANSI",
-			input: string(ColorBlue),
+			input: string(FgBlue),
 			want:  "",
 		},
 	}
