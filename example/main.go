@@ -112,7 +112,7 @@ func showSymbols(ctx context.Context) {
 		maxLen = max(maxLen, len(symbol.s))
 	}
 
-	exitMesg := rotato.Colorize("(Press Ctrl+C to exit)", rotato.ColorGray, rotato.ColorStyleItalic)
+	exitMesg := rotato.ColorGray.With(rotato.ColorStyleItalic).Sprint("(Press Ctrl+C to exit)")
 	for _, symbol := range allSymbols {
 		r := rotato.New(
 			rotato.WithMessage(exitMesg),
@@ -173,7 +173,7 @@ func spConnection(ctx context.Context) {
 	}
 
 	// connected
-	r.UpdateSymbols(rotato.WithSymbols(rotato.Colorize("✓", rotato.ColorBrightGreen)))
+	r.UpdateSymbols(rotato.WithSymbols(rotato.ColorBrightGreen.Sprint("✓")))
 	r.UpdateMesg("Connected!")
 	r.UpdateMesgColor(rotato.ColorBrightGreen, rotato.ColorStyleItalic)
 

@@ -1,6 +1,10 @@
 package rotato
 
-import "strings"
+import (
+	"fmt"
+	"os"
+	"strings"
+)
 
 type (
 	// cursor control sequences for showing, hiding the cursor.
@@ -82,21 +86,63 @@ const (
 	ColorStyleStrikethrough Color = "\x1b[9m" // Crossed-out/strikethrough
 )
 
-func Colorize(s string, codes ...Color) string {
-	var result string
-	for _, code := range codes {
-		result += string(code)
-	}
-	return result + s + string(ColorReset)
+// isColorDisabled checks the NO_COLOR environment variable.
+// https://no-color.org/
+func isColorDisabled() bool {
+	_, exists := os.LookupEnv("NO_COLOR")
+	return exists
 }
 
-func joinColors(colors ...Color) string {
-	if len(colors) == 0 {
+// Wrap wraps the given text with the provided styles and resets afterwards.
+func (c Color) Wrap(text string, styles ...Color) string {
+	if isColorDisabled() || nonInteractive {
+		return text
+	}
+	return string(c) + combine(styles...) + text + string(ColorReset)
+}
+
+// With combines the receiver style with additional styles and returns a new
+// Color value.
+func (c Color) With(styles ...Color) Color {
+	return Color(string(c) + combine(styles...))
+}
+
+// Sprint wraps the formatted text with the receiver style and returns it as a
+// string.
+func (c Color) Sprint(a ...any) string {
+	return c.Wrap(fmt.Sprint(a...))
+}
+
+// Sprintf wraps the formatted text using the provided format string with the
+// receiver style and returns it as a string.
+func (c Color) Sprintf(f string, a ...any) string {
+	return c.Wrap(fmt.Sprintf(f, a...))
+}
+
+func (c Color) String() string {
+	if isColorDisabled() {
 		return ""
 	}
+
+	return string(c)
+}
+
+// combine merges multiple Color codes into a single string.
+func combine(codes ...Color) string {
+	if len(codes) == 0 {
+		return ""
+	}
+	if len(codes) == 1 {
+		return string(codes[0])
+	}
+
 	var sb strings.Builder
-	for _, c := range colors {
-		sb.WriteString(string(c))
+	for _, code := range codes {
+		sb.WriteString(string(code))
 	}
 	return sb.String()
+}
+
+func NewColor(codes ...Color) Color {
+	return Color(combine(codes...))
 }
