@@ -44,9 +44,9 @@ There is a example in the [example](https://github.com/mateconpizza/rotato/blob/
 ```go
 r := rotato.New(
     rotato.WithPrefix("Repo"),
-    rotato.WithSpinnerColor(rotato.ColorBrightGreen),
-    rotato.WithDoneColorMesg(rotato.ColorBrightGreen, rotato.ColorStyleItalic),
-    rotato.WithFailColorMesg(rotato.ColorRed, rotato.ColorStyleBlink),
+    rotato.WithSpinnerColor(rotato.FgBrightGreen),
+    rotato.WithDoneColorMesg(rotato.FgBrightGreen, rotato.StyleItalic),
+    rotato.WithFailColorMesg(rotato.FgRed, rotato.StyleBlink),
 )
 r.Start()
 // do some stuff
