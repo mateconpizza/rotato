@@ -72,6 +72,14 @@ import (
 	"time"
 )
 
+func WithSpinnerStyle(name string) Option {
+	return func(r *Rotato) {
+		if sp, ok := ByName(name); ok {
+			r.symbols = sp.Frames
+		}
+	}
+}
+
 // WithMessage returns an option function that sets the spinner message.
 func WithMessage(s string) Option {
 	return func(r *Rotato) {

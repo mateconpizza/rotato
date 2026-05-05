@@ -133,6 +133,10 @@ linters:
       disable:
         - require-error
   exclusions:
+    rules:
+      - path: "registry.go"
+        linters:
+          - lll
     generated: lax
     presets:
       - common-false-positives
