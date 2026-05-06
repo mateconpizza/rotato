@@ -180,6 +180,7 @@ func sceneCountdown(ctx context.Context) {
 	<-ctx.Done()
 	r.UpdatePrefix("Demo")
 	r.UpdatePrefixColor(rotato.StyleBold)
+	r.UpdateDoneSymbol("\u25A0")
 	r.Done("goodbye!")
 }
 
