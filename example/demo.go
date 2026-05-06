@@ -28,12 +28,16 @@ type Flags struct {
 	All            bool
 	NonInteractive bool
 	Demo           bool
+	List           bool
+	Group          string
+	Show           string
 }
 
 // Colors.
 var (
 	greenBold   = rotato.NewColor(rotato.StyleBold, rotato.FgBrightGreen)
 	greenItalic = rotato.NewColor(rotato.FgBrightGreen, rotato.StyleItalic)
+	hint        = rotato.FgGray.With(rotato.StyleItalic).Sprint("(ctrl+c to exit)")
 )
 
 //nolint:gosec // deterministic demo seed
@@ -195,8 +199,6 @@ func showSymbols(ctx context.Context) {
 		}
 	}
 
-	hint := rotato.FgGray.With(rotato.StyleItalic).Sprint("(ctrl+c to exit)")
-
 	for _, sp := range rotato.Spinners() {
 		r := rotato.New(
 			rotato.WithContext(ctx),
@@ -208,12 +210,80 @@ func showSymbols(ctx context.Context) {
 		)
 		r.Start()
 
-		if err := pause(ctx, 1200*time.Millisecond); err != nil {
+		if err := pause(ctx, 1400*time.Millisecond); err != nil {
 			r.Fail("interrupted")
 			return
 		}
 		r.Done(strings.Join(r.Symbols(), " "))
 	}
+}
+
+func listGroups() {
+	fmt.Printf("rotato — %d groups, %d spinners total\n",
+		len(rotato.Groups), len(rotato.Spinners()))
+
+	for i, g := range rotato.Groups {
+		spinners := rotato.ByGroup(g)
+		names := make([]string, len(spinners))
+		for j, s := range spinners {
+			names[j] = s.Name
+		}
+
+		isLast := i == len(rotato.Groups)-1
+
+		prefix := "├──"
+		indent := "│   "
+		if isLast {
+			prefix = "└──"
+			indent = "    "
+		}
+
+		fmt.Printf("%s %s (%d)\n", prefix, g, len(spinners))
+		fmt.Printf("%s%s\n", indent, strings.Join(names, ", "))
+	}
+}
+
+func showByName(ctx context.Context, name string) {
+	if sp, ok := rotato.ByName(name); ok {
+		runRotato(ctx, sp, padRight(sp.Name, 18))
+	}
+}
+
+func showByGroup(ctx context.Context, g rotato.SpinnerGroup) {
+	group := rotato.ByGroup(g)
+	if len(group) == 0 {
+		return
+	}
+
+	maxLen := 0
+	for _, s := range group {
+		if l := utf8.RuneCountInString(s.Name); l > maxLen {
+			maxLen = l
+		}
+	}
+
+	maxLen = max(maxLen, 14)
+	for _, sp := range group {
+		runRotato(ctx, sp, padRight(sp.Name, maxLen))
+	}
+}
+
+func runRotato(ctx context.Context, sp rotato.SpinnerStyle, name string) {
+	r := rotato.New(
+		rotato.WithContext(ctx),
+		rotato.WithSymbols(sp.Frames...),
+		rotato.WithPrefix(name),
+		rotato.WithMessage(hint),
+		rotato.WithDoneSymbolColor(greenBold),
+		rotato.WithFailSymbolColor(rotato.StyleBold, rotato.FgBrightRed),
+	)
+	r.Start()
+
+	if err := pause(ctx, 1500*time.Millisecond); err != nil {
+		r.Fail("interrupted")
+		return
+	}
+	r.Done(strings.Join(r.Symbols(), " "))
 }
 
 func runDemo(ctx context.Context) {
@@ -246,6 +316,12 @@ func main() {
 		showSymbols(ctx)
 	case flags.Demo:
 		runDemo(ctx)
+	case flags.Group != "":
+		showByGroup(ctx, rotato.SpinnerGroup(flags.Group))
+	case flags.Show != "":
+		showByName(ctx, flags.Show)
+	case flags.List:
+		listGroups()
 	default:
 		flag.Usage()
 	}
@@ -254,6 +330,9 @@ func main() {
 func init() {
 	flag.BoolVar(&flags.All, "all", false, "demo all rotatos")
 	flag.BoolVar(&flags.Demo, "demo", false, "run narrative demo")
+	flag.BoolVar(&flags.List, "list", false, "list spinners by groups")
 	flag.BoolVar(&flags.NonInteractive, "ni", false, "non-interactive / dumb-terminal mode")
+	flag.StringVar(&flags.Group, "group", "", "show spinners by group")
+	flag.StringVar(&flags.Show, "show", "", "show spinner by name")
 	flag.Parse()
 }
