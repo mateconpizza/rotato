@@ -97,9 +97,9 @@ func WithMessageColor(c ...Color) Option {
 
 // WithMessageDecorator appends a decorator to transform the spinner message
 // before display.
-func WithMessageDecorator(fn MesgDecorator) Option {
+func WithMessageDecorator(fn MessageDecorator) Option {
 	return func(r *Rotato) {
-		r.decorators = append(r.decorators, fn)
+		r.messageDecorators = append(r.messageDecorators, fn)
 	}
 }
 
@@ -115,6 +115,14 @@ func WithPrefix(prefix string) Option {
 func WithPrefixColor(c ...Color) Option {
 	return func(r *Rotato) {
 		r.prefixColor = NewColor(c...)
+	}
+}
+
+// WithPrefixDecorator appends a decorator to transform the spinner message
+// before display.
+func WithPrefixDecorator(fn MessageDecorator) Option {
+	return func(r *Rotato) {
+		r.prefixDecorators = append(r.prefixDecorators, fn)
 	}
 }
 
@@ -218,14 +226,6 @@ func WithForceInteractive() Option {
 	}
 }
 
-// WithMesgDecorator appends a decorator to transform the spinner message
-// before display.
-func WithMesgDecorator(fn MesgDecorator) Option {
-	return func(r *Rotato) {
-		r.decorators = append(r.decorators, fn)
-	}
-}
-
 // WithContextDoneHandler sets a handler invoked when the context is done.
 func WithContextDoneHandler(handler func(*Rotato, error)) Option {
 	return func(r *Rotato) {
@@ -233,8 +233,8 @@ func WithContextDoneHandler(handler func(*Rotato, error)) Option {
 	}
 }
 
-// MesgDecorator defines a function that transforms a message string.
-type MesgDecorator func(mesg string) string
+// MessageDecorator defines a function that transforms a message string.
+type MessageDecorator func(mesg string) string
 
 // Option is an option function for the spinner.
 type Option func(*Rotato)
@@ -260,14 +260,16 @@ type Rotato struct {
 	spinnerColor Color         // Spinner color
 
 	// Messages
-	message       string       // Spinner message
-	messageUpdate sync.RWMutex // Mutex for message update
-	messageColor  Color        // Spinner message color
+	message           string             // Spinner message
+	messageUpdate     sync.RWMutex       // Mutex for message update
+	messageColor      Color              // Spinner message color
+	messageDecorators []MessageDecorator // decorators holds message decorator functions applied before display.
 
 	// Prefix messages
-	prefixMesg  string       // Prefix message
-	prefixMu    sync.RWMutex // Synchronization mechanism for prefix updates
-	prefixColor Color        // Prefix message color
+	prefixMesg       string             // Prefix message
+	prefixMu         sync.RWMutex       // Synchronization mechanism for prefix updates
+	prefixColor      Color              // Prefix message color
+	prefixDecorators []MessageDecorator // decorators holds message decorator functions applied before display.
 
 	// Delimiter
 	delimiter      string // Delimiter between prefix and spinner symbol
@@ -288,15 +290,12 @@ type Rotato struct {
 	// Active state
 	isActive bool         // State of the spinner
 	activeMu sync.RWMutex // Mutex for different spinner states
-
-	// decorators holds message decorator functions applied before display.
-	decorators []MesgDecorator
 }
 
 // render displays the current frame and message of the spinner.
 func (r *Rotato) render(current int) {
 	mesg := r.currentMessage()
-	mesg = r.decorateMessage(mesg)
+	mesg = decorate(mesg, r.messageDecorators)
 
 	frameFormatted := r.currentFrame(current)
 
@@ -492,6 +491,7 @@ func (r *Rotato) parsePrefix(frame, mesg string) {
 	r.prefixMu.RLock()
 	defer r.prefixMu.RUnlock()
 	prefix := r.prefixColor.Sprint(r.prefixMesg)
+	prefix = decorate(prefix, r.prefixDecorators)
 	del := r.delimiterColor.Sprint(r.delimiter)
 
 	r.display(fmt.Sprintf("%s%s%s %s", prefix, del, frame, mesg))
@@ -568,6 +568,9 @@ func (r *Rotato) displayMessage(symbol string, color Color, mesg ...string) {
 }
 
 func (r *Rotato) buildPrefix(sb *strings.Builder, symbol string) {
+	r.prefixMu.RLock()
+	defer r.prefixMu.RUnlock()
+
 	// prefix
 	if r.prefixColor != "" {
 		sb.WriteString(r.prefixColor.String())
@@ -593,12 +596,12 @@ func (r *Rotato) IsRunning() bool {
 	return r.isActive
 }
 
-// decorateMessage applies all message decorators in order.
-func (r *Rotato) decorateMessage(mesg string) string {
-	for _, d := range r.decorators {
-		mesg = d(mesg)
+// decorate applies all decorators in order to the given string.
+func decorate(s string, decorators []MessageDecorator) string {
+	for _, d := range decorators {
+		s = d(s)
 	}
-	return mesg
+	return s
 }
 
 // formatSymbol wraps a symbol with color codes if provided.
