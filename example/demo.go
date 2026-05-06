@@ -76,7 +76,7 @@ func sceneSimple(ctx context.Context) {
 	)
 	r.Start()
 
-	if err := pause(ctx, 2*time.Second); err != nil {
+	if err := pause(ctx, 1500*time.Millisecond); err != nil {
 		r.Fail("Aborted")
 		return
 	}
@@ -99,7 +99,7 @@ func sceneMultiStep(ctx context.Context) {
 	r.Start()
 
 	// Phase 1 - connect
-	if err := pause(ctx, 2*time.Second); err != nil {
+	if err := pause(ctx, 1600*time.Millisecond); err != nil {
 		r.Fail("connection aborted")
 		return
 	}
@@ -135,8 +135,8 @@ func sceneError(ctx context.Context) {
 		rotato.WithContext(ctx),
 		rotato.WithPrefix("AWS Health Check"),
 		rotato.WithSymbolsPipe(),
+		rotato.WithSpinnerColor(rotato.FgBlue.With(rotato.StyleBold)),
 		rotato.WithMessage("pinging us-east-1..."),
-		rotato.WithSpinnerColor(rotato.FgBlue),
 		rotato.WithFailSymbolColor(rotato.StyleBold, rotato.FgBrightRed),
 		rotato.WithFailMessageColor(rotato.FgBrightRed),
 	)
@@ -154,12 +154,14 @@ func sceneError(ctx context.Context) {
 // sceneCountdown demonstrates a countdown: a graceful shutdown that shows
 // remaining time using the library's own formatting helpers.
 func sceneCountdown(ctx context.Context) {
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	var color rotato.Color
+	ctx, cancel := context.WithTimeout(ctx, 4*time.Second)
 	defer cancel()
 
 	r := rotato.New(
 		rotato.WithContext(ctx),
 		rotato.WithPrefix("Shutting Down"),
+		rotato.WithPrefixColor(rotato.StyleBold),
 		rotato.WithMessage("in"),
 		rotato.WithMessageColor(),
 		rotato.WithSymbolsBlockPretty(),
@@ -171,7 +173,16 @@ func sceneCountdown(ctx context.Context) {
 				return mesg
 			}
 			remaining := max(time.Until(deadline).Round(time.Second), 0)
-			return fmt.Sprintf("in %.0fs...", remaining.Seconds())
+			switch {
+			case remaining.Seconds() > 3:
+				color = rotato.FgBrightGreen
+			case remaining.Seconds() > 1:
+				color = rotato.FgOrange
+			default:
+				color = rotato.FgBrightRed
+			}
+
+			return color.With(rotato.StyleItalic).Sprintf("in %.0fs...", remaining.Seconds())
 		}),
 	)
 	r.Start()
