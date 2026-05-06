@@ -59,14 +59,14 @@ go get github.com/mateconpizza/rotato@latest
 
 ## Example
 
-There is a example in the [example](https://github.com/mateconpizza/rotato/blob/master/example/main.go) folder.
+- Simple example:
 
 ```go
 r := rotato.New(
     rotato.WithPrefix("Repo"),
     rotato.WithSpinnerColor(rotato.FgBrightGreen),
-    rotato.WithDoneColorMesg(rotato.FgBrightGreen, rotato.StyleItalic),
-    rotato.WithFailColorMesg(rotato.FgRed, rotato.StyleBlink),
+    rotato.WithDoneColorMesg(rotato.FgBrightGreen.With(rotato.StyleItalic)),
+    rotato.WithFailColorMesg(rotato.FgRed.With(rotato.StyleBlink)),
 )
 r.Start()
 // do some stuff
@@ -78,6 +78,9 @@ if err := repo.Sync(); err != nil {
 }
 r.Done("Sync Completed!")
 ```
+
+> [!NOTE]
+> To see more, go to [example](https://github.com/mateconpizza/rotato/blob/master/example/main.go)
 
 ## Credits
 

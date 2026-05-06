@@ -7,7 +7,7 @@
 //	r := rotato.New(
 //		rotato.WithSpinnerColor(rotato.FgBrightGreen),
 //		rotato.WithPrefix("Simple Task #1"),
-//		rotato.WithDoneMessageColor(rotato.FgBrightGreen, rotato.StyleItalic),
+//		rotato.WithDoneMessageColor(rotato.FgBrightGreen.With(rotato.StyleItalic)),
 //	)
 //	r.Start()
 //
@@ -29,7 +29,7 @@
 //	// connected
 //	r.UpdateSymbols(rotato.WithSymbols(rotato.FgBrightGreen + "✓"))
 //	r.UpdateMesg("Connected!")
-//	r.UpdateMesgColor(rotato.FgBrightGreen, rotato.StyleItalic)
+//	r.UpdateMesgColor(rotato.FgBrightGreen.With(rotato.StyleItalic))
 //
 //	// updating
 //	time.Sleep(1 * time.Second)
@@ -48,7 +48,7 @@
 //	r := rotato.New(
 //		rotato.WithMessage("Trying to connect..."),
 //		rotato.WithPrefix("AWS Server"),
-//		rotato.WithFailMessageColor(rotato.FgBrightRed, rotato.StyleBlink),
+//		rotato.WithFailMessageColor(rotato.FgBrightRed.With(rotato.StyleBlink)),
 //	)
 //	r.Start()
 //	// trying to connect
@@ -214,12 +214,14 @@ func WithWriter(w io.Writer) Option {
 	}
 }
 
+// WithContext sets the context for the spinner.
 func WithContext(ctx context.Context) Option {
 	return func(r *Rotato) {
 		r.ctx = ctx
 	}
 }
 
+// WithForceInteractive forces the spinner to run in interactive mode.
 func WithForceInteractive() Option {
 	return func(r *Rotato) {
 		r.forceInteractive = true
