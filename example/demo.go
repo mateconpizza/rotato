@@ -195,6 +195,76 @@ func sceneCountdown(ctx context.Context) {
 	r.Done("goodbye!")
 }
 
+// sceneElapse runs sequential spinner tasks (download, verify, extract) and
+// shows elapsed time via a shared prefix decorator with a timeout.
+func sceneElapse(ctx context.Context) {
+	ctx, cancel := context.WithTimeout(ctx, 12*time.Second)
+	defer cancel()
+
+	task := "Work"
+	t := time.Now()
+	formatter := func(mesg string) string {
+		d := time.Since(t).Round(time.Second)
+		return mesg + " " + rotato.DimElapsedDecorator(d)
+	}
+
+	// Step 1: Download
+	download := rotato.New(
+		rotato.WithContext(ctx),
+		rotato.WithSpinnerColor(rotato.FgBrightGreen),
+		rotato.WithDoneSymbol("\u203A"),
+		rotato.WithDoneSymbolColor(rotato.FgBrightCyan),
+		rotato.WithSymbolsBarBlock7(),
+		rotato.WithFrequency(110*time.Millisecond),
+		rotato.WithPrefix(task),
+		rotato.WithPrefixDecorator(formatter), // elapsed
+		rotato.WithMessage("Downloading chunks..."),
+	)
+	download.Start()
+	if err := pause(ctx, 3*time.Second); err != nil {
+		download.Fail("Aborted")
+		return
+	}
+	download.Done("Download complete")
+
+	// Step 2: Verify
+	verify := rotato.New(
+		rotato.WithContext(ctx),
+		rotato.WithDoneSymbol("\u203A"),
+		rotato.WithDoneSymbolColor(rotato.FgBrightYellow),
+		rotato.WithSymbolsCircles7(),
+		rotato.WithSpinnerColor(rotato.FgBrightCyan),
+		rotato.WithFrequency(110*time.Millisecond),
+		rotato.WithPrefix(task),
+		rotato.WithPrefixDecorator(formatter), // elapsed
+		rotato.WithMessage("Verifying checksum..."),
+	)
+	verify.Start()
+	if err := pause(ctx, 3*time.Second); err != nil {
+		verify.Fail("Aborted")
+		return
+	}
+	verify.Done("Integrity OK")
+
+	// Step 3: Extract
+	extract := rotato.New(
+		rotato.WithContext(ctx),
+		rotato.WithSpinnerStyle("growvert"),
+		rotato.WithSpinnerColor(greenBold),
+		rotato.WithFrequency(140*time.Millisecond),
+		rotato.WithPrefix(task),
+		rotato.WithPrefixDecorator(formatter), // elapsed
+		rotato.WithMessage("Extracting files..."),
+		rotato.WithDoneSymbolColor(greenBold),
+	)
+	extract.Start()
+	if err := pause(ctx, 2*time.Second); err != nil {
+		extract.Fail("Aborted")
+		return
+	}
+	extract.Done("Ready")
+}
+
 func padRight(s string, width int) string {
 	n := width - utf8.RuneCountInString(s)
 	if n <= 0 {
@@ -303,6 +373,7 @@ func runDemo(ctx context.Context) {
 		sceneSimple,    // basic start/done
 		sceneMultiStep, // live updates across phases
 		sceneError,     // failure path
+		sceneElapse,    // shared elapse timer
 		sceneCountdown, // graceful shutdown with countdown
 	}
 	for _, scene := range scenes {

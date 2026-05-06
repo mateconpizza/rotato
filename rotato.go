@@ -629,6 +629,32 @@ func removeANSI(s string) string {
 	return re.ReplaceAllString(s, "")
 }
 
+// CountdownDecorator formats remaining duration as seconds text.
+// It displays remaining time in seconds 'ss'.
+func CountdownDecorator(d time.Duration) string {
+	return fmt.Sprintf("%.0fs", d.Seconds())
+}
+
+// DimCountdownDecorator formats remaining duration as dimmed seconds text.
+// It displays remaining time in seconds (ss left).
+func DimCountdownDecorator(d time.Duration) string {
+	return FgGray.With(StyleItalic).Sprintf("(%.0fs left)", d.Seconds())
+}
+
+// DimElapsedDecorator formats elapsed duration as dimmed mm:ss.
+func DimElapsedDecorator(d time.Duration) string {
+	m := int(d.Minutes())
+	s := int(d.Seconds()) % 60
+	return FgGray.Sprintf("+%02d:%02d", m, s)
+}
+
+// ElapsedDecorator formats elapsed duration as mm:ss.
+func ElapsedDecorator(d time.Duration) string {
+	m := int(d.Minutes())
+	s := int(d.Seconds()) % 60
+	return fmt.Sprintf("+%02d:%02d", m, s)
+}
+
 // New returns a new spinner.
 func New(opt ...Option) *Rotato {
 	r := &Rotato{

@@ -59,6 +59,9 @@ go get github.com/mateconpizza/rotato@latest
 
 ## Example
 
+> [!NOTE]
+> To see more, go to [example](https://github.com/mateconpizza/rotato/blob/master/example/main.go)
+
 - Simple example:
 
 ```go
@@ -78,9 +81,6 @@ if err := repo.Sync(); err != nil {
 }
 r.Done("Sync Completed!")
 ```
-
-> [!NOTE]
-> To see more, go to [example](https://github.com/mateconpizza/rotato/blob/master/example/main.go)
 
 ## Credits
 
