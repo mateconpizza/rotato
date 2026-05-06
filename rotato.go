@@ -449,6 +449,11 @@ func (r *Rotato) UpdatePrefixColor(c ...Color) {
 	r.prefixColor = NewColor(c...)
 }
 
+// UpdateDoneSymbol changes the done symbol.
+func (r *Rotato) UpdateDoneSymbol(s string) {
+	r.doneSymbol = s
+}
+
 // UpdateDoneMesgColor changes the done message shown next to the spinner.
 func (r *Rotato) UpdateDoneMesgColor(c ...Color) {
 	r.doneMessageColor = NewColor(c...)
