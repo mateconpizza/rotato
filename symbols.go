@@ -95,6 +95,12 @@ func WithSymbolsBarBlock5() Option { return setSymbols(blockbar5) }
 //	·----- -·---- --·--- ---·-- ----·- -----· ----·- ---·-- --·--- -·---- ·-----
 func WithSymbolsBarBlock6() Option { return setSymbols(blockbar6) }
 
+// WithSymbolsBarBlock7 returns an option function that sets the spinner
+// unicode animation with bars.
+//
+//	■      ■■     ■■■    ■■■■   ■■■■■  ■■■■■■
+func WithSymbolsBarBlock7() Option { return setSymbols(blockbar7) }
+
 // WithSymbolsBlockPretty returns an option function that sets the spinner
 // unicode animation with pretty blocks.
 //

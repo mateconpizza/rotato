@@ -17,27 +17,47 @@ Lightweight and highly customizable spinner library for Go, designed to enhance 
 
 </div>
 
-## 🎬 More demos
+## More demos
 
 You can check out the spinners with the following commands:
 
-- Simple demo.
+- Simple demo
+
 ```sh
 go run github.com/mateconpizza/rotato/example@latest -demo
 ```
 
-- All registered rotatos.
+- All spinners
+
 ```sh
 go run github.com/mateconpizza/rotato/example@latest -all
 ```
 
-## 📦 Installation
+- List by groups
+
+```sh
+go run github.com/mateconpizza/rotato/example@latest -list
+```
+
+- Show by group
+
+```sh
+go run github.com/mateconpizza/rotato/example@latest -group <name>
+```
+
+- Show by name
+
+```sh
+go run github.com/mateconpizza/rotato/example@latest -show <name>
+```
+
+## Installation
 
 ```sh
 go get github.com/mateconpizza/rotato@latest
 ```
 
-## 🚀 Example
+## Example
 
 There is a example in the [example](https://github.com/mateconpizza/rotato/blob/master/example/main.go) folder.
 
@@ -59,7 +79,7 @@ if err := repo.Sync(); err != nil {
 r.Done("Sync Completed!")
 ```
 
-## 🗨️ Credits
+## Credits
 
 This package uses `symbols/spinners` from this libraries, and of course ideas!
 
@@ -67,3 +87,10 @@ Thanks to:
 
 - [@briandowns](https://github.com/briandowns/spinner)
 - [@theckman](https://github.com/theckman/yacspin)
+
+## Others
+
+Visible elements
+
+- Terminal: [st-terminal](https://st.suckless.org/)
+- Font: [maple-font](https://github.com/subframe7536/maple-font)

@@ -43,7 +43,7 @@ var Groups = []SpinnerGroup{
 
 var (
 	// braille-style spinners.
-	defaultSymbols = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+	defaultSymbols = dots
 	brailleWave    = []string{"⡀", "⡄", "⡆", "⡇", "⡏", "⡟", "⡿", "⣿", "⡿", "⡟", "⡏", "⡇", "⡆", "⡄"}
 	dots           = []string{"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"}
 	dots3          = []string{"⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆"}
@@ -72,6 +72,7 @@ var (
 	blockbar4      = []string{"|", "||", "|||", "||||", "|||||", "||||||", "|||||||", "||||||||", "|||||||", "||||||", "|||||", "||||", "|||", "||", "|"}
 	blockbar5      = []string{"[*-------]", "[-*------]", "[--*-----]", "[---*----]", "[----*---]", "[-----*--]", "[------*-]", "[-------*]", "[------*-]", "[-----*--]", "[----*---]", "[---*----]", "[--*-----]", "[-*------]", "[*-------]"}
 	blockbar6      = []string{"·-----", "-·----", "--·---", "---·--", "----·-", "-----·", "----·-", "---·--", "--·---", "-·----", "·-----"}
+	blockbar7      = []string{"■     ", "■■    ", "■■■   ", "■■■■  ", "■■■■■ ", "■■■■■■"}
 	blockbarpretty = []string{"", "", "", "", "", "", ""}
 	boxfill        = []string{"[          ]", "[■         ]", "[■■        ]", "[■■■       ]", "[■■■■      ]", "[■■■■■     ]", "[■■■■■■    ]", "[■■■■■■■   ]", "[■■■■■■■■  ]", "[■■■■■■■■■ ]", "[■■■■■■■■■■]"}
 	boxfillshort   = []string{"[      ]", "[■     ]", "[■■    ]", "[■■■   ]", "[■■■■  ]", "[■■■■■ ]", "[■■■■■■]"}
@@ -171,6 +172,7 @@ var registry = []SpinnerStyle{
 	{"blockbar4", blockbar4, GroupBlocks, "WithSymbolsBarBlock4"},
 	{"blockbar5", blockbar5, GroupBlocks, "WithSymbolsBarBlock5"},
 	{"blockbar6", blockbar6, GroupBlocks, "WithSymbolsBarBlock6"},
+	{"blockbar7", blockbar7, GroupBlocks, "WithSymbolsBarBlock7"},
 	{"blockbarpretty", blockbarpretty, GroupBlocks, "WithSymbolsBlockPretty"},
 	{"boxfill", boxfill, GroupBlocks, "WithSymbolsBoxFill"},
 	{"boxfillshort", boxfillshort, GroupBlocks, "WithSymbolsBoxFill"},
