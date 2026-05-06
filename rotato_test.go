@@ -300,21 +300,60 @@ func TestDisplayMessage(t *testing.T) {
 	}
 }
 
-func TestMesgDecorator(t *testing.T) {
-	prefix := "prefix::"
-	suffix := "::suffix"
+func TestDecorate(t *testing.T) {
+	tests := []struct {
+		name       string
+		input      string
+		decorators []MessageDecorator
+		want       string
+	}{
+		{
+			name:  "single_decorator",
+			input: "hello",
+			decorators: []MessageDecorator{
+				func(s string) string { return s + "!" },
+			},
+			want: "hello!",
+		},
+		{
+			name:  "multiple_decorators_order",
+			input: "go",
+			decorators: []MessageDecorator{
+				func(s string) string { return s + "lang" },
+				func(s string) string { return "[" + s + "]" },
+			},
+			want: "[golang]",
+		},
+		{
+			name:       "no_decorators",
+			input:      "plain",
+			decorators: []MessageDecorator{},
+			want:       "plain",
+		},
+		{
+			name:       "nil_decorators_slice",
+			input:      "nilcase",
+			decorators: nil,
+			want:       "nilcase",
+		},
+		{
+			name:  "empty_string_with_decorators",
+			input: "",
+			decorators: []MessageDecorator{
+				func(s string) string { return s + "prefix" },
+				func(s string) string { return s + "suffix" },
+			},
+			want: "prefixsuffix",
+		},
+	}
 
-	r := New(
-		WithMessageDecorator(func(mesg string) string {
-			return prefix + mesg + suffix
-		}),
-	)
-
-	result := r.decorateMessage("hello")
-	expected := prefix + "hello" + suffix
-
-	if result != expected {
-		t.Errorf("expected %q, got %q", expected, result)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := decorate(tt.input, tt.decorators)
+			if got != tt.want {
+				t.Fatalf("decorate(%q, decorators) = %q; want %q", tt.input, got, tt.want)
+			}
+		})
 	}
 }
 
