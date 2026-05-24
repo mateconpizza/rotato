@@ -51,6 +51,12 @@ go run github.com/mateconpizza/rotato/example@latest -group <name>
 go run github.com/mateconpizza/rotato/example@latest -show <name>
 ```
 
+- Show more spinners
+
+```sh
+go run github.com/mateconpizza/rotato/example@latest -more
+```
+
 ## Installation
 
 ```sh
@@ -60,7 +66,7 @@ go get github.com/mateconpizza/rotato@latest
 ## Example
 
 > [!NOTE]
-> To see more, go to [example](https://github.com/mateconpizza/rotato/blob/master/example/main.go)
+> To see more, go to [demo](https://github.com/mateconpizza/rotato/blob/master/example/demo.go)
 
 - Simple example:
 
