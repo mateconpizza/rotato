@@ -5,6 +5,9 @@
 //
 //	all spinners
 //	go run github.com/mateconpizza/rotato/example@latest -all
+//
+//	more spinners
+//	go run github.com/mateconpizza/rotato/example@latest -more
 package main
 
 import (
@@ -31,6 +34,7 @@ type Flags struct {
 	List           bool
 	Group          string
 	Show           string
+	More           bool
 }
 
 // Colors.
@@ -346,6 +350,9 @@ func showByGroup(ctx context.Context, g rotato.SpinnerGroup) {
 
 	maxLen = max(maxLen, 14)
 	for _, sp := range group {
+		if err := ctx.Err(); err != nil {
+			return
+		}
 		runRotato(ctx, sp, padRight(sp.Name, maxLen))
 	}
 }
@@ -384,12 +391,25 @@ func runDemo(ctx context.Context) {
 	}
 }
 
+func runMore(ctx context.Context) {
+	scenes := []func(context.Context){
+		sceneElapse, // shared elapse timer
+	}
+	for _, scene := range scenes {
+		if ctx.Err() != nil {
+			return
+		}
+		scene(ctx)
+	}
+}
+
 func main() {
 	if flags.NonInteractive {
 		rotato.SetNonInteractive()
 	}
 
-	ctx, stop := signal.NotifyContext(context.Background(),
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
 		os.Interrupt, syscall.SIGTERM, syscall.SIGHUP,
 	)
 	defer stop()
@@ -405,6 +425,8 @@ func main() {
 		showByName(ctx, flags.Show)
 	case flags.List:
 		listGroups()
+	case flags.More:
+		runMore(ctx)
 	default:
 		flag.Usage()
 	}
@@ -413,9 +435,10 @@ func main() {
 func init() {
 	flag.BoolVar(&flags.All, "all", false, "demo all rotatos")
 	flag.BoolVar(&flags.Demo, "demo", false, "run narrative demo")
-	flag.BoolVar(&flags.List, "list", false, "list spinners by groups")
+	flag.BoolVar(&flags.List, "list", false, "list spinners groups")
 	flag.BoolVar(&flags.NonInteractive, "ni", false, "non-interactive / dumb-terminal mode")
 	flag.StringVar(&flags.Group, "group", "", "show spinners by group")
 	flag.StringVar(&flags.Show, "show", "", "show spinner by name")
+	flag.BoolVar(&flags.More, "more", false, "show more examples")
 	flag.Parse()
 }
