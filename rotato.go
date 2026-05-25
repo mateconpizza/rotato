@@ -410,6 +410,22 @@ func (r *Rotato) SetWriter(w io.Writer) {
 	r.writer = w
 }
 
+func (r *Rotato) SetMessageDecorator(fn MessageDecorator) {
+	r.messageDecorators = []MessageDecorator{fn}
+}
+
+func (r *Rotato) AddMessageDecorator(fn MessageDecorator) {
+	r.messageDecorators = append(r.messageDecorators, fn)
+}
+
+func (r *Rotato) SetPrefixDecorator(fn MessageDecorator) {
+	r.prefixDecorators = []MessageDecorator{fn}
+}
+
+func (r *Rotato) AddPrefixDecorator(fn MessageDecorator) {
+	r.prefixDecorators = append(r.prefixDecorators, fn)
+}
+
 // Writer returns the current output destination.
 func (r *Rotato) Writer() io.Writer {
 	r.writerMu.Lock()
@@ -657,6 +673,7 @@ func ElapsedDecorator(d time.Duration) string {
 
 // New returns a new spinner.
 func New(opt ...Option) *Rotato {
+	// [color prefix reset][color delimiter reset][color symbol reset][messageDecorator [color message reset]]
 	r := &Rotato{
 		frequency:  100 * time.Millisecond,
 		delimiter:  NBSP,
