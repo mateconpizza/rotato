@@ -41,7 +41,7 @@ type Flags struct {
 var (
 	greenBold   = rotato.NewColor(rotato.StyleBold, rotato.FgBrightGreen)
 	greenItalic = rotato.NewColor(rotato.FgBrightGreen, rotato.StyleItalic)
-	hint        = rotato.FgGray.With(rotato.StyleItalic).Sprint("(ctrl+c to exit)")
+	hint        = rotato.StyleDim.With(rotato.StyleItalic).Sprint("(ctrl+c to exit)")
 )
 
 //nolint:gosec // deterministic demo seed
@@ -71,14 +71,13 @@ func pause(ctx context.Context, d time.Duration) error {
 // sceneSimple shows the most basic spinner usage: start, wait, done.
 func sceneSimple(ctx context.Context) {
 	r := rotato.New(
-		rotato.WithContext(ctx),
 		rotato.WithPrefix("Fetching config"),
 		rotato.WithPrefixColor(rotato.StyleItalic),
 		rotato.WithSpinnerColor(rotato.FgBrightCyan),
 		rotato.WithDoneSymbolColor(greenBold),
 		rotato.WithDoneMessageColor(greenItalic),
 	)
-	r.Start()
+	r.Start(ctx)
 
 	if err := pause(ctx, 1500*time.Millisecond); err != nil {
 		r.Fail("Aborted")
@@ -91,7 +90,6 @@ func sceneSimple(ctx context.Context) {
 // by updating its message and symbol set as work progresses.
 func sceneMultiStep(ctx context.Context) {
 	r := rotato.New(
-		rotato.WithContext(ctx),
 		rotato.WithSymbolsCircles6(),
 		rotato.WithSpinnerColor(rotato.FgOrange),
 		rotato.WithPrefix("S3 backup"),
@@ -100,7 +98,7 @@ func sceneMultiStep(ctx context.Context) {
 		rotato.WithDoneSymbolColor(greenBold),
 		rotato.WithDoneMessageColor(rotato.StyleBold),
 	)
-	r.Start()
+	r.Start(ctx)
 
 	// Phase 1 - connect
 	if err := pause(ctx, 1600*time.Millisecond); err != nil {
@@ -136,7 +134,6 @@ func sceneMultiStep(ctx context.Context) {
 // sceneError shows the failure path.
 func sceneError(ctx context.Context) {
 	r := rotato.New(
-		rotato.WithContext(ctx),
 		rotato.WithPrefix("AWS Health Check"),
 		rotato.WithSymbolsPipe(),
 		rotato.WithSpinnerColor(rotato.FgBlue.With(rotato.StyleBold)),
@@ -144,7 +141,7 @@ func sceneError(ctx context.Context) {
 		rotato.WithFailSymbolColor(rotato.StyleBold, rotato.FgBrightRed),
 		rotato.WithFailMessageColor(rotato.FgBrightRed),
 	)
-	r.Start()
+	r.Start(ctx)
 
 	if err := pause(ctx, 2*time.Second); err != nil {
 		r.Fail("aborted by user")
@@ -163,7 +160,6 @@ func sceneCountdown(ctx context.Context) {
 	defer cancel()
 
 	r := rotato.New(
-		rotato.WithContext(ctx),
 		rotato.WithPrefix("Shutting Down"),
 		rotato.WithPrefixColor(rotato.StyleBold),
 		rotato.WithMessage("in"),
@@ -189,7 +185,7 @@ func sceneCountdown(ctx context.Context) {
 			return color.With(rotato.StyleItalic).Sprintf("in %.0fs...", remaining.Seconds())
 		}),
 	)
-	r.Start()
+	r.Start(ctx)
 
 	// Wait for the internal deadline; the spinner stops itself when ctx fires.
 	<-ctx.Done()
@@ -214,7 +210,6 @@ func sceneElapse(ctx context.Context) {
 
 	// Step 1: Download
 	download := rotato.New(
-		rotato.WithContext(ctx),
 		rotato.WithSpinnerColor(rotato.FgBrightGreen),
 		rotato.WithDoneSymbol("\u203A"),
 		rotato.WithDoneSymbolColor(rotato.FgBrightCyan),
@@ -224,7 +219,7 @@ func sceneElapse(ctx context.Context) {
 		rotato.WithPrefixDecorator(formatter), // elapsed
 		rotato.WithMessage("Downloading chunks..."),
 	)
-	download.Start()
+	download.Start(ctx)
 	if err := pause(ctx, 3*time.Second); err != nil {
 		download.Fail("Aborted")
 		return
@@ -233,7 +228,6 @@ func sceneElapse(ctx context.Context) {
 
 	// Step 2: Verify
 	verify := rotato.New(
-		rotato.WithContext(ctx),
 		rotato.WithDoneSymbol("\u203A"),
 		rotato.WithDoneSymbolColor(rotato.FgBrightYellow),
 		rotato.WithSymbolsCircles7(),
@@ -243,7 +237,7 @@ func sceneElapse(ctx context.Context) {
 		rotato.WithPrefixDecorator(formatter), // elapsed
 		rotato.WithMessage("Verifying checksum..."),
 	)
-	verify.Start()
+	verify.Start(ctx)
 	if err := pause(ctx, 3*time.Second); err != nil {
 		verify.Fail("Aborted")
 		return
@@ -252,7 +246,6 @@ func sceneElapse(ctx context.Context) {
 
 	// Step 3: Extract
 	extract := rotato.New(
-		rotato.WithContext(ctx),
 		rotato.WithSpinnerStyle("growvert"),
 		rotato.WithSpinnerColor(greenBold),
 		rotato.WithFrequency(140*time.Millisecond),
@@ -261,7 +254,7 @@ func sceneElapse(ctx context.Context) {
 		rotato.WithMessage("Extracting files..."),
 		rotato.WithDoneSymbolColor(greenBold),
 	)
-	extract.Start()
+	extract.Start(ctx)
 	if err := pause(ctx, 2*time.Second); err != nil {
 		extract.Fail("Aborted")
 		return
@@ -287,14 +280,13 @@ func showSymbols(ctx context.Context) {
 
 	for _, sp := range rotato.Spinners() {
 		r := rotato.New(
-			rotato.WithContext(ctx),
 			rotato.WithPrefix(padRight(sp.Name, maxLen)),
 			rotato.WithSpinnerStyle(sp.Name),
 			rotato.WithMessage(hint),
 			rotato.WithDoneSymbolColor(greenBold),
 			rotato.WithFailSymbolColor(rotato.StyleBold, rotato.FgBrightRed),
 		)
-		r.Start()
+		r.Start(ctx)
 
 		if err := pause(ctx, 1400*time.Millisecond); err != nil {
 			r.Fail("interrupted")
@@ -359,14 +351,13 @@ func showByGroup(ctx context.Context, g rotato.SpinnerGroup) {
 
 func runRotato(ctx context.Context, sp rotato.SpinnerStyle, name string) {
 	r := rotato.New(
-		rotato.WithContext(ctx),
 		rotato.WithSymbols(sp.Frames...),
 		rotato.WithPrefix(name),
 		rotato.WithMessage(hint),
 		rotato.WithDoneSymbolColor(greenBold),
 		rotato.WithFailSymbolColor(rotato.StyleBold, rotato.FgBrightRed),
 	)
-	r.Start()
+	r.Start(ctx)
 
 	if err := pause(ctx, 1500*time.Millisecond); err != nil {
 		r.Fail("interrupted")

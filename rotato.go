@@ -214,13 +214,6 @@ func WithWriter(w io.Writer) Option {
 	}
 }
 
-// WithContext sets the context for the spinner.
-func WithContext(ctx context.Context) Option {
-	return func(r *Rotato) {
-		r.ctx = ctx
-	}
-}
-
 // WithForceInteractive forces the spinner to run in interactive mode.
 func WithForceInteractive() Option {
 	return func(r *Rotato) {
@@ -248,7 +241,6 @@ type Rotato struct {
 	writerMu sync.Mutex
 
 	// Context
-	ctx            context.Context
 	ctxDoneHandler func(r *Rotato, err error)
 
 	// for Testing
@@ -310,7 +302,7 @@ func (r *Rotato) render(current int) {
 }
 
 // Start starts the spinning animation in a goroutine.
-func (r *Rotato) Start() {
+func (r *Rotato) Start(ctx context.Context) {
 	if !isInteractive(r) && !r.forceInteractive {
 		r.activeMu.Lock()
 		defer r.activeMu.Unlock()
@@ -350,9 +342,9 @@ func (r *Rotato) Start() {
 			select {
 			case <-r.doneChan:
 				return
-			case <-r.ctx.Done():
+			case <-ctx.Done():
 				if r.ctxDoneHandler != nil {
-					r.ctxDoneHandler(r, r.ctx.Err())
+					r.ctxDoneHandler(r, ctx.Err())
 				}
 
 				r.stopSpinner()
@@ -654,14 +646,14 @@ func CountdownDecorator(d time.Duration) string {
 // DimCountdownDecorator formats remaining duration as dimmed seconds text.
 // It displays remaining time in seconds (ss left).
 func DimCountdownDecorator(d time.Duration) string {
-	return FgGray.With(StyleItalic).Sprintf("(%.0fs left)", d.Seconds())
+	return StyleDim.With(StyleItalic).Sprintf("(%.0fs left)", d.Seconds())
 }
 
 // DimElapsedDecorator formats elapsed duration as dimmed mm:ss.
 func DimElapsedDecorator(d time.Duration) string {
 	m := int(d.Minutes())
 	s := int(d.Seconds()) % 60
-	return FgGray.Sprintf("+%02d:%02d", m, s)
+	return StyleDim.Sprintf("+%02d:%02d", m, s)
 }
 
 // ElapsedDecorator formats elapsed duration as mm:ss.
@@ -688,10 +680,6 @@ func New(opt ...Option) *Rotato {
 	}
 	for _, fn := range opt {
 		fn(r)
-	}
-
-	if r.ctx == nil {
-		r.ctx = context.Background()
 	}
 
 	return r
