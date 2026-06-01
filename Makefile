@@ -7,14 +7,14 @@ full: test lint
 
 # Run tests
 test:
-	@echo '>> Testing'
-	@go test -v ./...
+	@echo '>> Testing go test ./... -race'
+	@go test ./... -race
 	@echo
 
 # Run tests for a specific function
 testfn:
 	@echo '>> Testing function $(FN)'
-	@go test -run $(FN) ./...
+	@go test -run $(FN) ./... -race
 
 testrace:
 	@echo '>> Testing'
@@ -34,5 +34,11 @@ demo:
 # run all example
 all:
 	@go run example/demo.go -all
+
+ci: lint
+	go mod tidy
+	git diff --exit-code
+	go build ./...
+	go test -race ./...
 
 .PHONY: test testfn lint full

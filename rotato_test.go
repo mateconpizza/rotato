@@ -3,7 +3,9 @@ package rotato
 import (
 	"bytes"
 	"context"
+	"io"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -18,7 +20,8 @@ func TestSpinnerOutput(t *testing.T) {
 		WithFrequency(10*time.Millisecond),
 	)
 
-	r.Start()
+	ctx := context.Background()
+	r.Start(ctx)
 	time.Sleep(50 * time.Millisecond)
 	r.Done()
 
@@ -41,7 +44,10 @@ func TestSpinnerState(t *testing.T) {
 		WithSymbols([]string{"-", "\\", "|", "/"}...),
 		WithDoneMessage("Stopped"),
 	)
-	r.Start()
+
+	ctx := context.Background()
+	r.Start(ctx)
+
 	time.Sleep(20 * time.Millisecond)
 	// verify that the spinner state is true.
 	if !r.isActive {
@@ -65,11 +71,17 @@ func TestSpinnerMessageUpdate(t *testing.T) {
 		WithMessage("Initial"),
 		WithDoneMessage("Done"),
 	)
-	r.Start()
+
+	ctx := context.Background()
+	r.Start(ctx)
+
 	time.Sleep(20 * time.Millisecond)
+
 	// Update the message.
 	r.UpdateMesg("Updated")
+
 	time.Sleep(50 * time.Millisecond)
+
 	r.Done()
 
 	out := buf.String()
@@ -81,7 +93,8 @@ func TestSpinnerMessageUpdate(t *testing.T) {
 func TestFailMesg(t *testing.T) {
 	var buf bytes.Buffer
 	r := New(WithWriter(&buf))
-	r.Start()
+	ctx := context.Background()
+	r.Start(ctx)
 	r.Fail("Failed")
 	out := buf.String()
 	if !strings.Contains(out, "Failed") {
@@ -140,14 +153,16 @@ func TestContext(t *testing.T) {
 		WithWriter(&buf),
 		WithMessage(mesg),
 		WithDoneMessage("Done"),
-		WithContext(ctx),
 		WithForceInteractive(),
 		WithFrequency(10*time.Millisecond),
 	)
 
-	r.Start()
+	r.Start(ctx)
+
 	time.Sleep(50 * time.Millisecond)
+
 	cancel()
+
 	time.Sleep(50 * time.Millisecond)
 
 	isActive := r.IsRunning()
@@ -163,14 +178,16 @@ func TestContextCancelThenDone(t *testing.T) {
 		WithWriter(&buf),
 		WithMessage("Running..."),
 		WithDoneMessage("Completed"),
-		WithContext(ctx),
 		WithForceInteractive(),
 		WithFrequency(10*time.Millisecond),
 	)
 
-	r.Start()
+	r.Start(ctx)
+
 	time.Sleep(50 * time.Millisecond)
+
 	cancel()
+
 	time.Sleep(50 * time.Millisecond)
 
 	if r.IsRunning() {
@@ -192,12 +209,11 @@ func TestContextTimeoutStopsSpinner(t *testing.T) {
 	r := New(
 		WithWriter(&buf),
 		WithMessage("Timing out..."),
-		WithContext(ctx),
 		WithForceInteractive(),
 		WithFrequency(5*time.Millisecond),
 	)
 
-	r.Start()
+	r.Start(ctx)
 	time.Sleep(timeout + 50*time.Millisecond)
 
 	isActive := r.IsRunning()
@@ -216,12 +232,11 @@ func TestStartWithPreCancelledContext(t *testing.T) {
 	r := New(
 		WithWriter(&buf),
 		WithMessage(mesg),
-		WithContext(ctx),
 		WithFrequency(5*time.Millisecond),
 		WithForceInteractive(),
 	)
 
-	r.Start()
+	r.Start(ctx)
 	time.Sleep(5 * time.Millisecond)
 
 	isActive := r.IsRunning()
@@ -364,13 +379,12 @@ func TestContextCancelled(t *testing.T) {
 
 	r := New(
 		WithWriter(&buf),
-		WithContext(ctx),
 		WithForceInteractive(),
 		WithContextDoneHandler(func(r *Rotato, err error) {
 			r.Fail(err.Error())
 		}),
 	)
-	r.Start()
+	r.Start(ctx)
 
 	time.Sleep(20 * time.Millisecond)
 
@@ -392,13 +406,12 @@ func TestContextDeadlineExceeded(t *testing.T) {
 	r := New(
 		WithWriter(&buf),
 		WithPrefix("CtxDeadlineExceeded"),
-		WithContext(ctx),
 		WithForceInteractive(),
 		WithContextDoneHandler(func(r *Rotato, err error) {
 			r.Fail(err.Error())
 		}),
 	)
-	r.Start()
+	r.Start(ctx)
 
 	time.Sleep(20 * time.Millisecond)
 
@@ -409,5 +422,113 @@ func TestContextDeadlineExceeded(t *testing.T) {
 
 	if !strings.Contains(got, want) {
 		t.Fatalf("expected %s, got %s", want, got)
+	}
+}
+
+// TestStopSpinner_NoDeadlockDone is the same scenario but exercises Done
+// instead of Fail.
+func TestStopSpinner_NoDeadlockDone(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	r := New(
+		WithWriter(io.Discard),
+		WithMessage("Loading..."),
+		WithForceInteractive(),
+	)
+	r.Start(ctx)
+
+	time.Sleep(50 * time.Millisecond)
+
+	cancel()
+
+	time.Sleep(50 * time.Millisecond)
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		r.Done("Finished!")
+	}()
+
+	select {
+	case <-done:
+		// good.
+	case <-time.After(2 * time.Second):
+		t.Fatal("Done() blocked: stopSpinner deadlock detected (goroutine already exited)")
+	}
+}
+
+// TestRotato_DoneConcurrency tests the data race by firing multiple Done()
+// calls simultaneously.
+func TestRotato_DoneConcurrency(t *testing.T) {
+	var buf bytes.Buffer
+
+	r := &Rotato{
+		writer:           &buf,
+		isActive:         true,
+		doneChan:         make(chan struct{}, 1), // buffered to prevent blocking if read isn't active
+		forceInteractive: true,                   // force it to act like a real terminal
+	}
+
+	const workers = 50
+	var wg sync.WaitGroup
+	wg.Add(workers)
+
+	// fire 50 goroutines trying to stop the spinner at the exact same time
+	for i := 0; i < workers; i++ {
+		go func() {
+			defer wg.Done()
+			r.Done("Concurrent Done")
+		}()
+	}
+
+	wg.Wait()
+
+	// verify the spinner state was safely transitioned
+	if r.isActive {
+		t.Errorf("expected isActive to be false")
+	}
+
+	// the doneChan should only receive `exactly` one signal, regardless of
+	// how many goroutines called `Done()`
+	if len(r.doneChan) != 1 {
+		t.Errorf("expected doneChan to have exactly 1 item, got %d", len(r.doneChan))
+	}
+}
+
+// TestStopSpinner_DoneFailRace simulates the logical race condition where a context
+// timeout triggers Fail() at the exact same millisecond the deferred Done() fires.
+func TestStopSpinner_DoneFailRace(t *testing.T) {
+	var buf bytes.Buffer
+
+	r := &Rotato{
+		writer:           &buf,
+		isActive:         true,
+		doneChan:         make(chan struct{}, 1),
+		forceInteractive: true,
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		r.Fail("Context Timeout")
+	}()
+
+	go func() {
+		defer wg.Done()
+		r.Done("Graceful Exit")
+	}()
+
+	wg.Wait()
+
+	if r.isActive {
+		t.Errorf("expected isActive to be false")
+	}
+
+	if len(r.doneChan) != 1 {
+		t.Errorf("expected doneChan to receive exactly 1 stop signal, got %d", len(r.doneChan))
 	}
 }
