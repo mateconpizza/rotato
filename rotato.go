@@ -350,13 +350,15 @@ func (r *Rotato) Start(ctx context.Context) {
 				r.stopSpinner()
 				return
 			case <-ticker.C:
-				r.activeMu.Lock()
-				if !r.isActive {
-					r.activeMu.Unlock()
+				r.activeMu.RLock()
+				active := r.isActive
+				r.activeMu.RUnlock()
+
+				if !active {
 					return
 				}
+
 				r.render(i)
-				r.activeMu.Unlock()
 			}
 		}
 	}()
@@ -609,6 +611,66 @@ func (r *Rotato) IsRunning() bool {
 	r.activeMu.RLock()
 	defer r.activeMu.RUnlock()
 	return r.isActive
+}
+
+func (r *Rotato) Print(msg string) {
+	r.writeAbove(msg)
+}
+
+func (r *Rotato) Printf(format string, args ...any) {
+	r.Print(fmt.Sprintf(format, args...))
+}
+
+func (r *Rotato) writeAbove(msg string) {
+	r.writerMu.Lock()
+	defer r.writerMu.Unlock()
+
+	if !r.IsRunning() {
+		_, _ = fmt.Fprintln(r.writer, msg)
+		return
+	}
+
+	// removes current spinner
+	_, _ = fmt.Fprint(r.writer, clearChars)
+
+	// print permanent message
+	_, _ = fmt.Fprintln(r.writer, msg)
+
+	// redraw spinner
+	r.renderCurrentLocked()
+}
+
+func (r *Rotato) renderCurrentLocked() {
+	mesg := r.currentMessage()
+	mesg = decorate(mesg, r.messageDecorators)
+
+	frame := r.spinnerColor.Sprint(r.frame)
+
+	if r.prefixMesg != "" {
+		prefix := r.prefixColor.Sprint(r.prefixMesg)
+		prefix = decorate(prefix, r.prefixDecorators)
+
+		delimiter := r.delimiterColor.Sprint(r.delimiter)
+
+		_, _ = fmt.Fprintf(
+			r.writer,
+			"%s%s%s%s",
+			clearChars,
+			prefix,
+			delimiter,
+			frame+" "+mesg,
+		)
+
+		return
+	}
+
+	_, _ = fmt.Fprintf(
+		r.writer,
+		"%s%s %s",
+		clearChars,
+		frame,
+		mesg,
+	)
 }
 
 // decorate applies all decorators in order to the given string.

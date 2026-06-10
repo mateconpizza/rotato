@@ -262,6 +262,62 @@ func sceneElapse(ctx context.Context) {
 	extract.Done("Ready")
 }
 
+type Item struct {
+	text   string
+	pause  time.Duration
+	mesg   string
+	symbol string
+	color  rotato.Color
+}
+
+func (t *Item) String() string {
+	return fmt.Sprintf("%s %s %s", t.color.Sprint(t.symbol), t.text, t.mesg)
+}
+
+func sceneLog(ctx context.Context) {
+	sp := rotato.New(
+		rotato.WithPrefix("Processing items"),
+		rotato.WithMessage("starting"),
+		rotato.WithMessageColor(rotato.FgBrightBlue.With(rotato.StyleItalic)),
+		rotato.WithPrefixColor(rotato.StyleDim),
+		rotato.WithSpinnerColor(rotato.FgBrightYellow.With(rotato.StyleBold)),
+		rotato.WithDoneSymbolColor(rotato.FgBrightGreen.With(rotato.StyleBold)),
+	)
+
+	sp.Start(ctx)
+	defer sp.Done("completed")
+
+	items := []Item{
+		{"item #1", 500, "processed successfully", "✓", rotato.FgBrightGreen.With(rotato.StyleBold)},
+		{"item #2", 400, "requires manual review", "✗", rotato.FgBrightRed.With(rotato.StyleBold)},
+		{"item #3", 500, "processed successfully", "✓", rotato.FgBrightGreen.With(rotato.StyleBold)},
+		{"item #4", 800, "requires manual review", "!", rotato.FgBrightYellow.With(rotato.StyleBold)},
+	}
+
+	var (
+		current = 1
+		total   = len(items)
+	)
+
+	sp.AddPrefixDecorator(func(prefix string) string {
+		progress := fmt.Sprintf("[%d/%d] ", current, total)
+		return rotato.FgBrightCyan.With(rotato.StyleBold).Sprint(progress) + prefix
+	})
+
+	for _, item := range items {
+		sp.UpdateMesg("processing " + item.text)
+
+		if err := pause(ctx, item.pause*time.Millisecond); err != nil {
+			sp.Fail("Aborted")
+			return
+		}
+
+		sp.Print(item.String())
+
+		current++
+	}
+}
+
 func padRight(s string, width int) string {
 	n := width - utf8.RuneCountInString(s)
 	if n <= 0 {
@@ -372,6 +428,7 @@ func runDemo(ctx context.Context) {
 		sceneMultiStep, // live updates across phases
 		sceneError,     // failure path
 		sceneElapse,    // shared elapse timer
+		sceneLog,       // show log functionality
 		sceneCountdown, // graceful shutdown with countdown
 	}
 	for _, scene := range scenes {

@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+func TestWithNoColor(t *testing.T) {
+	t.Helper()
+	t.Setenv("NO_COLOR", "true")
+}
+
 func TestSpinnerOutput(t *testing.T) {
 	var buf bytes.Buffer
 	mesg := "Testing"
@@ -530,5 +535,413 @@ func TestStopSpinner_DoneFailRace(t *testing.T) {
 
 	if len(r.doneChan) != 1 {
 		t.Errorf("expected doneChan to receive exactly 1 stop signal, got %d", len(r.doneChan))
+	}
+}
+
+func TestWriteAbove(t *testing.T) {
+	tests := []struct {
+		name        string
+		msg         string
+		isRunning   bool
+		prefix      string
+		message     string
+		setupFn     func(*Rotato)
+		checkOutput func(t *testing.T, output string)
+	}{
+		{
+			name:      "spinner_not_running",
+			msg:       "test message",
+			isRunning: false,
+			prefix:    "",
+			message:   "Loading",
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, "test message") {
+					t.Fatalf("expected output to contain 'test message', got %q", output)
+				}
+				if !strings.Contains(output, "\n") {
+					t.Fatalf("expected newline in output, got %q", output)
+				}
+			},
+		},
+		{
+			name:      "spinner_running_without_prefix",
+			msg:       "log line",
+			isRunning: true,
+			prefix:    "",
+			message:   "Processing",
+			setupFn: func(r *Rotato) {
+				r.frame = "⠋"
+				r.isActive = true
+			},
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, "log line") {
+					t.Fatalf("expected output to contain 'log line', got %q", output)
+				}
+				if !strings.Contains(output, clearChars) {
+					t.Fatalf("expected clearChars in output, got %q", output)
+				}
+			},
+		},
+		{
+			name:      "spinner_running_with_prefix",
+			msg:       "status update",
+			isRunning: true,
+			prefix:    "[1/10]",
+			message:   "Syncing",
+			setupFn: func(r *Rotato) {
+				r.frame = "⠙"
+				r.isActive = true
+				r.prefixMesg = "[1/10]"
+			},
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, "status update") {
+					t.Fatalf("expected output to contain 'status update', got %q", output)
+				}
+				if !strings.Contains(output, "[1/10]") {
+					t.Fatalf("expected prefix '[1/10]' in output, got %q", output)
+				}
+			},
+		},
+		{
+			name:      "empty_message",
+			msg:       "",
+			isRunning: false,
+			prefix:    "",
+			message:   "Loading",
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				// Empty message still results in newline
+				if output == "" {
+					t.Fatalf("expected output to contain newline for empty message")
+				}
+			},
+		},
+		{
+			name:      "message_with_special_chars",
+			msg:       "Error: file not found (exit code: 1)",
+			isRunning: false,
+			prefix:    "",
+			message:   "Loading",
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, "Error: file not found (exit code: 1)") {
+					t.Fatalf("expected output to contain special chars message, got %q", output)
+				}
+			},
+		},
+		{
+			name:      "multiline_message_only_first_line_written",
+			msg:       "line 1\nline 2",
+			isRunning: false,
+			prefix:    "",
+			message:   "Loading",
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, "line 1\nline 2") {
+					t.Fatalf("expected output to contain multiline message, got %q", output)
+				}
+			},
+		},
+		{
+			name:      "spinner_running_no_frame_set",
+			msg:       "test",
+			isRunning: true,
+			prefix:    "",
+			message:   "",
+			setupFn: func(r *Rotato) {
+				r.isActive = true
+				r.frame = ""
+			},
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, "test") {
+					t.Fatalf("expected output to contain 'test', got %q", output)
+				}
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			r := New(
+				WithWriter(&buf),
+				WithMessage(tt.message),
+				WithForceInteractive(),
+			)
+
+			if tt.setupFn != nil {
+				tt.setupFn(r)
+			}
+
+			r.writeAbove(tt.msg)
+
+			output := buf.String()
+			tt.checkOutput(t, output)
+		})
+	}
+}
+
+func TestRenderCurrentLocked(t *testing.T) {
+	TestWithNoColor(t)
+
+	tests := []struct {
+		name        string
+		frame       string
+		message     string
+		prefix      string
+		decorator   MessageDecorator
+		checkOutput func(t *testing.T, output string)
+	}{
+		{
+			name:    "simple_frame_and_message",
+			frame:   "⠋",
+			message: "Loading",
+			prefix:  "",
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, "⠋") {
+					t.Fatalf("expected output to contain frame '⠋', got %q", output)
+				}
+				if !strings.Contains(output, "Loading") {
+					t.Fatalf("expected output to contain 'Loading', got %q", output)
+				}
+			},
+		},
+		{
+			name:    "with_prefix",
+			frame:   "⠙",
+			message: "Syncing",
+			prefix:  "[2/5]",
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, "[2/5]") {
+					t.Fatalf("expected output to contain prefix '[2/5]', got %q", output)
+				}
+				if !strings.Contains(output, "⠙") {
+					t.Fatalf("expected output to contain frame, got %q", output)
+				}
+				if !strings.Contains(output, "Syncing") {
+					t.Fatalf("expected output to contain message, got %q", output)
+				}
+			},
+		},
+		{
+			name:    "empty_message",
+			frame:   "⠹",
+			message: "",
+			prefix:  "",
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, "⠹") {
+					t.Fatalf("expected output to contain frame, got %q", output)
+				}
+				if !strings.Contains(output, clearChars) {
+					t.Fatalf("expected clearChars in output, got %q", output)
+				}
+			},
+		},
+		{
+			name:    "empty_prefix_with_message",
+			frame:   "⠸",
+			message: "Processing",
+			prefix:  "",
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, "⠸") {
+					t.Fatalf("expected frame in output, got %q", output)
+				}
+				if !strings.Contains(output, "Processing") {
+					t.Fatalf("expected message in output, got %q", output)
+				}
+			},
+		},
+		{
+			name:      "with_message_decorator",
+			frame:     "⠼",
+			message:   "decorated",
+			prefix:    "",
+			decorator: func(s string) string { return "[" + s + "]" },
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, "[decorated]") {
+					t.Fatalf("expected decorated message '[decorated]' in output, got %q", output)
+				}
+			},
+		},
+		{
+			name:    "prefix_and_message",
+			frame:   "⠾",
+			message: "Done",
+			prefix:  "[final]",
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, "[final]") {
+					t.Fatalf("expected prefix in output, got %q", output)
+				}
+				if !strings.Contains(output, "⠾") {
+					t.Fatalf("expected frame in output, got %q", output)
+				}
+				if !strings.Contains(output, "Done") {
+					t.Fatalf("expected message in output, got %q", output)
+				}
+			},
+		},
+		{
+			name:    "empty_frame_empty_message",
+			frame:   "",
+			message: "",
+			prefix:  "",
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, clearChars) {
+					t.Fatalf("expected clearChars in output, got %q", output)
+				}
+			},
+		},
+		{
+			name:    "frame_only_no_message",
+			frame:   "⠷",
+			message: "",
+			prefix:  "",
+			checkOutput: func(t *testing.T, output string) {
+				t.Helper()
+				if !strings.Contains(output, "⠷") {
+					t.Fatalf("expected frame in output, got %q", output)
+				}
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			r := New(
+				WithWriter(&buf),
+				WithMessage(tt.message),
+				WithForceInteractive(),
+			)
+
+			r.frame = tt.frame
+			if tt.prefix != "" {
+				r.prefixMesg = tt.prefix
+			}
+			if tt.decorator != nil {
+				r.AddMessageDecorator(tt.decorator)
+			}
+
+			r.writerMu.Lock()
+			r.renderCurrentLocked()
+			r.writerMu.Unlock()
+
+			output := buf.String()
+			tt.checkOutput(t, output)
+		})
+	}
+}
+
+func TestRenderCurrentLockedWithClearChars(t *testing.T) {
+	TestWithNoColor(t)
+
+	tests := []struct {
+		name       string
+		setup      func(*Rotato)
+		wantOutput string
+	}{
+		{
+			name: "normal_no_prefix",
+			setup: func(r *Rotato) {
+				r.frame = "|"
+				r.message = "Syncing..."
+			},
+			wantOutput: clearChars + "| Syncing...",
+		},
+		{
+			name: "with_prefix_and_delimiter",
+			setup: func(r *Rotato) {
+				r.frame = "/"
+				r.message = "Downloading..."
+				r.prefixMesg = "Worker 1"
+				r.delimiter = " - "
+			},
+			wantOutput: clearChars + "Worker 1 - / Downloading...",
+		},
+		{
+			name: "empty_values",
+			setup: func(r *Rotato) {
+				r.frame = ""
+				r.message = ""
+				r.prefixMesg = ""
+				r.delimiter = ""
+			},
+			wantOutput: clearChars + " ", // Format without prefix is "%s%s %s" -> clearChars + "" + " " + ""
+		},
+		{
+			name: "with_message_decorator",
+			setup: func(r *Rotato) {
+				r.frame = "\\"
+				r.message = "uploading"
+				r.messageDecorators = []MessageDecorator{
+					func(s string) string { return "[" + s + "]" },
+				}
+			},
+			wantOutput: clearChars + "\\ [uploading]",
+		},
+		{
+			name: "with_prefix_decorator",
+			setup: func(r *Rotato) {
+				r.frame = "-"
+				r.message = "parsing"
+				r.prefixMesg = "JOB"
+				r.delimiter = ":"
+				r.prefixDecorators = []MessageDecorator{
+					func(s string) string { return "(" + s + ")" },
+				}
+			},
+			wantOutput: clearChars + "(JOB):- parsing",
+		},
+		{
+			name: "multiple_decorators",
+			setup: func(r *Rotato) {
+				r.frame = "*"
+				r.message = "done"
+				r.prefixMesg = "status"
+				r.delimiter = " "
+				r.messageDecorators = []MessageDecorator{
+					func(s string) string { return s + "!" },
+				}
+				r.prefixDecorators = []MessageDecorator{
+					func(s string) string { return "{" + s + "}" },
+				}
+			},
+			wantOutput: clearChars + "{status} * done!",
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			var buf bytes.Buffer
+			r := New(
+				WithWriter(&buf),
+			)
+
+			if tt.setup != nil {
+				tt.setup(r)
+			}
+
+			r.renderCurrentLocked()
+
+			got := buf.String()
+			if got != tt.wantOutput {
+				t.Fatalf("renderCurrentLocked() = %q; want %q", got, tt.wantOutput)
+			}
+		})
 	}
 }

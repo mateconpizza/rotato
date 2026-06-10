@@ -137,6 +137,10 @@ linters:
       - path: "registry.go"
         linters:
           - lll
+      - path: "rotato_test.go"
+        linters:
+          - funlen
+          - goconst
     generated: lax
     presets:
       - common-false-positives
