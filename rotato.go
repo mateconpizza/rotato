@@ -442,6 +442,11 @@ func (r *Rotato) UpdateMesg(mesg string) {
 	}
 }
 
+// UpdateMesgf formats and updates the message.
+func (r *Rotato) UpdateMesgf(format string, args ...any) {
+	r.UpdateMesg(fmt.Sprintf(format, args...))
+}
+
 // UpdateMesgColor changes the color of the message.
 func (r *Rotato) UpdateMesgColor(c ...Color) {
 	r.messageColor = NewColor(c...)
@@ -452,6 +457,10 @@ func (r *Rotato) UpdatePrefix(mesg string) {
 	r.prefixMu.Lock()
 	r.prefixMesg = mesg
 	r.prefixMu.Unlock()
+}
+
+func (r *Rotato) UpdatePrefixf(format string, args ...any) {
+	r.UpdatePrefix(fmt.Sprintf(format, args...))
 }
 
 // UpdatePrefixColor changes the color of the prefix.
