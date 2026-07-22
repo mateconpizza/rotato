@@ -77,8 +77,9 @@ r := rotato.New(
     rotato.WithDoneColorMesg(rotato.FgBrightGreen.With(rotato.StyleItalic)),
     rotato.WithFailColorMesg(rotato.FgRed.With(rotato.StyleBlink)),
 )
-r.Start()
+r.Start(ctx)
 // do some stuff
+// ...
 repo := git.New("https://github.com/mateconpizza/rotato")
 r.UpdateMesg("Syncing Repo...")
 if err := repo.Sync(); err != nil {
