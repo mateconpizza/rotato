@@ -335,6 +335,10 @@ func WithSymbolsThinking() Option { return setSymbols(question) }
 //	<     > <    > <   > <  > < > <>< < > <  > <   > <    >
 func WithSymbolsPingPong() Option { return setSymbols(pingpong) }
 
+// WithSymbolsPingPong2 returns an option function that sets the spinner
+// animation with expanding and contracting brackets.
+func WithSymbolsPingPong2() Option { return setSymbols(pingpong2) }
+
 // WithSymbolsMatrix returns an option function that sets the spinner
 // unicode animation with matrix-style loading.
 //
@@ -485,3 +489,49 @@ func WithSymbolsSweep() Option { return setSymbols(sweep) }
 //
 //	░ ▒ ▓ █ ▓ ▒
 func WithSymbolsPulse() Option { return setSymbols(pulse) }
+
+// WithSymbolsFlip returns a option function that sets the spinner
+// unicode animation
+//
+//	_ _ _ - ` ` ' ´ - _ _ _
+func WithSymbolsFlip() Option { return setSymbols(flip) }
+
+// WithSymbolsMaterial returns a option function that sets the spinner
+// unicode animation.
+func WithSymbolsMaterial() Option { return setSymbols(material) }
+
+// WithSymbolsShark returns a option function that sets the spinner
+// unicode animation
+//
+//	▐________|\\____▌
+func WithSymbolsShark() Option { return setSymbols(shark) }
+
+// WithSymbolsBetawave returns a option function that sets the spinner
+// unicode animation
+//
+//	ρββββββ βρβββββ ββρββββ βββρβββ ββββρββ βββββρβ ββββββρ
+func WithSymbolsBetawave() Option { return setSymbols(betawave) }
+
+// WithSymbolsFistbump returns a option function that sets the spinner
+// unicode animation
+//
+//	🤜✨🤛
+func WithSymbolsFistbump() Option { return setSymbols(fistbump) }
+
+// WithSymbolsFutbol returns a option function that sets the spinner
+// unicode animation
+//
+//	🧑   ⚽️     🧑
+func WithSymbolsFutbol() Option { return setSymbols(futbolHead) }
+
+// WithSymbolsMindBlown returns a option function that sets the spinner
+// unicode animation
+//
+//	😐  😐  😮  😮  😦  😦  😧  😧  🤯  💥  ✨
+func WithSymbolsMindBlown() Option { return setSymbols(mindblown) }
+
+// WithSymbolsSpeaker returns a option function that sets the spinner
+// unicode animation
+//
+//	🔈 🔉  🔊  🔉
+func WithSymbolsSpeaker() Option { return setSymbols(speaker) }
