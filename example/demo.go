@@ -35,6 +35,7 @@ type Flags struct {
 	Group          string
 	Show           string
 	More           bool
+	Duration       time.Duration
 }
 
 // Colors.
@@ -69,7 +70,7 @@ func pause(ctx context.Context, d time.Duration) error {
 }
 
 // sceneSimple shows the most basic spinner usage: start, wait, done.
-func sceneSimple(ctx context.Context) {
+func sceneSimple(ctx context.Context, d time.Duration) {
 	r := rotato.New(
 		rotato.WithPrefix("Fetching config"),
 		rotato.WithPrefixColor(rotato.StyleItalic),
@@ -79,7 +80,7 @@ func sceneSimple(ctx context.Context) {
 	)
 	r.Start(ctx)
 
-	if err := pause(ctx, 1500*time.Millisecond); err != nil {
+	if err := pause(ctx, d); err != nil {
 		r.Fail("Aborted")
 		return
 	}
@@ -88,7 +89,7 @@ func sceneSimple(ctx context.Context) {
 
 // sceneMultiStep shows how a single spinner can represent a multi-phase task
 // by updating its message and symbol set as work progresses.
-func sceneMultiStep(ctx context.Context) {
+func sceneMultiStep(ctx context.Context, d time.Duration) {
 	r := rotato.New(
 		rotato.WithSymbolsCircles6(),
 		rotato.WithSpinnerColor(rotato.FgOrange),
@@ -101,7 +102,7 @@ func sceneMultiStep(ctx context.Context) {
 	r.Start(ctx)
 
 	// Phase 1 - connect
-	if err := pause(ctx, 1600*time.Millisecond); err != nil {
+	if err := pause(ctx, d); err != nil {
 		r.Fail("connection aborted")
 		return
 	}
@@ -132,7 +133,7 @@ func sceneMultiStep(ctx context.Context) {
 }
 
 // sceneError shows the failure path.
-func sceneError(ctx context.Context) {
+func sceneError(ctx context.Context, d time.Duration) {
 	r := rotato.New(
 		rotato.WithPrefix("AWS Health Check"),
 		rotato.WithSymbolsPipe(),
@@ -143,7 +144,7 @@ func sceneError(ctx context.Context) {
 	)
 	r.Start(ctx)
 
-	if err := pause(ctx, 2*time.Second); err != nil {
+	if err := pause(ctx, d); err != nil {
 		r.Fail("aborted by user")
 		return
 	}
@@ -154,9 +155,9 @@ func sceneError(ctx context.Context) {
 
 // sceneCountdown demonstrates a countdown: a graceful shutdown that shows
 // remaining time using the library's own formatting helpers.
-func sceneCountdown(ctx context.Context) {
+func sceneCountdown(ctx context.Context, d time.Duration) {
 	var color rotato.Color
-	ctx, cancel := context.WithTimeout(ctx, 4*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, d)
 	defer cancel()
 
 	r := rotato.New(
@@ -172,17 +173,20 @@ func sceneCountdown(ctx context.Context) {
 			if !ok {
 				return mesg
 			}
-			remaining := max(time.Until(deadline).Round(time.Second), 0)
+			remaining := max(time.Until(deadline), 0)
 			switch {
-			case remaining.Seconds() > 3:
+			case remaining > 3*time.Second:
 				color = rotato.FgBrightGreen
-			case remaining.Seconds() > 1:
+			case remaining > time.Second:
 				color = rotato.FgOrange
 			default:
 				color = rotato.FgBrightRed
 			}
 
-			return color.With(rotato.StyleItalic).Sprintf("in %.0fs...", remaining.Seconds())
+			return color.With(rotato.StyleItalic).Sprintf(
+				"in %s...",
+				formatDuration(remaining),
+			)
 		}),
 	)
 	r.Start(ctx)
@@ -197,7 +201,7 @@ func sceneCountdown(ctx context.Context) {
 
 // sceneElapse runs sequential spinner tasks (download, verify, extract) and
 // shows elapsed time via a shared prefix decorator with a timeout.
-func sceneElapse(ctx context.Context) {
+func sceneElapse(ctx context.Context, d time.Duration) {
 	ctx, cancel := context.WithTimeout(ctx, 12*time.Second)
 	defer cancel()
 
@@ -220,7 +224,7 @@ func sceneElapse(ctx context.Context) {
 		rotato.WithMessage("Downloading chunks..."),
 	)
 	download.Start(ctx)
-	if err := pause(ctx, 3*time.Second); err != nil {
+	if err := pause(ctx, d); err != nil {
 		download.Fail("Aborted")
 		return
 	}
@@ -238,7 +242,7 @@ func sceneElapse(ctx context.Context) {
 		rotato.WithMessage("Verifying checksum..."),
 	)
 	verify.Start(ctx)
-	if err := pause(ctx, 3*time.Second); err != nil {
+	if err := pause(ctx, d); err != nil {
 		verify.Fail("Aborted")
 		return
 	}
@@ -255,7 +259,7 @@ func sceneElapse(ctx context.Context) {
 		rotato.WithDoneSymbolColor(greenBold),
 	)
 	extract.Start(ctx)
-	if err := pause(ctx, 2*time.Second); err != nil {
+	if err := pause(ctx, d); err != nil {
 		extract.Fail("Aborted")
 		return
 	}
@@ -274,7 +278,7 @@ func (t *Item) String() string {
 	return fmt.Sprintf("%s %s %s", t.color.Sprint(t.symbol), t.text, t.mesg)
 }
 
-func sceneLog(ctx context.Context) {
+func sceneLog(ctx context.Context, d time.Duration) {
 	sp := rotato.New(
 		rotato.WithPrefix("Processing items"),
 		rotato.WithMessage("starting"),
@@ -282,16 +286,17 @@ func sceneLog(ctx context.Context) {
 		rotato.WithPrefixColor(rotato.StyleDim),
 		rotato.WithSpinnerColor(rotato.FgBrightYellow.With(rotato.StyleBold)),
 		rotato.WithDoneSymbolColor(rotato.FgBrightGreen.With(rotato.StyleBold)),
+		rotato.WithFailSymbolColor(rotato.StyleBold, rotato.FgBrightRed),
+		rotato.WithFailMessageColor(rotato.FgBrightRed),
 	)
 
 	sp.Start(ctx)
-	defer sp.Done("completed")
 
 	items := []Item{
-		{"item #1", 500, "processed successfully", "✓", rotato.FgBrightGreen.With(rotato.StyleBold)},
-		{"item #2", 400, "requires manual review", "✗", rotato.FgBrightRed.With(rotato.StyleBold)},
-		{"item #3", 500, "processed successfully", "✓", rotato.FgBrightGreen.With(rotato.StyleBold)},
-		{"item #4", 800, "requires manual review", "!", rotato.FgBrightYellow.With(rotato.StyleBold)},
+		{"item #1", d, "processed successfully", "✓", rotato.FgBrightGreen.With(rotato.StyleBold)},
+		{"item #2", d, "requires manual review", "✗", rotato.FgBrightRed.With(rotato.StyleBold)},
+		{"item #3", d, "processed successfully", "✓", rotato.FgBrightGreen.With(rotato.StyleBold)},
+		{"item #4", d, "requires manual review", "!", rotato.FgBrightYellow.With(rotato.StyleBold)},
 	}
 
 	var (
@@ -307,7 +312,7 @@ func sceneLog(ctx context.Context) {
 	for _, item := range items {
 		sp.UpdateMesg("processing " + item.text)
 
-		if err := pause(ctx, item.pause*time.Millisecond); err != nil {
+		if err := pause(ctx, item.pause); err != nil {
 			sp.Fail("Aborted")
 			return
 		}
@@ -316,6 +321,8 @@ func sceneLog(ctx context.Context) {
 
 		current++
 	}
+
+	sp.Done("completed")
 }
 
 func padRight(s string, width int) string {
@@ -326,7 +333,7 @@ func padRight(s string, width int) string {
 	return s + strings.Repeat(" ", n)
 }
 
-func showSymbols(ctx context.Context) {
+func showSymbols(ctx context.Context, d time.Duration) {
 	maxLen := 0
 	for _, s := range rotato.Spinners() {
 		if l := utf8.RuneCountInString(s.Name); l > maxLen {
@@ -344,11 +351,12 @@ func showSymbols(ctx context.Context) {
 		)
 		r.Start(ctx)
 
-		if err := pause(ctx, 1400*time.Millisecond); err != nil {
+		if err := pause(ctx, d); err != nil {
 			r.Fail("interrupted")
 			return
 		}
-		r.Done(strings.Join(r.Symbols(), " "))
+		symbols := shorten(strings.Join(r.Symbols(), " "))
+		r.Done(symbols)
 	}
 }
 
@@ -377,15 +385,16 @@ func listGroups() {
 	}
 }
 
-func showByName(ctx context.Context, name string) {
+func showByName(ctx context.Context, name string, d time.Duration) {
 	if sp, ok := rotato.ByName(name); ok {
-		runRotato(ctx, sp, padRight(sp.Name, 18))
+		runRotato(ctx, sp, padRight(sp.Name, 18), d)
 	}
 }
 
-func showByGroup(ctx context.Context, g rotato.SpinnerGroup) {
+func showByGroup(ctx context.Context, g rotato.SpinnerGroup, d time.Duration) {
 	group := rotato.ByGroup(g)
 	if len(group) == 0 {
+		fmt.Printf("rotato: group %q not found\n", g)
 		return
 	}
 
@@ -401,11 +410,11 @@ func showByGroup(ctx context.Context, g rotato.SpinnerGroup) {
 		if err := ctx.Err(); err != nil {
 			return
 		}
-		runRotato(ctx, sp, padRight(sp.Name, maxLen))
+		runRotato(ctx, sp, padRight(sp.Name, maxLen), d)
 	}
 }
 
-func runRotato(ctx context.Context, sp rotato.SpinnerStyle, name string) {
+func runRotato(ctx context.Context, sp rotato.SpinnerStyle, name string, d time.Duration) {
 	r := rotato.New(
 		rotato.WithSymbols(sp.Frames...),
 		rotato.WithPrefix(name),
@@ -415,15 +424,16 @@ func runRotato(ctx context.Context, sp rotato.SpinnerStyle, name string) {
 	)
 	r.Start(ctx)
 
-	if err := pause(ctx, 1500*time.Millisecond); err != nil {
+	if err := pause(ctx, d); err != nil {
 		r.Fail("interrupted")
 		return
 	}
-	r.Done(strings.Join(r.Symbols(), " "))
+	symbols := shorten(strings.Join(r.Symbols(), " "))
+	r.Done(symbols)
 }
 
-func runDemo(ctx context.Context) {
-	scenes := []func(context.Context){
+func runDemo(ctx context.Context, d time.Duration) {
+	scenes := []func(context.Context, time.Duration){
 		sceneSimple,    // basic start/done
 		sceneMultiStep, // live updates across phases
 		sceneError,     // failure path
@@ -435,19 +445,38 @@ func runDemo(ctx context.Context) {
 		if ctx.Err() != nil {
 			return
 		}
-		scene(ctx)
+		scene(ctx, d)
 	}
 }
 
-func runMore(ctx context.Context) {
-	scenes := []func(context.Context){
+func runMore(ctx context.Context, d time.Duration) {
+	scenes := []func(context.Context, time.Duration){
 		sceneElapse, // shared elapse timer
 	}
 	for _, scene := range scenes {
 		if ctx.Err() != nil {
 			return
 		}
-		scene(ctx)
+		scene(ctx, d)
+	}
+}
+
+func shorten(s string) string {
+	maxLen := 100
+	if utf8.RuneCountInString(s) <= maxLen {
+		return s
+	}
+	return string([]rune(s)[:maxLen])
+}
+
+func formatDuration(d time.Duration) string {
+	switch {
+	case d < time.Second:
+		return d.Round(100 * time.Millisecond).String()
+	case d < time.Minute:
+		return d.Round(time.Second).String()
+	default:
+		return d.Round(time.Second).String()
 	}
 }
 
@@ -462,19 +491,21 @@ func main() {
 	)
 	defer stop()
 
+	d := flags.Duration
+
 	switch {
 	case flags.All:
-		showSymbols(ctx)
+		showSymbols(ctx, d)
 	case flags.Demo:
-		runDemo(ctx)
+		runDemo(ctx, d)
 	case flags.Group != "":
-		showByGroup(ctx, rotato.SpinnerGroup(flags.Group))
+		showByGroup(ctx, rotato.SpinnerGroup(flags.Group), d)
 	case flags.Show != "":
-		showByName(ctx, flags.Show)
+		showByName(ctx, flags.Show, d)
 	case flags.List:
 		listGroups()
 	case flags.More:
-		runMore(ctx)
+		runMore(ctx, d)
 	default:
 		flag.Usage()
 	}
@@ -488,5 +519,6 @@ func init() {
 	flag.StringVar(&flags.Group, "group", "", "show spinners by group")
 	flag.StringVar(&flags.Show, "show", "", "show spinner by name")
 	flag.BoolVar(&flags.More, "more", false, "show more examples")
+	flag.DurationVar(&flags.Duration, "duration", 2*time.Second, "animation duration")
 	flag.Parse()
 }
