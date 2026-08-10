@@ -36,6 +36,7 @@ var Groups = []SpinnerGroup{
 	GroupFun,
 	GroupLines,
 	GroupMinimal,
+	GroupMisc,
 	GroupMotion,
 	GroupShapes,
 	GroupSymbols,
