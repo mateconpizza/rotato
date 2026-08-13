@@ -9,19 +9,15 @@ func Spinners() []SpinnerStyle {
 func Names() []string {
 	names := make([]string, len(registry))
 	for i, s := range registry {
-		names[i] = s.Name
+		names[i] = string(s.Name)
 	}
 	sort.Strings(names)
 	return names
 }
 
-func ByName(name string) (SpinnerStyle, bool) {
-	for _, s := range registry {
-		if s.Name == name {
-			return s, true
-		}
-	}
-	return SpinnerStyle{}, false
+func ByName(name SpinnerName) (SpinnerStyle, bool) {
+	sp, ok := byName[name]
+	return sp, ok
 }
 
 func ByGroup(group SpinnerGroup) []SpinnerStyle {
@@ -34,52 +30,50 @@ func ByGroup(group SpinnerGroup) []SpinnerStyle {
 	return out
 }
 
-func setSymbols(s []string) Option {
-	return func(r *Rotato) {
-		r.symbols = s
-	}
-}
-
 // WithSymbols returns an option function that sets the spinner unicode
 // animation.
-func WithSymbols(symbols ...string) Option { return setSymbols(symbols) }
+func WithSymbols(symbols ...string) Option {
+	return func(r *Rotato) {
+		r.symbols = symbols
+	}
+}
 
 // WithSymbolsDefault returns an option function that sets the spinner unicode
 // animation.
 //
 //	⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏
-func WithSymbolsDefault() Option { return setSymbols(defaultSymbols) }
+func WithSymbolsDefault() Option { return WithSpinnerStyle(SpinnerDefault) }
 
 // WithSymbolsBlock returns an option function that sets the spinner unicode
 // animation with blocks.
 //
 //	░ ▒ ▒ ░ ▓
-func WithSymbolsBlock() Option { return setSymbols(block) }
+func WithSymbolsBlock() Option { return WithSpinnerStyle(SpinnerBlock) }
 
 // WithSymbolsBarBlock returns an option function that sets the spinner
 // unicode animation with bars.
 //
 //	█▒▒▒▒▒▒▒▒▒ ███▒▒▒▒▒▒▒ █████▒▒▒▒▒ ███████▒▒▒ ██████████
-func WithSymbolsBarBlock() Option { return setSymbols(blockbar) }
+func WithSymbolsBarBlock() Option { return WithSpinnerStyle(SpinnerBlockbar) }
 
 // WithSymbolsBarBlock2 returns an option function that sets the spinner
 // unicode animation with bars.
 //
 //	[|       ] [||      ] [|||     ] [||||    ] [|||||   ] [||||||  ] [||||||| ] [||||||||].
-func WithSymbolsBarBlock2() Option { return setSymbols(blockbar2) }
+func WithSymbolsBarBlock2() Option { return WithSpinnerStyle(SpinnerBlockbar2) }
 
 // WithSymbolsBarBlock3 returns an option function that sets the spinner
 // unicode animation with bars.
 //
 //	[=       ] [==      ] [===     ] [====    ] [=====   ] [======  ] [======= ] [========]
-func WithSymbolsBarBlock3() Option { return setSymbols(blockbar3) }
+func WithSymbolsBarBlock3() Option { return WithSpinnerStyle(SpinnerBlockbar3) }
 
 // WithSymbolsBarBlock4 returns an option function that sets the spinner
 // unicode animation with bars.
 //
 //	| || ||| |||| ||||| |||||| ||||||| ||||||||
 //	||||||| |||||| ||||| |||| ||| || |
-func WithSymbolsBarBlock4() Option { return setSymbols(blockbar4) }
+func WithSymbolsBarBlock4() Option { return WithSpinnerStyle(SpinnerBlockbar4) }
 
 // WithSymbolsBarBlock5 returns an option function that sets the spinner
 // unicode animation with bars.
@@ -87,451 +81,471 @@ func WithSymbolsBarBlock4() Option { return setSymbols(blockbar4) }
 //	[*-------] [-*------] [--*-----] [---*----] [----*---]
 //	[-----*--] [------*-] [-------*] [------*-] [-----*--]
 //	[----*---] [---*----] [--*-----] [-*------] [*-------]
-func WithSymbolsBarBlock5() Option { return setSymbols(blockbar5) }
+func WithSymbolsBarBlock5() Option { return WithSpinnerStyle(SpinnerBlockbar5) }
 
 // WithSymbolsBarBlock6 returns an option function that sets the spinner
 // unicode animation with bars.
 //
 //	·----- -·---- --·--- ---·-- ----·- -----· ----·- ---·-- --·--- -·---- ·-----
-func WithSymbolsBarBlock6() Option { return setSymbols(blockbar6) }
+func WithSymbolsBarBlock6() Option { return WithSpinnerStyle(SpinnerBlockbar6) }
 
 // WithSymbolsBarBlock7 returns an option function that sets the spinner
 // unicode animation with bars.
 //
 //	■      ■■     ■■■    ■■■■   ■■■■■  ■■■■■■
-func WithSymbolsBarBlock7() Option { return setSymbols(blockbar7) }
+func WithSymbolsBarBlock7() Option { return WithSpinnerStyle(SpinnerBlockbar7) }
 
 // WithSymbolsBlockPretty returns an option function that sets the spinner
 // unicode animation with pretty blocks.
 //
 //	      
-func WithSymbolsBlockPretty() Option { return setSymbols(blockbarpretty) }
+func WithSymbolsBlockPretty() Option { return WithSpinnerStyle(SpinnerBlockbarPretty) }
 
 // WithSymbolsDots returns an option function that sets the spinner unicode
 // animation with braille patterns.
 //
 //	⣾ ⣽ ⣻ ⢿ ⡿ ⣟ ⣯ ⣷
-func WithSymbolsDots() Option { return setSymbols(dots) }
+func WithSymbolsDots() Option { return WithSpinnerStyle(SpinnerDots) }
 
 // WithSymbolsDots3 returns an option function that sets the spinner unicode
 // animation with dots.
 //
 //	⠄ ⠆ ⠇ ⠋ ⠙ ⠸ ⠰ ⠠ ⠰ ⠸ ⠙ ⠋ ⠇ ⠆
-func WithSymbolsDots3() Option { return setSymbols(dots3) }
+func WithSymbolsDots3() Option { return WithSpinnerStyle(SpinnerDots3) }
 
 // WithSymbolsDots4 returns an option function that sets the spinner unicode
 // animation with dots.
 //
 //	⠁ ⠂ ⠄ ⡀ ⢀ ⠠ ⠐ ⠈
-func WithSymbolsDots4() Option { return setSymbols(dots4) }
+func WithSymbolsDots4() Option { return WithSpinnerStyle(SpinnerDots4) }
 
 // WithSymbolsDots5 returns an option function that sets the spinner unicode
 // animation with dots.
 //
 //	⠁⠁⠉⠙⠚⠒⠂⠂⠒⠲⠴⠤⠄⠄⠤⠠⠠⠤⠦⠖⠒⠐⠐⠒⠓⠋⠉⠈⠈
-func WithSymbolsDots5() Option { return setSymbols(dots5) }
+func WithSymbolsDots5() Option { return WithSpinnerStyle(SpinnerDots5) }
+
+// WithSymbolsDots6 returns an option function that sets the spinner unicode
+// animation with dots.
+//
+//	⢀⠀ ⡀⠀ ⠄⠀ ⢂⠀ ⡂⠀ ⠅⠀ ⢃⠀ ⡃⠀ ⠍⠀ ⢋⠀ ⡋⠀ ⠍⠁ ⢋⠁ ⡋⠁ ⠍⠉ ⠋⠉ ⠋⠉ ⠉⠙ ⠉⠙ ⠉⠩ ⠈⢙ ⠈⡙ ⢈⠩ ⡀⢙ ⠄⡙ ⢂⠩
+func WithSymbolsDots6() Option { return WithSpinnerStyle(SpinnerDots6) }
+
+// WithSymbolsDots7 returns an option function that sets the spinner unicode
+// animation with dots.
+//
+//	⢀⠀ ⡀⠀ ⠄⠀ ⢂⠀ ⡂⠀ ⠅⠀ ⢃⠀ ⡃⠀ ⠍⠀ ⢋⠀ ⡋⠀ ⠍⠁ ⢋⠁ ⡋⠁ ⠍⠉ ⠋⠉ ⠋⠉ ⠉⠙ ⠉⠙ ⠉⠩ ⠈⢙ ⠈⡙ ⢈⠩ ⡀⢙ ⠄⡙ ⢂⠩
+func WithSymbolsDots7() Option { return WithSpinnerStyle(SpinnerDots7) }
 
 // WithSymbolsLines returns an option function that sets the spinner unicode
 // animation with lines.
 //
 //	⠂ - – — – -
-func WithSymbolsLines() Option { return setSymbols(lines) }
+func WithSymbolsLines() Option { return WithSpinnerStyle(SpinnerLines) }
 
 // WithSymbolsWave returns an option function that sets the spinner unicode
 // animation with wave patterns.
 //
 //	⢄ ⢂ ⢁ ⡀ ⠈ ⠘ ⠸
-func WithSymbolsWave() Option { return setSymbols(wave) }
+func WithSymbolsWave() Option { return WithSpinnerStyle(SpinnerWave) }
 
 // WithSymbolsGrow returns an option function that sets the spinner unicode
 // animation with growing bars.
 //
 //	▉ ▊ ▋ ▌ ▍ ▎ ▏
-func WithSymbolsGrow() Option { return setSymbols(grow) }
+func WithSymbolsGrow() Option { return WithSpinnerStyle(SpinnerGrow) }
 
 // WithSymbolsGrowVert returns an option function that sets the spinner unicode
 // animation with growing bars.
 //
 //	▁ ▃ ▄ ▅ ▆ ▇ ▆ ▅ ▄ ▃
-func WithSymbolsGrowVert() Option { return setSymbols(growvert) }
+func WithSymbolsGrowVert() Option { return WithSpinnerStyle(SpinnerGrowvert) }
 
 // WithSymbolsMoon returns an option function that sets the spinner unicode
 // animation with moon phases.
 //
 //	🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
-func WithSymbolsMoon() Option { return setSymbols(moon) }
+func WithSymbolsMoon() Option { return WithSpinnerStyle(SpinnerMoon) }
 
 // WithSymbolsPipe returns an option function that sets the spinner unicode
 // animation with pipe characters.
 //
 //	| / - \\
-func WithSymbolsPipe() Option { return setSymbols(pipe) }
+func WithSymbolsPipe() Option { return WithSpinnerStyle(SpinnerPipe) }
 
 // WithSymbolsPipe2 returns an option function that sets the spinner unicode
 // animation with pipe characters.
 //
 //	┤ ┘ ┴ └ ├ ┌ ┬ ┐
-func WithSymbolsPipe2() Option { return setSymbols(pipe2) }
+func WithSymbolsPipe2() Option { return WithSpinnerStyle(SpinnerPipe2) }
 
 // WithSymbolsSquare returns an option function that sets the spinner unicode
 // animation with square segments.
 //
 //	▖ ▘ ▝ ▗
-func WithSymbolsSquare() Option { return setSymbols(square) }
+func WithSymbolsSquare() Option { return WithSpinnerStyle(SpinnerSquare) }
 
 // WithSymbolsSquare2 returns an option function that sets the spinner unicode
 // animation with square segments.
 //
 //	    
-func WithSymbolsSquare2() Option { return setSymbols(square2) }
+func WithSymbolsSquare2() Option { return WithSpinnerStyle(SpinnerSquare2) }
 
 // WithSymbolsClock returns an option function that sets the spinner unicode
 // animation with clock symbols.
 //
 //	🕛 🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚
-func WithSymbolsClock() Option { return setSymbols(clock) }
+func WithSymbolsClock() Option { return WithSpinnerStyle(SpinnerClock) }
 
 // WithSymbolsDiamond returns an option function that sets the spinner unicode
 // animation with diamond symbols.
 //
 //	◇ ◈ ⬟ ⬞
-func WithSymbolsDiamond() Option { return setSymbols(diamond) }
+func WithSymbolsDiamond() Option { return WithSpinnerStyle(SpinnerDiamond) }
 
 // WithSymbolsDiamond2 returns an option function that sets the spinner unicode
 // animation with diamond symbols.
 //
 //	   
-func WithSymbolsDiamond2() Option { return setSymbols(diamond2) }
+func WithSymbolsDiamond2() Option { return WithSpinnerStyle(SpinnerDiamond2) }
 
 // WithSymbolsPlusCross returns an option function that sets the spinner unicode
 // animation with plus and cross symbols.
 //
 //   - x
-func WithSymbolsPlusCross() Option { return setSymbols(pluscross) }
+func WithSymbolsPlusCross() Option { return WithSpinnerStyle(SpinnerPluscross) }
 
 // WithSymbolsArrows returns an option function that sets the spinner unicode
 // animation with arrows.
 //
 //	< << <<< - > >> >>>
-func WithSymbolsArrows() Option { return setSymbols(arrow) }
+func WithSymbolsArrows() Option { return WithSpinnerStyle(SpinnerArrow) }
 
 // WithSymbolsArrows2 returns an option function that sets the spinner unicode
 // animation with arrows.
 //
 //	>    >>   >>>  >>>>
-func WithSymbolsArrows2() Option { return setSymbols(arrow2) }
+func WithSymbolsArrows2() Option { return WithSpinnerStyle(SpinnerArrow2) }
 
 // WithSymbolsArrows3 returns an option function that sets the spinner unicode
 // animation with arrows.
 //
 //	▹▹▹▹▹ ▸▹▹▹▹ ▹▸▹▹▹ ▹▹▸▹▹ ▹▹▹▸▹ ▹▹▹▹▸
-func WithSymbolsArrows3() Option { return setSymbols(arrow3) }
+func WithSymbolsArrows3() Option { return WithSpinnerStyle(SpinnerArrow3) }
 
 // WithSymbolsArrows4 returns an option function that sets the spinner unicode
 // animation with arrows.
 //
 //	← ↖ ↑ ↗ → ↘ ↓ ↙
-func WithSymbolsArrows4() Option { return setSymbols(arrow4) }
+func WithSymbolsArrows4() Option { return WithSpinnerStyle(SpinnerArrow4) }
 
 // WithSymbolsCircles returns an option function that sets the spinner unicode
 // animation with circles
 //
 //	o O @ *
-func WithSymbolsCircles() Option { return setSymbols(circle) }
+func WithSymbolsCircles() Option { return WithSpinnerStyle(SpinnerCircle) }
 
 // WithSymbolsCircles2 returns an option function that sets the spinner unicode
 // animation with circles.
 //
 //	. o O ° O o .
-func WithSymbolsCircles2() Option { return setSymbols(circle2) }
+func WithSymbolsCircles2() Option { return WithSpinnerStyle(SpinnerCircle2) }
 
 // WithSymbolsCircles3 returns an option function that sets the spinner unicode
 // animation with circles.
 //
 //	● ● ● ●
-func WithSymbolsCircles3() Option { return setSymbols(circle3) }
+func WithSymbolsCircles3() Option { return WithSpinnerStyle(SpinnerCircle3) }
 
 // WithSymbolsCircles4 returns an option function that sets the spinner unicode
 // animation with circles.
 //
 //	   
-func WithSymbolsCircles4() Option { return setSymbols(circle4) }
+func WithSymbolsCircles4() Option { return WithSpinnerStyle(SpinnerCircle4) }
 
 // WithSymbolsCircles5 returns an option function that sets the spinner unicode
 // animation with circles.
 //
 //	   
-func WithSymbolsCircles5() Option { return setSymbols(circle5) }
+func WithSymbolsCircles5() Option { return WithSpinnerStyle(SpinnerCircle5) }
 
 // WithSymbolsCircles6 returns an option function that sets the spinner unicode
 // animation with circles.
 //
 //	    
-func WithSymbolsCircles6() Option { return setSymbols(circle6) }
+func WithSymbolsCircles6() Option { return WithSpinnerStyle(SpinnerCircle6) }
 
 // WithSymbolsCircles7 returns an option function that sets the spinner unicode
 // animation with circles.
 //
 //	     
-func WithSymbolsCircles7() Option { return setSymbols(circle7) }
+func WithSymbolsCircles7() Option { return WithSpinnerStyle(SpinnerCircle7) }
 
 // WithSymbolsBounce returns an option function that sets the spinner unicode
 // animation with circles.
 //
 //	[    ] [=   ] [==  ] [=== ] [ ===] [  ==] [   =]
-func WithSymbolsBounce() Option { return setSymbols(bounce) }
+func WithSymbolsBounce() Option { return WithSpinnerStyle(SpinnerBounce) }
 
 // WithSymbolsBounceBall returns an option function that sets the spinner unicode
 // animation with circles.
 //
 //	( ●    ) (  ●   ) (   ●  ) (    ● ) (     ●)
-func WithSymbolsBounceBall() Option { return setSymbols(bounceball) }
+func WithSymbolsBounceBall() Option { return WithSpinnerStyle(SpinnerBounceball) }
 
 // WithSymbolsToggle returns an option function that sets the spinner unicode
 // animation with toggle symbols.
 //
 //	■ □ ▪ ▫
-func WithSymbolsToggle() Option { return setSymbols(toggle) }
+func WithSymbolsToggle() Option { return WithSpinnerStyle(SpinnerToggle) }
 
 // WithSymbolsToggle2 returns an option function that sets the spinner unicode
 // animation with toggle symbols.
 //
 //	= * -
-func WithSymbolsToggle2() Option { return setSymbols(toggle2) }
+func WithSymbolsToggle2() Option { return WithSpinnerStyle(SpinnerToggle2) }
 
 // WithSymbolsToggle3 returns an option function that sets the spinner unicode
 // animation with toggle symbols.
 //
 //	◉ ◎
-func WithSymbolsToggle3() Option { return setSymbols(toggle3) }
+func WithSymbolsToggle3() Option { return WithSpinnerStyle(SpinnerToggle3) }
 
 // WithSymbolsLoading returns an option function that sets the spinner unicode
 // animation with loading symbols.
 //
 //	loading....
-func WithSymbolsLoading() Option { return setSymbols(loading) }
+func WithSymbolsLoading() Option { return WithSpinnerStyle(SpinnerLoading) }
 
 // WithSymbolsTriangles returns an option function that sets the spinner
 // unicode animation with rotating triangles.
 //
 //	▲ ▶ ▼ ◀
-func WithSymbolsTriangles() Option { return setSymbols(triangles) }
+func WithSymbolsTriangles() Option { return WithSpinnerStyle(SpinnerTriangles) }
 
 // WithSymbolsCubes returns an option function that sets the spinner
 // unicode animation with cube rotation.
 //
 //	▖ ▘ ▝ ▗
-func WithSymbolsCubes() Option { return setSymbols(cubes) }
+func WithSymbolsCubes() Option { return WithSpinnerStyle(SpinnerCubes) }
 
 // WithSymbolsThinking returns an option function that sets the spinner
 // animation with growing question marks.
 //
 //	? ?? ??? ???? ?????
-func WithSymbolsThinking() Option { return setSymbols(question) }
+func WithSymbolsThinking() Option { return WithSpinnerStyle(SpinnerQuestion) }
 
 // WithSymbolsPingPong returns an option function that sets the spinner
 // animation with expanding and contracting brackets.
 //
 //	<     > <    > <   > <  > < > <>< < > <  > <   > <    >
-func WithSymbolsPingPong() Option { return setSymbols(pingpong) }
+func WithSymbolsPingPong() Option { return WithSpinnerStyle(SpinnerPingpong) }
 
 // WithSymbolsPingPong2 returns an option function that sets the spinner
 // animation with expanding and contracting brackets.
-func WithSymbolsPingPong2() Option { return setSymbols(pingpong2) }
+func WithSymbolsPingPong2() Option { return WithSpinnerStyle(SpinnerPingpong2) }
 
 // WithSymbolsMatrix returns an option function that sets the spinner
 // unicode animation with matrix-style loading.
 //
 //	╔═══╗ ║▓▓▓║ ║░▓▓║ ║░░▓║ ║░░░║ ╚═══╝
-func WithSymbolsMatrix() Option { return setSymbols(matrix) }
+func WithSymbolsMatrix() Option { return WithSpinnerStyle(SpinnerMatrix) }
 
 // WithSymbolsHex returns an option function that sets the spinner
 // animation with hexadecimal counting.
 //
 //	0x0 0x1 0x2 0x3 0x4 0x5 0x6 0x7 0x8 0x9 0xA 0xB 0xC 0xD 0xE 0xF
-func WithSymbolsHex() Option { return setSymbols(hexsymbols) }
+func WithSymbolsHex() Option { return WithSpinnerStyle(SpinnerHexsymbols) }
 
 // WithSymbolsPacman returns an option function that sets the spinner
 // unicode animation with pacman movement.
 //
 //	󰮯··· ·󰮯·· ··󰮯· ···󰮯
-func WithSymbolsPacman() Option { return setSymbols(pacman) }
+func WithSymbolsPacman() Option { return WithSpinnerStyle(SpinnerPacman) }
 
 // WithSymbolsBoxFill returns an option function that sets the spinner
 // animation with progressively filling box.
 //
 //	[          ] [■         ] [■■        ] [■■■       ] [■■■■      ]
 //	[■■■■■ ] [■■■■■■    ] [■■■■■■■   ] [■■■■■■■■  ] [■■■■■■■■■ ] [■■■■■■■■■■]
-func WithSymbolsBoxFill() Option { return setSymbols(boxfill) }
+func WithSymbolsBoxFill() Option { return WithSpinnerStyle(SpinnerBoxFill) }
 
 // WithSymbolsBoxFillShort returns an option function that sets the spinner
 // animation with progressively filling box.
 //
 //	[      ] [■     ] [■■    ] [■■■   ] [■■■■  ] [■■■■■ ] [■■■■■■]
-func WithSymbolsBoxFillShort() Option { return setSymbols(boxfillshort) }
+func WithSymbolsBoxFillShort() Option { return WithSpinnerStyle(SpinnerBoxFillshort) }
+
+func WithSymbolsBoxBounce() Option { return WithSpinnerStyle(SpinnerBoxBounce) }
 
 // WithSymbolsSnail returns an option function that sets the spinner
 // animation with growing snail trail.
 //
 //	@ @- @-- @--- @---- @-----
-func WithSymbolsSnail() Option { return setSymbols(snail) }
+func WithSymbolsSnail() Option { return WithSpinnerStyle(SpinnerSnail) }
 
 // WithSymbolsWorm returns an option function that sets the spinner
 // animation with growing and shrinking worm.
 //
 //	~ ~~ ~~~ ~~~~ ~~~~~ ~~~~ ~~~ ~~ ~
-func WithSymbolsWorm() Option { return setSymbols(worm) }
+func WithSymbolsWorm() Option { return WithSpinnerStyle(SpinnerWorm) }
 
 // WithSymbolsWorm2 returns an option function that sets the spinner
 // animation with growing and shrinking worm.
 //
 //	~ ~~ ~~~ ~~~~ ~~~~~ ~~~~ ~~~ ~~ ~
-func WithSymbolsWorm2() Option { return setSymbols(worm2) }
+func WithSymbolsWorm2() Option { return WithSpinnerStyle(SpinnerWorm2) }
 
 // WithSymbolsMathOps returns an option function that sets the spinner
 // unicode animation with mathematical operators.
 //
 //   - - × ÷ = ≠ ≈ ≤ ≥
-func WithSymbolsMathOps() Option { return setSymbols(mathops) }
+func WithSymbolsMathOps() Option { return WithSpinnerStyle(SpinnerMathops) }
 
 // WithSymbolsGreek returns an option function that sets the spinner
 // unicode animation with Greek letters.
 //
 //	α β γ δ ε ζ η θ
-func WithSymbolsGreek() Option { return setSymbols(greek) }
+func WithSymbolsGreek() Option { return WithSpinnerStyle(SpinnerGreek) }
 
 // WithSymbolsCorners returns an option function that sets the spinner
 // unicode animation with box corners.
 //
 //	┌ ┐ └ ┘
-func WithSymbolsCorners() Option { return setSymbols(corners) }
+func WithSymbolsCorners() Option { return WithSpinnerStyle(SpinnerCorners) }
 
 // WithSymbolsSlash returns an option function that sets the spinner
 // animation with increasing forward slashes.
 //
 //	/ // /// //// /////
-func WithSymbolsSlash() Option { return setSymbols(slash) }
+func WithSymbolsSlash() Option { return WithSpinnerStyle(SpinnerSlash) }
 
 // WithSymbolsBackslash returns an option function that sets the spinner
 // animation with increasing backslashes.
 //
 //	\ \\ \\\ \\\\ \\\\\
-func WithSymbolsBackslash() Option { return setSymbols(backslash) }
+func WithSymbolsBackslash() Option { return WithSpinnerStyle(SpinnerBackslash) }
 
 // WithSymbolsMarquee returns an option function that sets the spinner
 // animation with moving marquee arrow.
 //
 //	[          ] [ >        ] [  >       ] [   >      ] [    >     ]
 //	[     >    ] [      >   ] [       >  ] [        > ] [         >]
-func WithSymbolsMarquee() Option { return setSymbols(marquee) }
+func WithSymbolsMarquee() Option { return WithSpinnerStyle(SpinnerMarquee) }
 
 // WithSymbolsFade returns an option function that sets the spinner
 // unicode animation with fading block.
 //
 //	█ ▓ ▒ ░   ░ ▒ ▓
-func WithSymbolsFade() Option { return setSymbols(fade) }
+func WithSymbolsFade() Option { return WithSpinnerStyle(SpinnerFade) }
 
 // WithSymbolsMath returns an option function that sets the spinner
 // unicode animation with mathematical symbols.
 //
 //	∀ ∃ ∈ ∉ ∋ ∌ ⊆ ⊂ ⊄ ⊇ ⊃ ⊅
-func WithSymbolsMath() Option { return setSymbols(logicsymbols) }
+func WithSymbolsMath() Option { return WithSpinnerStyle(SpinnerLogicsymbols) }
 
 // WithSymbolsCurrency returns an option function that sets the spinner
 // unicode animation with currency symbols.
 //
 //	$ € £ ¥ ₿ ₹
-func WithSymbolsCurrency() Option { return setSymbols(currency) }
+func WithSymbolsCurrency() Option { return WithSpinnerStyle(SpinnerCurrency) }
 
 // WithSymbolsGeometric returns an option function that sets the spinner
 // unicode animation with geometric shapes.
 //
 //	△ ◊ ◈ ◇ ○ ● ◐ ◑ ◒ ◓
-func WithSymbolsGeometric() Option { return setSymbols(geometric) }
+func WithSymbolsGeometric() Option { return WithSpinnerStyle(SpinnerGeometric) }
 
 // WithSymbolsRunner returns an option function that sets the spinner unicode animation.
 //
 //	▁▁▁▁▁ ▂▁▁▁▁ ▃▂▁▁▁ ▄▃▂▁▁ ▅▄▃▂▁ ▆▅▄▃▂ ▇▆▅▄▃ █▇▆▅▄
-func WithSymbolsRunner() Option { return setSymbols(runner) }
+func WithSymbolsRunner() Option { return WithSpinnerStyle(SpinnerRunner) }
 
 // WithSymbolsCursorBlink returns a option function that sets the spinner
 // unicode animation
 //
 //	"_", " ", "_", " "
-func WithSymbolsCursorBlink() Option { return setSymbols(cursorBlink) }
+func WithSymbolsCursorBlink() Option { return WithSpinnerStyle(SpinnerCursorBlink) }
 
 // WithSymbolsEllipsis returns a option function that sets the spinner
 // unicode animation
 //
 //	".  " ".. " "..." " .." "  ." "   "
-func WithSymbolsEllipsis() Option { return setSymbols(ellipsis) }
+func WithSymbolsEllipsis() Option { return WithSpinnerStyle(SpinnerEllipsis) }
 
 // WithSymbolsBrailleWave returns a option function that sets the spinner
 // unicode animation
 //
 //	⡀ ⡄ ⡆ ⡇ ⡏ ⡟ ⡿ ⣿ ⡿ ⡟ ⡏ ⡇ ⡆ ⡄
-func WithSymbolsBrailleWave() Option { return setSymbols(brailleWave) }
+func WithSymbolsBrailleWave() Option { return WithSpinnerStyle(SpinnerBrailleWave) }
 
 // WithSymbolsOrbit returns a option function that sets the spinner
 // unicode animation
 //
 //	◐ ◓ ◑ ◒
-func WithSymbolsOrbit() Option { return setSymbols(orbit) }
+func WithSymbolsOrbit() Option { return WithSpinnerStyle(SpinnerOrbit) }
 
 // WithSymbolsSweep returns a option function that sets the spinner
 // unicode animation
 //
 //	←──── ─←─── ──←── ───←─ ────← ───→─ ──→── ─→─── →────
-func WithSymbolsSweep() Option { return setSymbols(sweep) }
+func WithSymbolsSweep() Option { return WithSpinnerStyle(SpinnerSweep) }
 
 // WithSymbolsPulse returns a option function that sets the spinner
 // unicode animation
 //
 //	░ ▒ ▓ █ ▓ ▒
-func WithSymbolsPulse() Option { return setSymbols(pulse) }
+func WithSymbolsPulse() Option { return WithSpinnerStyle(SpinnerPulse) }
 
 // WithSymbolsFlip returns a option function that sets the spinner
 // unicode animation
 //
 //	_ _ _ - ` ` ' ´ - _ _ _
-func WithSymbolsFlip() Option { return setSymbols(flip) }
+func WithSymbolsFlip() Option { return WithSpinnerStyle(SpinnerFlip) }
 
 // WithSymbolsMaterial returns a option function that sets the spinner
 // unicode animation.
-func WithSymbolsMaterial() Option { return setSymbols(material) }
+func WithSymbolsMaterial() Option { return WithSpinnerStyle(SpinnerMaterial) }
 
 // WithSymbolsShark returns a option function that sets the spinner
 // unicode animation
 //
 //	▐________|\\____▌
-func WithSymbolsShark() Option { return setSymbols(shark) }
+func WithSymbolsShark() Option { return WithSpinnerStyle(SpinnerShark) }
 
 // WithSymbolsBetawave returns a option function that sets the spinner
 // unicode animation
 //
 //	ρββββββ βρβββββ ββρββββ βββρβββ ββββρββ βββββρβ ββββββρ
-func WithSymbolsBetawave() Option { return setSymbols(betawave) }
+func WithSymbolsBetawave() Option { return WithSpinnerStyle(SpinnerBetawave) }
 
 // WithSymbolsFistbump returns a option function that sets the spinner
 // unicode animation
 //
 //	🤜✨🤛
-func WithSymbolsFistbump() Option { return setSymbols(fistbump) }
+func WithSymbolsFistbump() Option { return WithSpinnerStyle(SpinnerFistbump) }
 
 // WithSymbolsFutbol returns a option function that sets the spinner
 // unicode animation
 //
 //	🧑   ⚽️     🧑
-func WithSymbolsFutbol() Option { return setSymbols(futbolHead) }
+func WithSymbolsFutbol() Option { return WithSpinnerStyle(SpinnerFutbolHead) }
 
 // WithSymbolsMindBlown returns a option function that sets the spinner
 // unicode animation
 //
 //	😐  😐  😮  😮  😦  😦  😧  😧  🤯  💥  ✨
-func WithSymbolsMindBlown() Option { return setSymbols(mindblown) }
+func WithSymbolsMindBlown() Option { return WithSpinnerStyle(SpinnerMindblown) }
 
 // WithSymbolsSpeaker returns a option function that sets the spinner
 // unicode animation
 //
 //	🔈 🔉  🔊  🔉
-func WithSymbolsSpeaker() Option { return setSymbols(speaker) }
+func WithSymbolsSpeaker() Option { return WithSpinnerStyle(SpinnerSpeaker) }
+
+// WithSymbolsStar returns a option function that sets the spinner
+// unicode animation
+//
+//	🔈 🔉  🔊  🔉
+func WithSymbolsStar() Option { return WithSpinnerStyle(SpinnerStar) }
