@@ -1,16 +1,27 @@
 package rotato
 
+import "time"
+
 type SpinnerName string
 
 const (
-	SpinnerDefault     SpinnerName = "default"
-	SpinnerBrailleWave SpinnerName = "brailleWave"
-	SpinnerDots        SpinnerName = "dots"
-	SpinnerDots3       SpinnerName = "dots3"
-	SpinnerDots4       SpinnerName = "dots4"
-	SpinnerDots5       SpinnerName = "dots5"
-	SpinnerDots6       SpinnerName = "dots6"
-	SpinnerDots7       SpinnerName = "dots7"
+	SpinnerDefault SpinnerName = "default"
+
+	SpinnerBrailleWave    SpinnerName = "brailleWave"
+	SpinnerBraillePulse   SpinnerName = "braillePulse"
+	SpinnerBrailleSpin    SpinnerName = "brailleSpin"
+	SpinnerBrailleOrbit   SpinnerName = "brailleOrbit"
+	SpinnerBrailleBounce  SpinnerName = "brailleBounce"
+	SpinnerBrailleScanner SpinnerName = "brailleScanner"
+	SpinnerBrailleFire    SpinnerName = "brailleFire"
+	SpinnerBrailleSpark   SpinnerName = "brailleSpark"
+
+	SpinnerDots  SpinnerName = "dots"
+	SpinnerDots3 SpinnerName = "dots3"
+	SpinnerDots4 SpinnerName = "dots4"
+	SpinnerDots5 SpinnerName = "dots5"
+	SpinnerDots6 SpinnerName = "dots6"
+	SpinnerDots7 SpinnerName = "dots7"
 
 	SpinnerArrow  SpinnerName = "arrow"
 	SpinnerArrow2 SpinnerName = "arrow2"
@@ -107,8 +118,11 @@ const (
 type SpinnerGroup string
 
 const (
+	GroupDefault SpinnerGroup = "default"
+
 	GroupArrows   SpinnerGroup = "arrows"
 	GroupBlocks   SpinnerGroup = "blocks"
+	GroupDots     SpinnerGroup = "dots"
 	GroupBraille  SpinnerGroup = "braille"
 	GroupCircular SpinnerGroup = "circular"
 	GroupEffects  SpinnerGroup = "effects"
@@ -124,9 +138,10 @@ const (
 )
 
 type SpinnerStyle struct {
-	Name   SpinnerName
-	Frames []string
-	Group  SpinnerGroup
+	Name      SpinnerName
+	Frames    []string
+	Group     SpinnerGroup
+	Frequency time.Duration
 }
 
 var byName = func() map[SpinnerName]SpinnerStyle {
@@ -144,6 +159,10 @@ var Groups = func() []SpinnerGroup {
 	groups := make([]SpinnerGroup, 0)
 
 	for _, spinner := range registry {
+		if spinner.Group == GroupDefault {
+			continue
+		}
+
 		if _, ok := seen[spinner.Group]; ok {
 			continue
 		}
@@ -156,329 +175,41 @@ var Groups = func() []SpinnerGroup {
 }()
 
 var (
-	// braille-style spinners.
 	defaultSymbols = dots
-	brailleWave    = []string{"⡀", "⡄", "⡆", "⡇", "⡏", "⡟", "⡿", "⣿", "⡿", "⡟", "⡏", "⡇", "⡆", "⡄"}
-	dots           = []string{"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"}
-	dots3          = []string{"⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆"}
-	dots4          = []string{"⠁", "⠃", "⠇", "⠧", "⠷", "⠿", "⠷", "⠧", "⠇", "⠃"}
-	dots5          = []string{"⠁", "⠁", "⠉", "⠙", "⠚", "⠒", "⠂", "⠂", "⠒", "⠲", "⠴", "⠤", "⠄", "⠄", "⠤", "⠠", "⠠", "⠤", "⠦", "⠖", "⠒", "⠐", "⠐", "⠒", "⠓", "⠋", "⠉", "⠈", "⠈"}
-	dots6          = []string{
-		"⢀⠀",
-		"⡀⠀",
-		"⠄⠀",
-		"⢂⠀",
-		"⡂⠀",
-		"⠅⠀",
-		"⢃⠀",
-		"⡃⠀",
-		"⠍⠀",
-		"⢋⠀",
-		"⡋⠀",
-		"⠍⠁",
-		"⢋⠁",
-		"⡋⠁",
-		"⠍⠉",
-		"⠋⠉",
-		"⠋⠉",
-		"⠉⠙",
-		"⠉⠙",
-		"⠉⠩",
-		"⠈⢙",
-		"⠈⡙",
-		"⢈⠩",
-		"⡀⢙",
-		"⠄⡙",
-		"⢂⠩",
-		"⡂⢘",
-		"⠅⡘",
-		"⢃⠨",
-		"⡃⢐",
-		"⠍⡐",
-		"⢋⠠",
-		"⡋⢀",
-		"⠍⡁",
-		"⢋⠁",
-		"⡋⠁",
-		"⠍⠉",
-		"⠋⠉",
-		"⠋⠉",
-		"⠉⠙",
-		"⠉⠙",
-		"⠉⠩",
-		"⠈⢙",
-		"⠈⡙",
-		"⠈⠩",
-		"⠀⢙",
-		"⠀⡙",
-		"⠀⠩",
-		"⠀⢘",
-		"⠀⡘",
-		"⠀⠨",
-		"⠀⢐",
-		"⠀⡐",
-		"⠀⠠",
-		"⠀⢀",
-		"⠀⡀",
+
+	// dots.
+	dots  = []string{"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"}
+	dots3 = []string{"⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆"}
+	dots4 = []string{"⠁", "⠃", "⠇", "⠧", "⠷", "⠿", "⠷", "⠧", "⠇", "⠃"}
+	dots5 = []string{"⠁", "⠁", "⠉", "⠙", "⠚", "⠒", "⠂", "⠂", "⠒", "⠲", "⠴", "⠤", "⠄", "⠄", "⠤", "⠠", "⠠", "⠤", "⠦", "⠖", "⠒", "⠐", "⠐", "⠒", "⠓", "⠋", "⠉", "⠈", "⠈"}
+	dots6 = []string{
+		"⢀⠀", "⡀⠀", "⠄⠀", "⢂⠀", "⡂⠀", "⠅⠀", "⢃⠀", "⡃⠀", "⠍⠀", "⢋⠀", "⡋⠀", "⠍⠁", "⢋⠁", "⡋⠁", "⠍⠉", "⠋⠉", "⠋⠉", "⠉⠙", "⠉⠙", "⠉⠩",
+		"⠈⢙", "⠈⡙", "⢈⠩", "⡀⢙", "⠄⡙", "⢂⠩", "⡂⢘", "⠅⡘", "⢃⠨", "⡃⢐", "⠍⡐", "⢋⠠", "⡋⢀", "⠍⡁", "⢋⠁", "⡋⠁", "⠍⠉", "⠋⠉", "⠋⠉", "⠉⠙",
+		"⠉⠙", "⠉⠩", "⠈⢙", "⠈⡙", "⠈⠩", "⠀⢙", "⠀⡙", "⠀⠩", "⠀⢘", "⠀⡘", "⠀⠨", "⠀⢐", "⠀⡐", "⠀⠠", "⠀⢀", "⠀⡀",
 	}
 	dots7 = []string{
-		"⠀",
-		"⠁",
-		"⠂",
-		"⠃",
-		"⠄",
-		"⠅",
-		"⠆",
-		"⠇",
-		"⡀",
-		"⡁",
-		"⡂",
-		"⡃",
-		"⡄",
-		"⡅",
-		"⡆",
-		"⡇",
-		"⠈",
-		"⠉",
-		"⠊",
-		"⠋",
-		"⠌",
-		"⠍",
-		"⠎",
-		"⠏",
-		"⡈",
-		"⡉",
-		"⡊",
-		"⡋",
-		"⡌",
-		"⡍",
-		"⡎",
-		"⡏",
-		"⠐",
-		"⠑",
-		"⠒",
-		"⠓",
-		"⠔",
-		"⠕",
-		"⠖",
-		"⠗",
-		"⡐",
-		"⡑",
-		"⡒",
-		"⡓",
-		"⡔",
-		"⡕",
-		"⡖",
-		"⡗",
-		"⠘",
-		"⠙",
-		"⠚",
-		"⠛",
-		"⠜",
-		"⠝",
-		"⠞",
-		"⠟",
-		"⡘",
-		"⡙",
-		"⡚",
-		"⡛",
-		"⡜",
-		"⡝",
-		"⡞",
-		"⡟",
-		"⠠",
-		"⠡",
-		"⠢",
-		"⠣",
-		"⠤",
-		"⠥",
-		"⠦",
-		"⠧",
-		"⡠",
-		"⡡",
-		"⡢",
-		"⡣",
-		"⡤",
-		"⡥",
-		"⡦",
-		"⡧",
-		"⠨",
-		"⠩",
-		"⠪",
-		"⠫",
-		"⠬",
-		"⠭",
-		"⠮",
-		"⠯",
-		"⡨",
-		"⡩",
-		"⡪",
-		"⡫",
-		"⡬",
-		"⡭",
-		"⡮",
-		"⡯",
-		"⠰",
-		"⠱",
-		"⠲",
-		"⠳",
-		"⠴",
-		"⠵",
-		"⠶",
-		"⠷",
-		"⡰",
-		"⡱",
-		"⡲",
-		"⡳",
-		"⡴",
-		"⡵",
-		"⡶",
-		"⡷",
-		"⠸",
-		"⠹",
-		"⠺",
-		"⠻",
-		"⠼",
-		"⠽",
-		"⠾",
-		"⠿",
-		"⡸",
-		"⡹",
-		"⡺",
-		"⡻",
-		"⡼",
-		"⡽",
-		"⡾",
-		"⡿",
-		"⢀",
-		"⢁",
-		"⢂",
-		"⢃",
-		"⢄",
-		"⢅",
-		"⢆",
-		"⢇",
-		"⣀",
-		"⣁",
-		"⣂",
-		"⣃",
-		"⣄",
-		"⣅",
-		"⣆",
-		"⣇",
-		"⢈",
-		"⢉",
-		"⢊",
-		"⢋",
-		"⢌",
-		"⢍",
-		"⢎",
-		"⢏",
-		"⣈",
-		"⣉",
-		"⣊",
-		"⣋",
-		"⣌",
-		"⣍",
-		"⣎",
-		"⣏",
-		"⢐",
-		"⢑",
-		"⢒",
-		"⢓",
-		"⢔",
-		"⢕",
-		"⢖",
-		"⢗",
-		"⣐",
-		"⣑",
-		"⣒",
-		"⣓",
-		"⣔",
-		"⣕",
-		"⣖",
-		"⣗",
-		"⢘",
-		"⢙",
-		"⢚",
-		"⢛",
-		"⢜",
-		"⢝",
-		"⢞",
-		"⢟",
-		"⣘",
-		"⣙",
-		"⣚",
-		"⣛",
-		"⣜",
-		"⣝",
-		"⣞",
-		"⣟",
-		"⢠",
-		"⢡",
-		"⢢",
-		"⢣",
-		"⢤",
-		"⢥",
-		"⢦",
-		"⢧",
-		"⣠",
-		"⣡",
-		"⣢",
-		"⣣",
-		"⣤",
-		"⣥",
-		"⣦",
-		"⣧",
-		"⢨",
-		"⢩",
-		"⢪",
-		"⢫",
-		"⢬",
-		"⢭",
-		"⢮",
-		"⢯",
-		"⣨",
-		"⣩",
-		"⣪",
-		"⣫",
-		"⣬",
-		"⣭",
-		"⣮",
-		"⣯",
-		"⢰",
-		"⢱",
-		"⢲",
-		"⢳",
-		"⢴",
-		"⢵",
-		"⢶",
-		"⢷",
-		"⣰",
-		"⣱",
-		"⣲",
-		"⣳",
-		"⣴",
-		"⣵",
-		"⣶",
-		"⣷",
-		"⢸",
-		"⢹",
-		"⢺",
-		"⢻",
-		"⢼",
-		"⢽",
-		"⢾",
-		"⢿",
-		"⣸",
-		"⣹",
-		"⣺",
-		"⣻",
-		"⣼",
-		"⣽",
-		"⣾",
-		"⣿",
+		"⠀", "⠁", "⠂", "⠃", "⠄", "⠅", "⠆", "⠇", "⡀", "⡁", "⡂", "⡃", "⡄", "⡅", "⡆", "⡇", "⠈", "⠉", "⠊", "⠋", "⠌", "⠍", "⠎", "⠏",
+		"⡈", "⡉", "⡊", "⡋", "⡌", "⡍", "⡎", "⡏", "⠐", "⠑", "⠒", "⠓", "⠔", "⠕", "⠖", "⠗", "⡐", "⡑", "⡒", "⡓", "⡔", "⡕", "⡖", "⡗",
+		"⠘", "⠙", "⠚", "⠛", "⠜", "⠝", "⠞", "⠟", "⡘", "⡙", "⡚", "⡛", "⡜", "⡝", "⡞", "⡟", "⠠", "⠡", "⠢", "⠣", "⠤", "⠥", "⠦", "⠧",
+		"⡠", "⡡", "⡢", "⡣", "⡤", "⡥", "⡦", "⡧", "⠨", "⠩", "⠪", "⠫", "⠬", "⠭", "⠮", "⠯", "⡨", "⡩", "⡪", "⡫", "⡬", "⡭", "⡮", "⡯",
+		"⠰", "⠱", "⠲", "⠳", "⠴", "⠵", "⠶", "⠷", "⡰", "⡱", "⡲", "⡳", "⡴", "⡵", "⡶", "⡷", "⠸", "⠹", "⠺", "⠻", "⠼", "⠽", "⠾", "⠿",
+		"⡸", "⡹", "⡺", "⡻", "⡼", "⡽", "⡾", "⡿", "⢀", "⢁", "⢂", "⢃", "⢄", "⢅", "⢆", "⢇", "⣀", "⣁", "⣂", "⣃", "⣄", "⣅", "⣆", "⣇",
+		"⢈", "⢉", "⢊", "⢋", "⢌", "⢍", "⢎", "⢏", "⣈", "⣉", "⣊", "⣋", "⣌", "⣍", "⣎", "⣏", "⢐", "⢑", "⢒", "⢓", "⢔", "⢕", "⢖", "⢗",
+		"⣐", "⣑", "⣒", "⣓", "⣔", "⣕", "⣖", "⣗", "⢘", "⢙", "⢚", "⢛", "⢜", "⢝", "⢞", "⢟", "⣘", "⣙", "⣚", "⣛", "⣜", "⣝", "⣞", "⣟",
+		"⢠", "⢡", "⢢", "⢣", "⢤", "⢥", "⢦", "⢧", "⣠", "⣡", "⣢", "⣣", "⣤", "⣥", "⣦", "⣧", "⢨", "⢩", "⢪", "⢫", "⢬", "⢭", "⢮", "⢯",
+		"⣨", "⣩", "⣪", "⣫", "⣬", "⣭", "⣮", "⣯", "⢰", "⢱", "⢲", "⢳", "⢴", "⢵", "⢶", "⢷", "⣰", "⣱", "⣲", "⣳", "⣴", "⣵", "⣶", "⣷",
+		"⢸", "⢹", "⢺", "⢻", "⢼", "⢽", "⢾", "⢿", "⣸", "⣹", "⣺", "⣻", "⣼", "⣽", "⣾", "⣿",
 	}
+
+	// braille.
+	braillePulse   = []string{"⣀", "⣄", "⣤", "⣦", "⣶", "⣿", "⣷", "⣯", "⣟", "⣻", "⣽", "⣾", "⣿", "⣾", "⣽", "⣻", "⣟", "⣯", "⣷", "⣶", "⣦", "⣤", "⣄", "⣀"}
+	brailleSpin    = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏", "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+	brailleOrbit   = []string{"⠋", "⠙", "⠚", "⠒", "⠂", "⠂", "⠒", "⠲", "⠴", "⠤", "⠄", "⠄", "⠤", "⠠", "⠠", "⠤", "⠦", "⠖", "⠒", "⠐", "⠐", "⠒", "⠓", "⠋"}
+	brailleBounce  = []string{"⠁", "⠂", "⠄", "⡀", "⢀", "⠠", "⠐", "⠈", "⠐", "⠠", "⢀", "⡀", "⠄", "⠂"}
+	brailleWave    = []string{"⡀", "⡄", "⡆", "⡇", "⡏", "⡟", "⡿", "⣿", "⡿", "⡟", "⡏", "⡇", "⡆", "⡄"}
+	brailleScanner = []string{"⠁", "⠃", "⠉", "⠙", "⠚", "⠒", "⠂", "⠂", "⠒", "⠲", "⠴", "⠤", "⠄", "⠄", "⠤", "⠠", "⠠", "⠤", "⠦", "⠖", "⠒", "⠐", "⠐", "⠒", "⠓", "⠋", "⠉", "⠈"}
+	brailleFire    = []string{"⠁", "⠉", "⠋", "⠛", "⠫", "⠭", "⠮", "⠷", "⠿", "⡿", "⢿", "⣷", "⣶", "⣤", "⣀", "⣄", "⣤", "⣶", "⣷", "⢿", "⡿", "⠿", "⠷", "⠮", "⠭", "⠫", "⠛", "⠋", "⠉", "⠁"}
+	brailleSpark   = []string{"⠀", "⠁", "⠈", "⠐", "⠠", "⡀", "⢀", "⣀", "⣤", "⣶", "⣿", "⣷", "⣦", "⣄", "⢀", "⡀", "⠠", "⠐", "⠈", "⠁", "⠀"}
 
 	// arrow and directional spinners.
 	arrow  = []string{"<", "<<", "<<<", "-", ">", ">>", ">>>"}
@@ -574,249 +305,168 @@ var (
 
 	flip     = []string{"_", "_", "_", "-", "`", "`", "'", "´", "-", "_", "_", "_"}
 	material = []string{
-		"█▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
-		"██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
-		"███▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
-		"████▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
-		"██████▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
-		"██████▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
-		"███████▁▁▁▁▁▁▁▁▁▁▁▁▁",
-		"████████▁▁▁▁▁▁▁▁▁▁▁▁",
-		"█████████▁▁▁▁▁▁▁▁▁▁▁",
-		"█████████▁▁▁▁▁▁▁▁▁▁▁",
-		"██████████▁▁▁▁▁▁▁▁▁▁",
-		"███████████▁▁▁▁▁▁▁▁▁",
-		"█████████████▁▁▁▁▁▁▁",
-		"██████████████▁▁▁▁▁▁",
-		"██████████████▁▁▁▁▁▁",
-		"▁██████████████▁▁▁▁▁",
-		"▁██████████████▁▁▁▁▁",
-		"▁██████████████▁▁▁▁▁",
-		"▁▁██████████████▁▁▁▁",
-		"▁▁▁██████████████▁▁▁",
-		"▁▁▁▁█████████████▁▁▁",
-		"▁▁▁▁██████████████▁▁",
-		"▁▁▁▁██████████████▁▁",
-		"▁▁▁▁▁██████████████▁",
-		"▁▁▁▁▁██████████████▁",
-		"▁▁▁▁▁██████████████▁",
-		"▁▁▁▁▁▁██████████████",
-		"▁▁▁▁▁▁██████████████",
-		"▁▁▁▁▁▁▁█████████████",
-		"▁▁▁▁▁▁▁█████████████",
-		"▁▁▁▁▁▁▁▁████████████",
-		"▁▁▁▁▁▁▁▁████████████",
-		"▁▁▁▁▁▁▁▁▁███████████",
-		"▁▁▁▁▁▁▁▁▁███████████",
-		"▁▁▁▁▁▁▁▁▁▁██████████",
-		"▁▁▁▁▁▁▁▁▁▁██████████",
-		"▁▁▁▁▁▁▁▁▁▁▁▁████████",
-		"▁▁▁▁▁▁▁▁▁▁▁▁▁███████",
-		"▁▁▁▁▁▁▁▁▁▁▁▁▁▁██████",
-		"▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████",
-		"▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████",
-		"▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁████",
-		"▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███",
-		"▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███",
-		"▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███",
-		"▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁██",
-		"▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█",
-		"▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█",
-		"▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█",
+		"█▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁", "██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁", "███▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁", "████▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁", "██████▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
+		"██████▁▁▁▁▁▁▁▁▁▁▁▁▁▁", "███████▁▁▁▁▁▁▁▁▁▁▁▁▁", "████████▁▁▁▁▁▁▁▁▁▁▁▁", "█████████▁▁▁▁▁▁▁▁▁▁▁", "█████████▁▁▁▁▁▁▁▁▁▁▁",
+		"██████████▁▁▁▁▁▁▁▁▁▁", "███████████▁▁▁▁▁▁▁▁▁", "█████████████▁▁▁▁▁▁▁", "██████████████▁▁▁▁▁▁", "██████████████▁▁▁▁▁▁",
+		"▁██████████████▁▁▁▁▁", "▁██████████████▁▁▁▁▁", "▁██████████████▁▁▁▁▁", "▁▁██████████████▁▁▁▁", "▁▁▁██████████████▁▁▁",
+		"▁▁▁▁█████████████▁▁▁", "▁▁▁▁██████████████▁▁", "▁▁▁▁██████████████▁▁", "▁▁▁▁▁██████████████▁", "▁▁▁▁▁██████████████▁",
+		"▁▁▁▁▁██████████████▁", "▁▁▁▁▁▁██████████████", "▁▁▁▁▁▁██████████████", "▁▁▁▁▁▁▁█████████████", "▁▁▁▁▁▁▁█████████████",
+		"▁▁▁▁▁▁▁▁████████████", "▁▁▁▁▁▁▁▁████████████", "▁▁▁▁▁▁▁▁▁███████████", "▁▁▁▁▁▁▁▁▁███████████", "▁▁▁▁▁▁▁▁▁▁██████████",
+		"▁▁▁▁▁▁▁▁▁▁██████████", "▁▁▁▁▁▁▁▁▁▁▁▁████████", "▁▁▁▁▁▁▁▁▁▁▁▁▁███████", "▁▁▁▁▁▁▁▁▁▁▁▁▁▁██████", "▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████",
+		"▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█████", "▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁████", "▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███", "▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███", "▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁███",
+		"▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁██", "▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█", "▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█", "▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁█",
 	}
 
 	shark = []string{
-		"▐|\\____________▌",
-		"▐_|\\___________▌",
-		"▐__|\\__________▌",
-		"▐___|\\_________▌",
-		"▐____|\\________▌",
-		"▐_____|\\_______▌",
-		"▐______|\\______▌",
-		"▐_______|\\_____▌",
-		"▐________|\\____▌",
-		"▐_________|\\___▌",
-		"▐__________|\\__▌",
-		"▐___________|\\_▌",
-		"▐____________|\\▌",
-		"▐____________/|▌",
-		"▐___________/|_▌",
-		"▐__________/|__▌",
-		"▐_________/|___▌",
-		"▐________/|____▌",
-		"▐_______/|_____▌",
-		"▐______/|______▌",
-		"▐_____/|_______▌",
-		"▐____/|________▌",
-		"▐___/|_________▌",
-		"▐__/|__________▌",
-		"▐_/|___________▌",
-		"▐/|____________▌",
+		"▐|\\____________▌", "▐_|\\___________▌", "▐__|\\__________▌", "▐___|\\_________▌", "▐____|\\________▌", "▐_____|\\_______▌",
+		"▐______|\\______▌", "▐_______|\\_____▌", "▐________|\\____▌", "▐_________|\\___▌", "▐__________|\\__▌", "▐___________|\\_▌",
+		"▐____________|\\▌", "▐____________/|▌", "▐___________/|_▌", "▐__________/|__▌", "▐_________/|___▌", "▐________/|____▌",
+		"▐_______/|_____▌", "▐______/|______▌", "▐_____/|_______▌", "▐____/|________▌", "▐___/|_________▌", "▐__/|__________▌",
+		"▐_/|___________▌", "▐/|____________▌",
 	}
 
 	betawave = []string{"ρββββββ", "βρβββββ", "ββρββββ", "βββρβββ", "ββββρββ", "βββββρβ", "ββββββρ"}
 	fistbump = []string{
-		"🤜\u3000\u3000\u3000\u3000🤛 ",
-		"🤜\u3000\u3000\u3000\u3000🤛 ",
-		"🤜\u3000\u3000\u3000\u3000🤛 ",
-		"\u3000🤜\u3000\u3000🤛\u3000 ",
-		"\u3000\u3000🤜🤛\u3000\u3000 ",
-		"\u3000🤜✨🤛\u3000\u3000 ",
+		"🤜\u3000\u3000\u3000\u3000🤛 ", "🤜\u3000\u3000\u3000\u3000🤛 ", "🤜\u3000\u3000\u3000\u3000🤛 ",
+		"\u3000🤜\u3000\u3000🤛\u3000 ", "\u3000\u3000🤜🤛\u3000\u3000 ", "\u3000🤜✨🤛\u3000\u3000 ",
 		"🤜\u3000✨\u3000🤛\u3000 ",
 	}
 	futbolHead = []string{
-		" 🧑⚽️       🧑 ",
-		"🧑  ⚽️      🧑 ",
-		"🧑   ⚽️     🧑 ",
-		"🧑    ⚽️    🧑 ",
-		"🧑     ⚽️   🧑 ",
-		"🧑      ⚽️  🧑 ",
-		"🧑       ⚽️🧑  ",
-		"🧑      ⚽️  🧑 ",
-		"🧑     ⚽️   🧑 ",
-		"🧑    ⚽️    🧑 ",
-		"🧑   ⚽️     🧑 ",
-		"🧑  ⚽️      🧑 ",
+		" 🧑⚽️       🧑 ", "🧑  ⚽️      🧑 ", "🧑   ⚽️     🧑 ", "🧑    ⚽️    🧑 ",
+		"🧑     ⚽️   🧑 ", "🧑      ⚽️  🧑 ", "🧑       ⚽️🧑  ", "🧑      ⚽️  🧑 ",
+		"🧑     ⚽️   🧑 ", "🧑    ⚽️    🧑 ", "🧑   ⚽️     🧑 ", "🧑  ⚽️      🧑 ",
 	}
 	mindblown = []string{
-		"😐 ",
-		"😐 ",
-		"😮 ",
-		"😮 ",
-		"😦 ",
-		"😦 ",
-		"😧 ",
-		"😧 ",
-		"🤯 ",
-		"💥 ",
-		"✨ ",
-		"\u3000 ",
-		"\u3000 ",
-		"\u3000 ",
+		"😐 ", "😐 ", "😮 ", "😮 ", "😦 ", "😦 ", "😧 ", "😧 ",
+		"🤯 ", "💥 ", "✨ ", "\u3000 ", "\u3000 ", "\u3000 ",
 	}
 	speaker = []string{"🔈 ", "🔉 ", "🔊 ", "🔉 "}
-	star    = []string{
-		"✶",
-		"✸",
-		"✹",
-		"✺",
-		"✹",
-		"✷",
-	}
+	star    = []string{"✶", "✸", "✹", "✺", "✹", "✷"}
 )
 
+const defaultFreq = 100 * time.Millisecond
+
 var registry = []SpinnerStyle{
+	// dots
+	{SpinnerDefault, defaultSymbols, GroupDots, 80 * time.Millisecond},
+	{SpinnerDots, dots, GroupDots, 80 * time.Millisecond},
+	{SpinnerDots3, dots3, GroupDots, 80 * time.Millisecond},
+	{SpinnerDots4, dots4, GroupDots, 80 * time.Millisecond},
+	{SpinnerDots5, dots5, GroupDots, 80 * time.Millisecond},
+	{SpinnerDots6, dots6, GroupDots, 80 * time.Millisecond},
+	{SpinnerDots7, dots7, GroupDots, 80 * time.Millisecond},
+
 	// braille
-	{SpinnerDefault, defaultSymbols, GroupBraille},
-	{SpinnerBrailleWave, brailleWave, GroupBraille},
-	{SpinnerDots, dots, GroupBraille},
-	{SpinnerDots3, dots3, GroupBraille},
-	{SpinnerDots4, dots4, GroupBraille},
-	{SpinnerDots5, dots5, GroupBraille},
-	{SpinnerDots6, dots6, GroupBraille},
-	{SpinnerDots7, dots7, GroupBraille},
+	{SpinnerBrailleWave, brailleWave, GroupBraille, 80 * time.Millisecond},
+	{SpinnerBraillePulse, braillePulse, GroupBraille, 80 * time.Millisecond},
+	{SpinnerBrailleSpin, brailleSpin, GroupBraille, 80 * time.Millisecond},
+	{SpinnerBrailleOrbit, brailleOrbit, GroupBraille, 90 * time.Millisecond},
+	{SpinnerBrailleBounce, brailleBounce, GroupBraille, defaultFreq},
+	{SpinnerBrailleScanner, brailleScanner, GroupBraille, 80 * time.Millisecond},
+	{SpinnerBrailleFire, brailleFire, GroupBraille, 70 * time.Millisecond},
+	{SpinnerBrailleSpark, brailleSpark, GroupBraille, 90 * time.Millisecond},
 
 	// arrows
-	{SpinnerArrow, arrow, GroupArrows},
-	{SpinnerArrow2, arrow2, GroupArrows},
-	{SpinnerArrow3, arrow3, GroupArrows},
-	{SpinnerArrow4, arrow4, GroupArrows},
-	{SpinnerSweep, sweep, GroupArrows},
+	{SpinnerArrow, arrow, GroupArrows, defaultFreq},
+	{SpinnerArrow2, arrow2, GroupArrows, defaultFreq},
+	{SpinnerArrow3, arrow3, GroupArrows, defaultFreq},
+	{SpinnerArrow4, arrow4, GroupArrows, 120 * time.Millisecond},
+	{SpinnerSweep, sweep, GroupArrows, defaultFreq},
 
 	// lines
-	{SpinnerSlash, slash, GroupLines},
-	{SpinnerBackslash, backslash, GroupLines},
-	{SpinnerPipe, pipe, GroupLines},
-	{SpinnerPipe2, pipe2, GroupLines},
-	{SpinnerLines, lines, GroupLines},
+	{SpinnerSlash, slash, GroupLines, defaultFreq},
+	{SpinnerBackslash, backslash, GroupLines, defaultFreq},
+	{SpinnerPipe, pipe, GroupLines, 120 * time.Millisecond},
+	{SpinnerPipe2, pipe2, GroupLines, defaultFreq},
+	{SpinnerLines, lines, GroupLines, 120 * time.Millisecond},
 
 	// blocks
-	{SpinnerBlock, block, GroupBlocks},
-	{SpinnerBlockbar, blockbar, GroupBlocks},
-	{SpinnerBlockbar2, blockbar2, GroupBlocks},
-	{SpinnerBlockbar3, blockbar3, GroupBlocks},
-	{SpinnerBlockbar4, blockbar4, GroupBlocks},
-	{SpinnerBlockbar5, blockbar5, GroupBlocks},
-	{SpinnerBlockbar6, blockbar6, GroupBlocks},
-	{SpinnerBlockbar7, blockbar7, GroupBlocks},
-	{SpinnerBlockbarPretty, blockbarpretty, GroupBlocks},
-	{SpinnerBoxFill, boxfill, GroupBlocks},
-	{SpinnerBoxFillshort, boxfillshort, GroupBlocks},
-	{SpinnerBoxBounce, boxBounce, GroupBlocks},
+	{SpinnerBlock, block, GroupBlocks, 180 * time.Millisecond},
+	{SpinnerBlockbar, blockbar, GroupBlocks, 120 * time.Millisecond},
+	{SpinnerBlockbar2, blockbar2, GroupBlocks, 120 * time.Millisecond},
+	{SpinnerBlockbar3, blockbar3, GroupBlocks, 120 * time.Millisecond},
+	{SpinnerBlockbar4, blockbar4, GroupBlocks, 120 * time.Millisecond},
+	{SpinnerBlockbar5, blockbar5, GroupBlocks, defaultFreq},
+	{SpinnerBlockbar6, blockbar6, GroupBlocks, defaultFreq},
+	{SpinnerBlockbar7, blockbar7, GroupBlocks, 120 * time.Millisecond},
+	{SpinnerBlockbarPretty, blockbarpretty, GroupBlocks, 120 * time.Millisecond},
+	{SpinnerBoxFill, boxfill, GroupBlocks, 120 * time.Millisecond},
+	{SpinnerBoxFillshort, boxfillshort, GroupBlocks, 120 * time.Millisecond},
+	{SpinnerBoxBounce, boxBounce, GroupBlocks, 150 * time.Millisecond},
 
 	// motion
-	{SpinnerBounce, bounce, GroupMotion},
-	{SpinnerBounceball, bounceball, GroupMotion},
-	{SpinnerPingpong, pingpong, GroupMotion},
-	{SpinnerPingpong2, pingpong2, GroupMotion},
-	{SpinnerRunner, runner, GroupMotion},
+	{SpinnerBounce, bounce, GroupMotion, defaultFreq},
+	{SpinnerBounceball, bounceball, GroupMotion, defaultFreq},
+	{SpinnerPingpong, pingpong, GroupMotion, 120 * time.Millisecond},
+	{SpinnerPingpong2, pingpong2, GroupMotion, 80 * time.Millisecond},
+	{SpinnerRunner, runner, GroupMotion, 80 * time.Millisecond},
 
 	// circular
-	{SpinnerCircle, circle, GroupCircular},
-	{SpinnerCircle2, circle2, GroupCircular},
-	{SpinnerCircle3, circle3, GroupCircular},
-	{SpinnerCircle4, circle4, GroupCircular},
-	{SpinnerCircle5, circle5, GroupCircular},
-	{SpinnerCircle6, circle6, GroupCircular},
-	{SpinnerCircle7, circle7, GroupCircular},
-	{SpinnerOrbit, orbit, GroupCircular},
-	{SpinnerMoon, moon, GroupCircular},
-	{SpinnerClock, clock, GroupCircular},
+	{SpinnerCircle, circle, GroupCircular, 150 * time.Millisecond},
+	{SpinnerCircle2, circle2, GroupCircular, 120 * time.Millisecond},
+	{SpinnerCircle3, circle3, GroupCircular, 120 * time.Millisecond},
+	{SpinnerCircle4, circle4, GroupCircular, 120 * time.Millisecond},
+	{SpinnerCircle5, circle5, GroupCircular, 120 * time.Millisecond},
+	{SpinnerCircle6, circle6, GroupCircular, 120 * time.Millisecond},
+	{SpinnerCircle7, circle7, GroupCircular, 120 * time.Millisecond},
+	{SpinnerOrbit, orbit, GroupCircular, 150 * time.Millisecond},
+	{SpinnerMoon, moon, GroupCircular, 150 * time.Millisecond},
+	{SpinnerClock, clock, GroupCircular, 200 * time.Millisecond},
 
 	// shapes
-	{SpinnerSquare, square, GroupShapes},
-	{SpinnerSquare2, square2, GroupShapes},
-	{SpinnerCubes, cubes, GroupShapes},
-	{SpinnerTriangles, triangles, GroupShapes},
-	{SpinnerDiamond, diamond, GroupShapes},
-	{SpinnerDiamond2, diamond2, GroupShapes},
-	{SpinnerGeometric, geometric, GroupShapes},
+	{SpinnerSquare, square, GroupShapes, 150 * time.Millisecond},
+	{SpinnerSquare2, square2, GroupShapes, 120 * time.Millisecond},
+	{SpinnerCubes, cubes, GroupShapes, 150 * time.Millisecond},
+	{SpinnerTriangles, triangles, GroupShapes, 150 * time.Millisecond},
+	{SpinnerDiamond, diamond, GroupShapes, 150 * time.Millisecond},
+	{SpinnerDiamond2, diamond2, GroupShapes, 120 * time.Millisecond},
+	{SpinnerGeometric, geometric, GroupShapes, 120 * time.Millisecond},
 
 	// text
-	{SpinnerLoading, loading, GroupText},
-	{SpinnerEllipsis, ellipsis, GroupText},
-	{SpinnerQuestion, question, GroupText},
-	{SpinnerHexsymbols, hexsymbols, GroupText},
+	{SpinnerLoading, loading, GroupText, 180 * time.Millisecond},
+	{SpinnerEllipsis, ellipsis, GroupText, 250 * time.Millisecond},
+	{SpinnerQuestion, question, GroupText, 200 * time.Millisecond},
+	{SpinnerHexsymbols, hexsymbols, GroupText, 120 * time.Millisecond},
 
 	// symbols
-	{SpinnerCurrency, currency, GroupSymbols},
-	{SpinnerMathops, mathops, GroupSymbols},
-	{SpinnerLogicsymbols, logicsymbols, GroupSymbols},
-	{SpinnerGreek, greek, GroupSymbols},
+	{SpinnerCurrency, currency, GroupSymbols, 200 * time.Millisecond},
+	{SpinnerMathops, mathops, GroupSymbols, 180 * time.Millisecond},
+	{SpinnerLogicsymbols, logicsymbols, GroupSymbols, 180 * time.Millisecond},
+	{SpinnerGreek, greek, GroupSymbols, 180 * time.Millisecond},
 
 	// fun
-	{SpinnerPacman, pacman, GroupFun},
-	{SpinnerSnail, snail, GroupFun},
-	{SpinnerWorm, worm, GroupFun},
-	{SpinnerWorm2, worm2, GroupFun},
+	{SpinnerFistbump, fistbump, GroupFun, 150 * time.Millisecond},
+	{SpinnerPacman, pacman, GroupFun, 150 * time.Millisecond},
+	{SpinnerMindblown, mindblown, GroupFun, 200 * time.Millisecond},
+	{SpinnerFutbolHead, futbolHead, GroupFun, 150 * time.Millisecond},
+	{SpinnerSpeaker, speaker, GroupFun, 200 * time.Millisecond},
 
 	// minimal
-	{SpinnerToggle, toggle, GroupMinimal},
-	{SpinnerToggle2, toggle2, GroupMinimal},
-	{SpinnerToggle3, toggle3, GroupMinimal},
-	{SpinnerCursorBlink, cursorBlink, GroupMinimal},
-	{SpinnerPluscross, pluscross, GroupMinimal},
+	{SpinnerToggle, toggle, GroupMinimal, 200 * time.Millisecond},
+	{SpinnerToggle2, toggle2, GroupMinimal, 200 * time.Millisecond},
+	{SpinnerToggle3, toggle3, GroupMinimal, 250 * time.Millisecond},
+	{SpinnerCursorBlink, cursorBlink, GroupMinimal, 300 * time.Millisecond},
+	{SpinnerPluscross, pluscross, GroupMinimal, 200 * time.Millisecond},
 
 	// effects
-	{SpinnerFade, fade, GroupEffects},
-	{SpinnerPulse, pulse, GroupEffects},
-	{SpinnerGrow, grow, GroupEffects},
-	{SpinnerGrowvert, growvert, GroupEffects},
-	{SpinnerWave, wave, GroupEffects},
+	{SpinnerFade, fade, GroupEffects, 120 * time.Millisecond},
+	{SpinnerPulse, pulse, GroupEffects, 120 * time.Millisecond},
+	{SpinnerGrow, grow, GroupEffects, 120 * time.Millisecond},
+	{SpinnerGrowvert, growvert, GroupEffects, defaultFreq},
+	{SpinnerWave, wave, GroupEffects, defaultFreq},
 
 	// framed
-	{SpinnerMarquee, marquee, GroupFramed},
-	{SpinnerMatrix, matrix, GroupFramed},
-	{SpinnerCorners, corners, GroupFramed},
+	{SpinnerMarquee, marquee, GroupFramed, 120 * time.Millisecond},
+	{SpinnerMatrix, matrix, GroupFramed, 150 * time.Millisecond},
+	{SpinnerCorners, corners, GroupFramed, 200 * time.Millisecond},
 
 	// misc
-	{SpinnerFlip, flip, GroupMisc},
-	{SpinnerMaterial, material, GroupMisc},
-	{SpinnerShark, shark, GroupMisc},
-	{SpinnerBetawave, betawave, GroupMisc},
-	{SpinnerFistbump, fistbump, GroupMisc},
-	{SpinnerFutbolHead, futbolHead, GroupMisc},
-	{SpinnerMindblown, mindblown, GroupMisc},
-	{SpinnerSpeaker, speaker, GroupMisc},
-	{SpinnerStar, star, GroupMisc},
+	{SpinnerFlip, flip, GroupMisc, 120 * time.Millisecond},
+	{SpinnerMaterial, material, GroupMisc, 80 * time.Millisecond},
+	{SpinnerShark, shark, GroupMisc, 80 * time.Millisecond},
+	{SpinnerBetawave, betawave, GroupMisc, defaultFreq},
+	{SpinnerStar, star, GroupMisc, 150 * time.Millisecond},
+	{SpinnerSnail, snail, GroupMisc, 180 * time.Millisecond},
+	{SpinnerWorm, worm, GroupMisc, 150 * time.Millisecond},
+	{SpinnerWorm2, worm2, GroupMisc, 150 * time.Millisecond},
 }

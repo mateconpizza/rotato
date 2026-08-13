@@ -134,7 +134,7 @@ func WithSymbolsDots6() Option { return WithSpinnerStyle(SpinnerDots6) }
 // WithSymbolsDots7 returns an option function that sets the spinner unicode
 // animation with dots.
 //
-//	⢀⠀ ⡀⠀ ⠄⠀ ⢂⠀ ⡂⠀ ⠅⠀ ⢃⠀ ⡃⠀ ⠍⠀ ⢋⠀ ⡋⠀ ⠍⠁ ⢋⠁ ⡋⠁ ⠍⠉ ⠋⠉ ⠋⠉ ⠉⠙ ⠉⠙ ⠉⠩ ⠈⢙ ⠈⡙ ⢈⠩ ⡀⢙ ⠄⡙ ⢂⠩
+//	⠁ ⠂ ⠃ ⠄ ⠅ ⠆ ⠇ ⡀ ⡁ ⡂ ⡃ ⡄ ⡅ ⡆ ⡇ ⠈ ⠉ ⠊ ⠋ ⠌ ⠍ ⠎ ⠏ ⡈ ⡉ ⡊ ⡋ ⡌ ⡍ ⡎ ⡏
 func WithSymbolsDots7() Option { return WithSpinnerStyle(SpinnerDots7) }
 
 // WithSymbolsLines returns an option function that sets the spinner unicode
