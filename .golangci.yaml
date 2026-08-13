@@ -141,6 +141,9 @@ linters:
         linters:
           - funlen
           - goconst
+      - path: "registry.go"
+        linters:
+          - goconst
     generated: lax
     presets:
       - common-false-positives

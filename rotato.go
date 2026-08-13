@@ -72,7 +72,7 @@ import (
 	"time"
 )
 
-func WithSpinnerStyle(name string) Option {
+func WithSpinnerStyle(name SpinnerName) Option {
 	return func(r *Rotato) {
 		if sp, ok := ByName(name); ok {
 			r.symbols = sp.Frames

@@ -325,7 +325,8 @@ func sceneLog(ctx context.Context, d time.Duration) {
 	sp.Done("completed")
 }
 
-func padRight(s string, width int) string {
+func padRight(name rotato.SpinnerName, width int) string {
+	s := string(name)
 	n := width - utf8.RuneCountInString(s)
 	if n <= 0 {
 		return s
@@ -336,7 +337,7 @@ func padRight(s string, width int) string {
 func showSymbols(ctx context.Context, d time.Duration) {
 	maxLen := 0
 	for _, s := range rotato.Spinners() {
-		if l := utf8.RuneCountInString(s.Name); l > maxLen {
+		if l := utf8.RuneCountInString(string(s.Name)); l > maxLen {
 			maxLen = l
 		}
 	}
@@ -368,7 +369,7 @@ func listGroups() {
 		spinners := rotato.ByGroup(g)
 		names := make([]string, len(spinners))
 		for j, s := range spinners {
-			names[j] = s.Name
+			names[j] = string(s.Name)
 		}
 
 		isLast := i == len(rotato.Groups)-1
@@ -385,9 +386,14 @@ func listGroups() {
 	}
 }
 
-func showByName(ctx context.Context, name string, d time.Duration) {
+func showByName(ctx context.Context, s string, d time.Duration) {
+	name := rotato.SpinnerName(s)
 	if sp, ok := rotato.ByName(name); ok {
-		runRotato(ctx, sp, padRight(sp.Name, 18), d)
+		if err := ctx.Err(); err != nil {
+			return
+		}
+		sp := sp
+		runRotato(ctx, &sp, padRight(sp.Name, 18), d)
 	}
 }
 
@@ -400,7 +406,7 @@ func showByGroup(ctx context.Context, g rotato.SpinnerGroup, d time.Duration) {
 
 	maxLen := 0
 	for _, s := range group {
-		if l := utf8.RuneCountInString(s.Name); l > maxLen {
+		if l := utf8.RuneCountInString(string(s.Name)); l > maxLen {
 			maxLen = l
 		}
 	}
@@ -410,11 +416,12 @@ func showByGroup(ctx context.Context, g rotato.SpinnerGroup, d time.Duration) {
 		if err := ctx.Err(); err != nil {
 			return
 		}
-		runRotato(ctx, sp, padRight(sp.Name, maxLen), d)
+		sp := sp
+		runRotato(ctx, &sp, padRight(sp.Name, maxLen), d)
 	}
 }
 
-func runRotato(ctx context.Context, sp rotato.SpinnerStyle, name string, d time.Duration) {
+func runRotato(ctx context.Context, sp *rotato.SpinnerStyle, name string, d time.Duration) {
 	r := rotato.New(
 		rotato.WithSymbols(sp.Frames...),
 		rotato.WithPrefix(name),
