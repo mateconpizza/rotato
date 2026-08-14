@@ -404,9 +404,9 @@ func (r *Rotato) Done(mesg ...string) {
 		return
 	}
 
-	symbol := formatSymbol(r.doneSymbol, r.color.doneSymbol)
+	symbol := formatSymbol(r.doneSymbol, r.color.DoneSymbol)
 
-	r.displayMessage(symbol, r.color.doneMessage, finalMesg)
+	r.displayMessage(symbol, r.color.DoneMsg, finalMesg)
 }
 
 // Fail fails the spinner animation.
@@ -415,9 +415,9 @@ func (r *Rotato) Fail(mesg ...string) {
 	if len(mesg) == 0 {
 		mesg = append(mesg, "Failed")
 	}
-	symbol := formatSymbol(r.failSymbol, r.color.failSymbol)
+	symbol := formatSymbol(r.failSymbol, r.color.FailSymbol)
 
-	r.displayMessage(symbol, r.color.failMessage, mesg...)
+	r.displayMessage(symbol, r.color.FailMsg, mesg...)
 }
 
 // SetWriter updates the output destination safely.
@@ -609,7 +609,7 @@ func (r *Rotato) stopSpinner() {
 }
 
 // displayMessage formats and displays a message with optional prefix and color.
-func (r *Rotato) displayMessage(symbol string, color Color, mesg ...string) {
+func (r *Rotato) displayMessage(symbol string, colorFn colorFormatFunc, mesg ...string) {
 	if len(mesg) == 0 {
 		return
 	}
@@ -633,10 +633,7 @@ func (r *Rotato) displayMessage(symbol string, color Color, mesg ...string) {
 	}
 
 	// message color
-	if color != "" {
-		sb.WriteString(color.String())
-	}
-
+	msg = colorFn(msg)
 	sb.WriteString(msg)
 	sb.WriteByte('\n')
 
@@ -728,15 +725,12 @@ func decorate(s string, decorators []MessageDecorator) string {
 }
 
 // formatSymbol wraps a symbol with color codes if provided.
-func formatSymbol(symbol string, color Color) string {
+func formatSymbol(symbol string, colorFn colorFormatFunc) string {
 	if symbol == "" {
 		return ""
 	}
-	if color == "" {
-		return symbol
-	}
 
-	return color.Sprint(symbol)
+	return colorFn(symbol)
 }
 
 // CountdownDecorator formats remaining duration as seconds text.

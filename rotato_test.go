@@ -333,7 +333,9 @@ func TestDisplayMessage(t *testing.T) {
 				WithForceInteractive(), // bypass isInteractive early-return
 			)
 
-			r.displayMessage(tt.symbol, tt.color, tt.msg...)
+			r.displayMessage(tt.symbol, func(s string) string {
+				return tt.color.Sprint(s)
+			}, tt.msg...)
 
 			got := buf.String()
 			if got != tt.expected {
