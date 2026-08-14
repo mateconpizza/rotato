@@ -66,7 +66,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -222,6 +221,14 @@ func WithForceInteractive() Option {
 	}
 }
 
+// WithNonInteractive forces the spinner to treat output as non-interactive,
+// regardless of whether the writer is actually a terminal.
+func WithNonInteractive() Option {
+	return func(r *Rotato) {
+		r.term = r.term.WithNonInteractive()
+	}
+}
+
 // WithContextDoneHandler sets a handler invoked when the context is done.
 func WithContextDoneHandler(handler func(*Rotato, error)) Option {
 	return func(r *Rotato) {
@@ -285,21 +292,32 @@ type Rotato struct {
 	// Active state
 	isActive bool         // State of the spinner
 	activeMu sync.RWMutex // Mutex for different spinner states
+
+	// term provides terminal control sequences and interactive-output detection.
+	term Term
 }
 
-// render displays the current frame and message of the spinner.
-func (r *Rotato) render(current int) {
-	mesg := r.currentMessage()
-	mesg = decorate(mesg, r.messageDecorators)
-
-	frameFormatted := r.currentFrame(current)
-
-	if r.prefixMesg != "" {
-		r.parsePrefix(frameFormatted, mesg)
-		return
+// New returns a new spinner.
+func New(opt ...Option) *Rotato {
+	// [color prefix reset][color delimiter reset][color symbol reset][messageDecorator [color message reset]]
+	r := &Rotato{
+		frequency:  defaultFreq,
+		delimiter:  NBSP,
+		isActive:   false,
+		message:    "Loading...",
+		prefixMesg: "",
+		doneChan:   make(chan struct{}, 1),
+		doneSymbol: "✓",
+		failSymbol: "✗",
+		symbols:    defaultSymbols,
+		writer:     os.Stdout,
+		term:       NewTerm(),
+	}
+	for _, fn := range opt {
+		fn(r)
 	}
 
-	r.display(fmt.Sprintf("%s %s", frameFormatted, mesg))
+	return r
 }
 
 // Start starts the spinning animation in a goroutine.
@@ -322,7 +340,7 @@ func (r *Rotato) Start(ctx context.Context) {
 		return
 	}
 
-	hideCursor(r.writer)
+	r.term.HideCursor(r.writer)
 	r.activeMu.Lock()
 	if r.isActive {
 		r.activeMu.Unlock()
@@ -331,7 +349,7 @@ func (r *Rotato) Start(ctx context.Context) {
 	r.isActive = true
 	r.activeMu.Unlock()
 
-	if isRedirected(r.writer) && !r.forceInteractive {
+	if isRedirected(r.writer, r.term.nonInteractive) && !r.forceInteractive {
 		r.render(0)
 		return
 	}
@@ -367,7 +385,7 @@ func (r *Rotato) Start(ctx context.Context) {
 
 // Done stops the spinner animation.
 func (r *Rotato) Done(mesg ...string) {
-	defer showCursor(r.writer)
+	defer r.term.ShowCursor(r.writer)
 
 	r.stopSpinner()
 
@@ -378,7 +396,7 @@ func (r *Rotato) Done(mesg ...string) {
 	case r.doneMessage != "":
 		finalMesg = r.doneMessage
 	default:
-		r.display(clearChars)
+		r.display(r.term.ClearLine())
 		return
 	}
 
@@ -491,6 +509,36 @@ func (r *Rotato) UpdateSymbols(opt Option) {
 	opt(r)
 }
 
+func (r *Rotato) IsRunning() bool {
+	r.activeMu.RLock()
+	defer r.activeMu.RUnlock()
+	return r.isActive
+}
+
+func (r *Rotato) Print(msg string) {
+	r.writeAbove(msg)
+}
+
+// Printf formats according to a format specifier.
+func (r *Rotato) Printf(format string, args ...any) {
+	r.Print(fmt.Sprintf(format, args...))
+}
+
+// render displays the current frame and message of the spinner.
+func (r *Rotato) render(current int) {
+	mesg := r.currentMessage()
+	mesg = decorate(mesg, r.messageDecorators)
+
+	frameFormatted := r.currentFrame(current)
+
+	if r.prefixMesg != "" {
+		r.parsePrefix(frameFormatted, mesg)
+		return
+	}
+
+	r.display(fmt.Sprintf("%s %s", frameFormatted, mesg))
+}
+
 // currentMessage safely constructs and returns the current message.
 func (r *Rotato) currentMessage() string {
 	if r.message == "" {
@@ -529,12 +577,12 @@ func (r *Rotato) display(s string) {
 	r.writerMu.Lock()
 	defer r.writerMu.Unlock()
 
-	if isRedirected(r.writer) {
-		_, _ = fmt.Fprint(r.writer, removeANSI(s))
+	if isRedirected(r.writer, r.term.nonInteractive) {
+		_, _ = fmt.Fprint(r.writer, r.term.RemoveANSI(s))
 		return
 	}
 
-	_, _ = fmt.Fprintf(r.writer, "%s%s", clearChars, s)
+	_, _ = fmt.Fprintf(r.writer, "%s%s", r.term.ClearLine(), s)
 }
 
 // stopSpinner handles the common logic for stopping the spinner.
@@ -552,7 +600,7 @@ func (r *Rotato) stopSpinner() {
 		return
 	}
 
-	defer showCursor(r.writer)
+	defer r.term.ShowCursor(r.writer)
 	r.doneChan <- struct{}{}
 }
 
@@ -617,20 +665,6 @@ func (r *Rotato) buildPrefix(sb *strings.Builder, symbol string) {
 	}
 }
 
-func (r *Rotato) IsRunning() bool {
-	r.activeMu.RLock()
-	defer r.activeMu.RUnlock()
-	return r.isActive
-}
-
-func (r *Rotato) Print(msg string) {
-	r.writeAbove(msg)
-}
-
-func (r *Rotato) Printf(format string, args ...any) {
-	r.Print(fmt.Sprintf(format, args...))
-}
-
 func (r *Rotato) writeAbove(msg string) {
 	r.writerMu.Lock()
 	defer r.writerMu.Unlock()
@@ -641,7 +675,7 @@ func (r *Rotato) writeAbove(msg string) {
 	}
 
 	// removes current spinner
-	_, _ = fmt.Fprint(r.writer, clearChars)
+	_, _ = fmt.Fprint(r.writer, r.term.ClearLine())
 
 	// print permanent message
 	_, _ = fmt.Fprintln(r.writer, msg)
@@ -665,7 +699,7 @@ func (r *Rotato) renderCurrentLocked() {
 		_, _ = fmt.Fprintf(
 			r.writer,
 			"%s%s%s%s",
-			clearChars,
+			r.term.ClearLine(),
 			prefix,
 			delimiter,
 			frame+" "+mesg,
@@ -677,7 +711,7 @@ func (r *Rotato) renderCurrentLocked() {
 	_, _ = fmt.Fprintf(
 		r.writer,
 		"%s%s %s",
-		clearChars,
+		r.term.ClearLine(),
 		frame,
 		mesg,
 	)
@@ -701,12 +735,6 @@ func formatSymbol(symbol string, color Color) string {
 	}
 
 	return color.Sprint(symbol)
-}
-
-// removeANSI removes ANSI codes from a given string.
-func removeANSI(s string) string {
-	re := regexp.MustCompile(`\x1b\[[0-9;]*m`)
-	return re.ReplaceAllString(s, "")
 }
 
 // CountdownDecorator formats remaining duration as seconds text.
@@ -733,26 +761,4 @@ func ElapsedDecorator(d time.Duration) string {
 	m := int(d.Minutes())
 	s := int(d.Seconds()) % 60
 	return fmt.Sprintf("+%02d:%02d", m, s)
-}
-
-// New returns a new spinner.
-func New(opt ...Option) *Rotato {
-	// [color prefix reset][color delimiter reset][color symbol reset][messageDecorator [color message reset]]
-	r := &Rotato{
-		frequency:  100 * time.Millisecond,
-		delimiter:  NBSP,
-		isActive:   false,
-		message:    "Loading...",
-		prefixMesg: "",
-		doneChan:   make(chan struct{}, 1),
-		doneSymbol: "✓",
-		failSymbol: "✗",
-		symbols:    defaultSymbols,
-		writer:     os.Stdout,
-	}
-	for _, fn := range opt {
-		fn(r)
-	}
-
-	return r
 }
