@@ -3,8 +3,9 @@
 <h1><b><span style="font-size: 1.2em">🌀</span> Rotato</b></h1>
 
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mateconpizza/rotato)
-![Linux](https://img.shields.io/badge/-Linux-grey?logo=linux)
+![Release](https://img.shields.io/github/v/release/mateconpizza/rotato)
 [![Go Reference](https://pkg.go.dev/badge/github.com/mateconpizza/rotato.svg)](https://pkg.go.dev/github.com/mateconpizza/rotato)
+![Linux](https://img.shields.io/badge/-Linux-grey?logo=linux)
 
 Lightweight and highly customizable spinner library for Go, designed to enhance your command-line applications with visually appealing progress indicators. With **+70** spinners to choose from, you can easily integrate dynamic loading animations into your projects.
 
@@ -33,6 +34,9 @@ go run github.com/mateconpizza/rotato/example@latest -demo
 go run github.com/mateconpizza/rotato/example@latest -all
 ```
 
+<details>
+<summary><strong>Demo usage</strong></summary>
+
 - List by groups
 
 ```sh
@@ -51,11 +55,13 @@ go run github.com/mateconpizza/rotato/example@latest -group <name>
 go run github.com/mateconpizza/rotato/example@latest -show <name>
 ```
 
-- Show more spinners
+- More options
 
 ```sh
-go run github.com/mateconpizza/rotato/example@latest -more
+go run github.com/mateconpizza/rotato/example@latest -help
 ```
+
+</details>
 
 ## Installation
 

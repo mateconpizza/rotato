@@ -7,19 +7,18 @@ full: test lint
 
 # Run tests
 test:
-	@echo '>> Testing go test ./... -race'
-	@go test ./... -race
+	@go test -race -count=1 ./...
 	@echo
 
 # Run tests for a specific function
 testfn:
 	@echo '>> Testing function $(FN)'
-	@go test -run $(FN) ./... -race
+	@go test -race -run $(FN) ./...
 
-testrace:
-	@echo '>> Testing'
-	@go test ./... -race
-	@echo
+# Run tests with gotestsum
+testsum:
+	@echo '>> Testing with gotestsum'
+	@gotestsum --format=testname --hide-summary=skipped
 
 # Lint code with 'golangci-lint'
 lint:
