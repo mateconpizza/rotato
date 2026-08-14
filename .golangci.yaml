@@ -144,6 +144,9 @@ linters:
       - path: "registry.go"
         linters:
           - goconst
+      - path: "ansi.go"
+        linters:
+          - unused
     generated: lax
     presets:
       - common-false-positives

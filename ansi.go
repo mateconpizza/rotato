@@ -10,21 +10,13 @@ type (
 	// cursor control sequences for showing, hiding the cursor.
 	cursor string
 
-	// Color (Select Graphic Rendition) sequences for colors and text styles.
+	// Color in a sequences for colors and text styles.
 	Color string
 )
 
-const (
-	// Hide the cursor.
-	CursorHide cursor = "\x1b[?25l"
-
-	// Show the cursor.
-	CursorShow cursor = "\x1b[?25h"
-
-	// clearChars represents a sequence of characters used to clear the current
-	// line in the terminal.
-	clearChars = "\r\033[K\r"
-)
+func NewColor(codes ...Color) Color {
+	return Color(combine(codes...))
+}
 
 const (
 	ColorReset Color = "\x1b[0m" // Reset all attributes
@@ -86,19 +78,9 @@ const (
 	StyleStrikethrough Color = "\x1b[9m" // Crossed-out/strikethrough
 )
 
-// isColorDisabled checks the NO_COLOR environment variable.
-// https://no-color.org/
-func isColorDisabled() bool {
-	_, exists := os.LookupEnv("NO_COLOR")
-	return exists
-}
-
 // Wrap wraps the given text with the provided styles and resets afterwards.
 func (c Color) Wrap(text string, styles ...Color) string {
-	if isColorDisabled() || nonInteractive {
-		return text
-	}
-	return string(c) + combine(styles...) + text + string(ColorReset)
+	return string(c) + combine(styles...) + text + ColorReset.String()
 }
 
 // With combines the receiver style with additional styles and returns a new
@@ -120,10 +102,6 @@ func (c Color) Sprintf(f string, a ...any) string {
 }
 
 func (c Color) String() string {
-	if isColorDisabled() {
-		return ""
-	}
-
 	return string(c)
 }
 
@@ -138,11 +116,41 @@ func combine(codes ...Color) string {
 
 	var sb strings.Builder
 	for _, code := range codes {
-		sb.WriteString(string(code))
+		sb.WriteString(code.String())
 	}
 	return sb.String()
 }
 
-func NewColor(codes ...Color) Color {
-	return Color(combine(codes...))
+type Palette struct {
+	spinner     Color
+	message     Color
+	prefixMesg  Color
+	delimiter   Color
+	doneMessage Color
+	doneSymbol  Color
+	failMessage Color
+	failSymbol  Color
+
+	Enabled bool
 }
+
+func newPalette() *Palette {
+	_, exists := os.LookupEnv("NO_COLOR")
+	return &Palette{Enabled: !exists}
+}
+
+func (p *Palette) Format(c Color, text string) string {
+	if !p.Enabled || text == "" || c == "" {
+		return text
+	}
+	return c.Sprint(text)
+}
+
+func (p *Palette) Spinner(s string) string    { return p.Format(p.spinner, s) }     // Spinner color
+func (p *Palette) Message(s string) string    { return p.Format(p.message, s) }     // Spinner message color
+func (p *Palette) Prefix(s string) string     { return p.Format(p.prefixMesg, s) }  // Prefix message color
+func (p *Palette) Delimiter(s string) string  { return p.Format(p.delimiter, s) }   // Delimiter color
+func (p *Palette) DoneMsg(s string) string    { return p.Format(p.doneMessage, s) } // Done channel message color
+func (p *Palette) DoneSymbol(s string) string { return p.Format(p.doneSymbol, s) }  // Done symbol color
+func (p *Palette) FailMsg(s string) string    { return p.Format(p.failMessage, s) } // Fail message color
+func (p *Palette) FailSymbol(s string) string { return p.Format(p.failSymbol, s) }  // Fail symbol color

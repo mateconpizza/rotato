@@ -469,12 +469,11 @@ func TestStopSpinner_NoDeadlockDone(t *testing.T) {
 func TestRotato_DoneConcurrency(t *testing.T) {
 	var buf bytes.Buffer
 
-	r := &Rotato{
-		writer:           &buf,
-		isActive:         true,
-		doneChan:         make(chan struct{}, 1), // buffered to prevent blocking if read isn't active
-		forceInteractive: true,                   // force it to act like a real terminal
-	}
+	r := New(
+		WithWriter(&buf),
+		WithForceInteractive(),
+	)
+	r.isActive = true
 
 	const workers = 50
 	var wg sync.WaitGroup
@@ -507,12 +506,11 @@ func TestRotato_DoneConcurrency(t *testing.T) {
 func TestStopSpinner_DoneFailRace(t *testing.T) {
 	var buf bytes.Buffer
 
-	r := &Rotato{
-		writer:           &buf,
-		isActive:         true,
-		doneChan:         make(chan struct{}, 1),
-		forceInteractive: true,
-	}
+	r := New(
+		WithWriter(&buf),
+		WithForceInteractive(),
+	)
+	r.isActive = true
 
 	var wg sync.WaitGroup
 	wg.Add(2)

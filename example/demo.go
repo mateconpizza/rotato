@@ -488,10 +488,6 @@ func formatDuration(d time.Duration) string {
 }
 
 func main() {
-	if flags.NonInteractive {
-		rotato.SetNonInteractive()
-	}
-
 	ctx, stop := signal.NotifyContext(
 		context.Background(),
 		os.Interrupt, syscall.SIGTERM, syscall.SIGHUP,

@@ -13,10 +13,18 @@ const NBSP = "\u00A0"
 // nonInteractive indicates whether the terminal is non-interactive.
 var nonInteractive = false
 
-// SetNonInteractive sets the terminal to non-interactive mode.
-func SetNonInteractive() {
-	nonInteractive = true
-}
+const (
+	// Hide the cursor.
+	CursorHide cursor = "\x1b[?25l"
+
+	// Show the cursor.
+	CursorShow cursor = "\x1b[?25h"
+
+	// clearChars represents a sequence of characters used to clear the current
+	// line in the terminal.
+	clearChars = "\r\033[K\r"
+)
+
 
 // hideCursor hides the cursor.
 func hideCursor(output io.Writer) {
