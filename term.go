@@ -24,7 +24,7 @@ type Term struct {
 	nonInteractive bool
 }
 
-func NewTerm() Term {
+func newTerm() Term {
 	return Term{
 		clearLine:  clearChars,
 		hideCursor: string(cursorHide),

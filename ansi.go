@@ -18,6 +18,13 @@ func NewColor(codes ...Color) Color {
 	return Color(combine(codes...))
 }
 
+// isColorDisabled checks the NO_COLOR environment variable.
+// https://no-color.org/
+func isColorDisabled() bool {
+	_, exists := os.LookupEnv("NO_COLOR")
+	return exists
+}
+
 const (
 	ColorReset Color = "\x1b[0m" // Reset all attributes
 
@@ -80,6 +87,9 @@ const (
 
 // Wrap wraps the given text with the provided styles and resets afterwards.
 func (c Color) Wrap(text string, styles ...Color) string {
+	if isColorDisabled() {
+		return text
+	}
 	return string(c) + combine(styles...) + text + ColorReset.String()
 }
 
@@ -102,6 +112,9 @@ func (c Color) Sprintf(f string, a ...any) string {
 }
 
 func (c Color) String() string {
+	if isColorDisabled() {
+		return ""
+	}
 	return string(c)
 }
 
@@ -121,6 +134,8 @@ func combine(codes ...Color) string {
 	return sb.String()
 }
 
+type colorFormatFunc func(s string) string
+
 type Palette struct {
 	spinner     Color
 	message     Color
@@ -135,8 +150,7 @@ type Palette struct {
 }
 
 func newPalette() *Palette {
-	_, exists := os.LookupEnv("NO_COLOR")
-	return &Palette{Enabled: !exists}
+	return &Palette{Enabled: !isColorDisabled()}
 }
 
 func (p *Palette) Format(c Color, text string) string {
