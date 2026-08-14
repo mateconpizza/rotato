@@ -5,163 +5,70 @@ run:
 output:
   path-prefix: ""
 linters:
-  default: none
-  enable:
-    - asasalint
-    - bidichk
-    - dogsled
-    - dupl
-    - err113
-    - errcheck
-    - errname
-    - errorlint
-    - forcetypeassert
-    - funlen
+  default: all
+  disable:
+    - copyloopvar
+    - cyclop
+    - depguard
+    - exhaustruct
+    - forbidigo
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
     - goconst
-    - gocritic
-    - gocyclo
-    - godot
-    - gosec
-    - govet
-    - iface
-    - ineffassign
-    - interfacebloat
-    - lll
-    - maintidx
-    - makezero
-    - misspell
-    - musttag
-    - nakedret
-    - nestif
-    - nilerr
-    - nilnil
-    # - nlreturn
-    - noctx
-    - nolintlint
-    - perfsprint
-    - prealloc
-    - predeclared
-    - protogetter
-    - reassign
-    - recvcheck
+    - gomodguard
+    - intrange
+    - mnd
+    - nlreturn
+    - noinlineerr
+    - paralleltest
     - revive
-    - rowserrcheck
-    - sqlclosecheck
-    - staticcheck
-    - tagalign
-    - testifylint
-    - thelper
-    - unconvert
-    - unparam
-    - unused
-    - usestdlibvars
-    - usetesting
-    - wastedassign
-    - whitespace
-    # - wrapcheck
+    - testpackage
+    - tparallel
+    - varnamelen
+    - wrapcheck
+    - wsl
+    - wsl_v5
   settings:
     errcheck:
       check-type-assertions: true
       check-blank: false
-    errorlint:
-      errorf: true
-      asserts: false
-      comparison: false
-    goconst:
-      min-len: 2
-      min-occurrences: 4
-    gocritic:
-      enabled-tags:
-        - diagnostic
-        - experimental
-        - opinionated
-        - performance
-        - style
+      exclude-functions:
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - fmt.Print
+        - fmt.Printf
+        - fmt.Println
+    tagliatelle:
+      case:
+        rules:
+          json: snake
+          yaml: snake
     gosec:
       excludes:
-        - G115
-        - G201
         - G204
-    nlreturn:
-      block-size: 3
-    nolintlint:
-      require-explanation: false
-      require-specific: true
-    revive:
-      severity: warning
-      rules:
-        - name: atomic
-        - name: unexported-return
-        - name: errorf
-        - name: error-return
-        - name: error-naming
-        - name: if-return
-        - name: increment-decrement
-        - name: range
-        - name: receiver-naming
-        - name: empty-block
-        - name: confusing-naming
-        - name: unnecessary-stmt
-        - name: struct-tag
-        - name: modifies-value-receiver
-        - name: bool-literal-in-expr
-        - name: early-return
-        - name: unexported-naming
-        - name: nested-structs
-    staticcheck:
-      checks:
-        - -ST1000
-        - ST1001
-        - ST1003
-        - ST1005
-        - ST1006
-        - ST1008
-        - ST1011
-        - ST1012
-        - ST1013
-        - ST1015
-        - ST1016
-        - ST1017
-        - ST1018
-        - ST1019
-        - ST1020
-        - ST1021
-        - ST1022
-        - ST1023
-    testifylint:
-      enable-all: true
-      disable:
-        - require-error
   exclusions:
     rules:
+      - path: "term.go"
+        linters:
+          - lll
       - path: "registry.go"
         linters:
           - lll
-      - path: "rotato_test.go"
+      - path: "ansi.go"
+        linters:
+          - godoclint
+      - path: "example/demo.go"
         linters:
           - funlen
-          - goconst
-      - path: "registry.go"
+      - path: '.*_test\.go'
         linters:
           - goconst
-    generated: lax
-    presets:
-      - common-false-positives
-    paths:
-      - cmd/Test.go
-      - third_party$
-      - builtin$
-      - examples$
-issues:
-  uniq-by-line: true
+          - funlen
+          - cyclop
+          - lll
 formatters:
   enable:
     - gofumpt
     - goimports
-  exclusions:
-    generated: lax
-    paths:
-      - cmd/Test.go
-      - third_party$
-      - builtin$
-      - examples$
