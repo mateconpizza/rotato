@@ -307,7 +307,7 @@ func New(opt ...Option) *Rotato {
 		frequency:  defaultFreq,
 		delimiter:  NBSP,
 		isActive:   false,
-		message:    "Loading...",
+		message:    "",
 		prefixMesg: "",
 		doneChan:   make(chan struct{}, 1),
 		doneSymbol: "✓",

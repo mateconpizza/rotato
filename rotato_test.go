@@ -896,7 +896,6 @@ func TestNew_WithSymbols(t *testing.T) {
 		spinnerName    SpinnerName
 		wantDoneSymbol string
 		wantFailSymbol string
-		wantMessage    string
 		wantDelimiter  string
 		wantActive     bool
 		wantWriter     io.Writer // nil = expect default os.Stdout
@@ -907,7 +906,6 @@ func TestNew_WithSymbols(t *testing.T) {
 			spinnerName:    "",
 			wantDoneSymbol: "✓",
 			wantFailSymbol: "✗",
-			wantMessage:    "Loading...",
 			wantDelimiter:  NBSP,
 			wantActive:     false,
 			wantWriter:     nil,
@@ -918,7 +916,6 @@ func TestNew_WithSymbols(t *testing.T) {
 			spinnerName:    SpinnerDefault,
 			wantDoneSymbol: "✓",
 			wantFailSymbol: "✗",
-			wantMessage:    "Loading...",
 			wantDelimiter:  NBSP,
 			wantActive:     false,
 			wantWriter:     nil,
@@ -929,7 +926,6 @@ func TestNew_WithSymbols(t *testing.T) {
 			spinnerName:    SpinnerBlock,
 			wantDoneSymbol: "✓",
 			wantFailSymbol: "✗",
-			wantMessage:    "Loading...",
 			wantDelimiter:  NBSP,
 			wantActive:     false,
 			wantWriter:     nil,
@@ -940,7 +936,6 @@ func TestNew_WithSymbols(t *testing.T) {
 			spinnerName:    SpinnerBlockbar4,
 			wantDoneSymbol: "✓",
 			wantFailSymbol: "✗",
-			wantMessage:    "Loading...",
 			wantDelimiter:  NBSP,
 			wantActive:     false,
 			wantWriter:     nil,
@@ -951,7 +946,6 @@ func TestNew_WithSymbols(t *testing.T) {
 			spinnerName:    SpinnerBlockbar2,
 			wantDoneSymbol: "✓",
 			wantFailSymbol: "✗",
-			wantMessage:    "Loading...",
 			wantDelimiter:  NBSP,
 			wantActive:     false,
 			wantWriter:     nil,
@@ -962,7 +956,6 @@ func TestNew_WithSymbols(t *testing.T) {
 			spinnerName:    "",
 			wantDoneSymbol: "✓",
 			wantFailSymbol: "✗",
-			wantMessage:    "Loading...",
 			wantDelimiter:  NBSP,
 			wantActive:     false,
 			wantWriter:     nil,
@@ -973,7 +966,6 @@ func TestNew_WithSymbols(t *testing.T) {
 			spinnerName:    "",
 			wantDoneSymbol: "✓",
 			wantFailSymbol: "✗",
-			wantMessage:    "Loading...",
 			wantDelimiter:  NBSP,
 			wantActive:     false,
 			wantWriter:     &buf,
@@ -984,7 +976,6 @@ func TestNew_WithSymbols(t *testing.T) {
 			spinnerName:    "",
 			wantDoneSymbol: "✓",
 			wantFailSymbol: "✗",
-			wantMessage:    "Loading...",
 			wantDelimiter:  NBSP,
 			wantActive:     false,
 			wantWriter:     io.Writer(nil),
@@ -995,7 +986,6 @@ func TestNew_WithSymbols(t *testing.T) {
 			spinnerName:    SpinnerBlockbar3,
 			wantDoneSymbol: "✓",
 			wantFailSymbol: "✗",
-			wantMessage:    "Loading...",
 			wantDelimiter:  NBSP,
 			wantActive:     false,
 			wantWriter:     &buf,
@@ -1015,9 +1005,6 @@ func TestNew_WithSymbols(t *testing.T) {
 
 			if r.isActive != tt.wantActive {
 				t.Errorf("isActive = %v; want %v", r.isActive, tt.wantActive)
-			}
-			if r.message != tt.wantMessage {
-				t.Errorf("message = %q; want %q", r.message, tt.wantMessage)
 			}
 			if r.delimiter != tt.wantDelimiter {
 				t.Errorf("delimiter = %q; want %q", r.delimiter, tt.wantDelimiter)
