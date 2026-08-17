@@ -11,7 +11,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestPaletteFormat(t *testing.T) {
+func TestColorizerFormat(t *testing.T) {
 	tests := []struct {
 		name    string
 		c       Color
@@ -31,7 +31,7 @@ func TestPaletteFormat(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := newPalette()
+			p := newColorizer()
 			p.spinner = tt.c
 			p.Enabled = tt.enabled
 
@@ -43,7 +43,7 @@ func TestPaletteFormat(t *testing.T) {
 	}
 }
 
-func TestNewPalette(t *testing.T) {
+func TestNewColorizer(t *testing.T) {
 	tests := []struct {
 		name        string
 		noColorSet  bool
@@ -67,20 +67,20 @@ func TestNewPalette(t *testing.T) {
 				t.Setenv("NO_COLOR", "1")
 			}
 
-			p := newPalette()
+			p := newColorizer()
 			if p.Enabled != tt.wantEnabled {
-				t.Fatalf("newPalette().Enabled = %v; want %v", p.Enabled, tt.wantEnabled)
+				t.Fatalf("newColorizer().Enabled = %v; want %v", p.Enabled, tt.wantEnabled)
 			}
 		})
 	}
 }
 
-func TestPalette_Formatters(t *testing.T) {
+func TestColorizer_Formatters(t *testing.T) {
 	t.Parallel()
 
-	p := Palette{
+	p := Colorizer{
 		Enabled:     true,
-		spinner:     FgBlue,
+		spinner:     Color("c1"),
 		message:     Color("c2"),
 		prefixMesg:  Color("c3"),
 		delimiter:   Color("c4"),

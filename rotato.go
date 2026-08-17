@@ -91,7 +91,7 @@ func WithMessage(s string) Option {
 // color.
 func WithMessageColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.color.message = NewColor(c...)
+		r.colorize.message = NewColor(c...)
 	}
 }
 
@@ -114,7 +114,7 @@ func WithPrefix(prefix string) Option {
 // prefix.
 func WithPrefixColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.color.prefixMesg = NewColor(c...)
+		r.colorize.prefixMesg = NewColor(c...)
 	}
 }
 
@@ -137,14 +137,14 @@ func WithDelimiter(s string) Option {
 // delimiter, only visible with `prefix`.
 func WithDelimiterColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.color.delimiter = NewColor(c...)
+		r.colorize.delimiter = NewColor(c...)
 	}
 }
 
 // WithSpinnerColor returns an option function that sets the spinner color.
 func WithSpinnerColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.color.spinner = NewColor(c...)
+		r.colorize.spinner = NewColor(c...)
 	}
 }
 
@@ -166,14 +166,14 @@ func WithDoneSymbol(symbol string) Option {
 // color.
 func WithDoneMessageColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.color.doneMessage = NewColor(c...)
+		r.colorize.doneMessage = NewColor(c...)
 	}
 }
 
 // WithDoneSymbolColor sets the combined color(s) for the completion symbol.
 func WithDoneSymbolColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.color.doneSymbol = NewColor(c...)
+		r.colorize.doneSymbol = NewColor(c...)
 	}
 }
 
@@ -188,7 +188,7 @@ func WithFailSymbol(symbol string) Option {
 // color.
 func WithFailMessageColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.color.failMessage = NewColor(c...)
+		r.colorize.failMessage = NewColor(c...)
 	}
 }
 
@@ -196,7 +196,7 @@ func WithFailMessageColor(c ...Color) Option {
 // color.
 func WithFailSymbolColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.color.failSymbol = NewColor(c...)
+		r.colorize.failSymbol = NewColor(c...)
 	}
 }
 
@@ -295,9 +295,9 @@ type Rotato struct {
 	// term provides terminal control sequences and interactive-output detection.
 	term Term
 
-	// color defines the visual color scheme and handles conditional ANSI
+	// colorize defines the visual color scheme and handles conditional ANSI
 	// formatting.
-	color *Palette
+	colorize *Colorizer
 }
 
 // New returns a new spinner.
@@ -315,7 +315,7 @@ func New(opt ...Option) *Rotato {
 		symbols:    defaultSymbols,
 		writer:     os.Stdout,
 		term:       newTerm(),
-		color:      newPalette(),
+		colorize:   newColorizer(),
 	}
 	for _, fn := range opt {
 		fn(r)
@@ -404,9 +404,9 @@ func (r *Rotato) Done(mesg ...string) {
 		return
 	}
 
-	symbol := formatSymbol(r.doneSymbol, r.color.DoneSymbol)
+	symbol := formatSymbol(r.doneSymbol, r.colorize.DoneSymbol)
 
-	r.displayMessage(symbol, r.color.DoneMsg, finalMesg)
+	r.displayMessage(symbol, r.colorize.DoneMsg, finalMesg)
 }
 
 // Fail fails the spinner animation.
@@ -415,9 +415,9 @@ func (r *Rotato) Fail(mesg ...string) {
 	if len(mesg) == 0 {
 		mesg = append(mesg, "Failed")
 	}
-	symbol := formatSymbol(r.failSymbol, r.color.FailSymbol)
+	symbol := formatSymbol(r.failSymbol, r.colorize.FailSymbol)
 
-	r.displayMessage(symbol, r.color.FailMsg, mesg...)
+	r.displayMessage(symbol, r.colorize.FailMsg, mesg...)
 }
 
 // SetWriter updates the output destination safely.
@@ -472,7 +472,7 @@ func (r *Rotato) UpdateMesgf(format string, args ...any) {
 
 // UpdateMesgColor changes the color of the message.
 func (r *Rotato) UpdateMesgColor(c ...Color) {
-	r.color.message = NewColor(c...)
+	r.colorize.message = NewColor(c...)
 }
 
 // UpdatePrefix changes the prefix shown next to the spinner.
@@ -488,7 +488,7 @@ func (r *Rotato) UpdatePrefixf(format string, args ...any) {
 
 // UpdatePrefixColor changes the color of the prefix.
 func (r *Rotato) UpdatePrefixColor(c ...Color) {
-	r.color.prefixMesg = NewColor(c...)
+	r.colorize.prefixMesg = NewColor(c...)
 }
 
 // UpdateDoneSymbol changes the done symbol.
@@ -498,12 +498,12 @@ func (r *Rotato) UpdateDoneSymbol(s string) {
 
 // UpdateDoneMesgColor changes the done message shown next to the spinner.
 func (r *Rotato) UpdateDoneMesgColor(c ...Color) {
-	r.color.doneMessage = NewColor(c...)
+	r.colorize.doneMessage = NewColor(c...)
 }
 
 // UpdateSpinnerColor changes the color of the spinner.
 func (r *Rotato) UpdateSpinnerColor(c ...Color) {
-	r.color.spinner = NewColor(c...)
+	r.colorize.spinner = NewColor(c...)
 }
 
 // UpdateSymbols updates the spinner symbols.
@@ -551,7 +551,7 @@ func (r *Rotato) currentMessage() string {
 	r.messageUpdate.RLock()
 	defer r.messageUpdate.RUnlock()
 
-	return r.color.Message(r.message)
+	return r.colorize.Message(r.message)
 }
 
 // currentFrame returns the spinner frame for the given iteration.
@@ -562,16 +562,16 @@ func (r *Rotato) currentFrame(i int) string {
 	r.frameIdx = i % len(r.symbols)
 	r.frame = r.symbols[r.frameIdx]
 
-	return r.color.Spinner(r.frame)
+	return r.colorize.Spinner(r.frame)
 }
 
 // parsePrefix updates the spinner prefix.
 func (r *Rotato) parsePrefix(frame, mesg string) {
 	r.prefixMu.RLock()
 	defer r.prefixMu.RUnlock()
-	prefix := r.color.Prefix(r.prefixMesg)
+	prefix := r.colorize.Prefix(r.prefixMesg)
 	prefix = decorate(prefix, r.prefixDecorators)
-	deli := r.color.Delimiter(r.delimiter)
+	deli := r.colorize.Delimiter(r.delimiter)
 
 	r.display(fmt.Sprintf("%s%s%s %s", prefix, deli, frame, mesg))
 }
@@ -649,12 +649,12 @@ func (r *Rotato) buildPrefix(sb *strings.Builder, symbol string) {
 
 	// prefix
 	if r.prefixMesg != "" {
-		sb.WriteString(r.color.Prefix(r.prefixMesg))
+		sb.WriteString(r.colorize.Prefix(r.prefixMesg))
 	}
 
 	// delimiter
 	if r.delimiter != "" {
-		sb.WriteString(r.color.Delimiter(r.delimiter))
+		sb.WriteString(r.colorize.Delimiter(r.delimiter))
 	}
 
 	// symbol
@@ -687,13 +687,13 @@ func (r *Rotato) renderCurrentLocked() {
 	mesg := r.currentMessage()
 	mesg = decorate(mesg, r.messageDecorators)
 
-	frame := r.color.Spinner(r.frame)
+	frame := r.colorize.Spinner(r.frame)
 
 	if r.prefixMesg != "" {
-		prefix := r.color.Prefix(r.prefixMesg)
+		prefix := r.colorize.Prefix(r.prefixMesg)
 		prefix = decorate(prefix, r.prefixDecorators)
 
-		delimiter := r.color.Delimiter(r.delimiter)
+		delimiter := r.colorize.Delimiter(r.delimiter)
 
 		_, _ = fmt.Fprintf(
 			r.writer,

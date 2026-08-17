@@ -136,7 +136,7 @@ func combine(codes ...Color) string {
 
 type colorFormatFunc func(s string) string
 
-type Palette struct {
+type Colorizer struct {
 	spinner     Color
 	message     Color
 	prefixMesg  Color
@@ -149,22 +149,22 @@ type Palette struct {
 	Enabled bool
 }
 
-func newPalette() *Palette {
-	return &Palette{Enabled: !isColorDisabled()}
+func newColorizer() *Colorizer {
+	return &Colorizer{Enabled: !isColorDisabled()}
 }
 
-func (p *Palette) Format(c Color, text string) string {
-	if !p.Enabled || text == "" || c == "" {
+func (c *Colorizer) Format(color Color, text string) string {
+	if !c.Enabled || text == "" || color == "" {
 		return text
 	}
-	return c.Sprint(text)
+	return color.Sprint(text)
 }
 
-func (p *Palette) Spinner(s string) string    { return p.Format(p.spinner, s) }     // Spinner color
-func (p *Palette) Message(s string) string    { return p.Format(p.message, s) }     // Spinner message color
-func (p *Palette) Prefix(s string) string     { return p.Format(p.prefixMesg, s) }  // Prefix message color
-func (p *Palette) Delimiter(s string) string  { return p.Format(p.delimiter, s) }   // Delimiter color
-func (p *Palette) DoneMsg(s string) string    { return p.Format(p.doneMessage, s) } // Done channel message color
-func (p *Palette) DoneSymbol(s string) string { return p.Format(p.doneSymbol, s) }  // Done symbol color
-func (p *Palette) FailMsg(s string) string    { return p.Format(p.failMessage, s) } // Fail message color
-func (p *Palette) FailSymbol(s string) string { return p.Format(p.failSymbol, s) }  // Fail symbol color
+func (c *Colorizer) Spinner(s string) string    { return c.Format(c.spinner, s) }     // Spinner color
+func (c *Colorizer) Message(s string) string    { return c.Format(c.message, s) }     // Spinner message color
+func (c *Colorizer) Prefix(s string) string     { return c.Format(c.prefixMesg, s) }  // Prefix message color
+func (c *Colorizer) Delimiter(s string) string  { return c.Format(c.delimiter, s) }   // Delimiter color
+func (c *Colorizer) DoneMsg(s string) string    { return c.Format(c.doneMessage, s) } // Done channel message color
+func (c *Colorizer) DoneSymbol(s string) string { return c.Format(c.doneSymbol, s) }  // Done symbol color
+func (c *Colorizer) FailMsg(s string) string    { return c.Format(c.failMessage, s) } // Fail message color
+func (c *Colorizer) FailSymbol(s string) string { return c.Format(c.failSymbol, s) }  // Fail symbol color
