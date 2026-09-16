@@ -7,117 +7,117 @@ type SpinnerName string
 const (
 	SpinnerDefault SpinnerName = "default"
 
-	SpinnerBrailleWave    SpinnerName = "brailleWave"
-	SpinnerBraillePulse   SpinnerName = "braillePulse"
-	SpinnerBrailleSpin    SpinnerName = "brailleSpin"
-	SpinnerBrailleOrbit   SpinnerName = "brailleOrbit"
-	SpinnerBrailleBounce  SpinnerName = "brailleBounce"
-	SpinnerBrailleScanner SpinnerName = "brailleScanner"
-	SpinnerBrailleFire    SpinnerName = "brailleFire"
-	SpinnerBrailleSpark   SpinnerName = "brailleSpark"
+	SpinnerBrailleWave    SpinnerName = "brailleWave"    // ⡀ ⡄ ⡆ ⡇ ⡏ ⡟ ⡿ ⣿ ⡿ ⡟ ⡏ ⡇ ⡆ ⡄
+	SpinnerBraillePulse   SpinnerName = "braillePulse"   // ⣀ ⣄ ⣤ ⣦ ⣶ ⣿ ⣷ ⣯ ⣟ ⣻ ⣽ ⣾ ⣿ ⣾ ⣽ ⣻ ⣟ ⣯ ⣷ ⣶ ⣦ ⣤ ⣄ ⣀
+	SpinnerBrailleSpin    SpinnerName = "brailleSpin"    // ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏ ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏
+	SpinnerBrailleOrbit   SpinnerName = "brailleOrbit"   // ⠋ ⠙ ⠚ ⠒ ⠂ ⠂ ⠒ ⠲ ⠴ ⠤ ⠄ ⠄ ⠤ ⠠ ⠠ ⠤ ⠦ ⠖ ⠒ ⠐ ⠐ ⠒ ⠓ ⠋
+	SpinnerBrailleBounce  SpinnerName = "brailleBounce"  // ⠁ ⠂ ⠄ ⡀ ⢀ ⠠ ⠐ ⠈ ⠐ ⠠ ⢀ ⡀ ⠄ ⠂
+	SpinnerBrailleScanner SpinnerName = "brailleScanner" // ⠁ ⠃ ⠉ ⠙ ⠚ ⠒ ⠂ ⠂ ⠒ ⠲ ⠴ ⠤ ⠄ ⠄ ⠤ ⠠ ⠠ ⠤ ⠦ ⠖ ⠒ ⠐ ⠐ ⠒ ⠓ ⠋ ⠉ ⠈
+	SpinnerBrailleFire    SpinnerName = "brailleFire"    // ⠁ ⠉ ⠋ ⠛ ⠫ ⠭ ⠮ ⠷ ⠿ ⡿ ⢿ ⣷ ⣶ ⣤ ⣀ ⣄ ⣤ ⣶ ⣷ ⢿ ⡿ ⠿ ⠷ ⠮ ⠭ ⠫ ⠛ ⠋ ⠉ ⠁
+	SpinnerBrailleSpark   SpinnerName = "brailleSpark"   // ⠁ ⠈ ⠐ ⠠ ⡀ ⢀ ⣀ ⣤ ⣶ ⣿ ⣷ ⣦ ⣄ ⢀ ⡀ ⠠ ⠐ ⠈ ⠁ ⠀
 
-	SpinnerDots  SpinnerName = "dots"
-	SpinnerDots3 SpinnerName = "dots3"
-	SpinnerDots4 SpinnerName = "dots4"
-	SpinnerDots5 SpinnerName = "dots5"
-	SpinnerDots6 SpinnerName = "dots6"
-	SpinnerDots7 SpinnerName = "dots7"
+	SpinnerDots  SpinnerName = "dots"  // ⣾ ⣽ ⣻ ⢿ ⡿ ⣟ ⣯ ⣷
+	SpinnerDots3 SpinnerName = "dots3" // ⠄ ⠆ ⠇ ⠋ ⠙ ⠸ ⠰ ⠠ ⠰ ⠸ ⠙ ⠋ ⠇ ⠆
+	SpinnerDots4 SpinnerName = "dots4" // ⠁ ⠂ ⠄ ⡀ ⢀ ⠠ ⠐ ⠈
+	SpinnerDots5 SpinnerName = "dots5" // ⠁⠁⠉⠙⠚⠒⠂⠂⠒⠲⠴⠤⠄⠄⠤⠠⠠⠤⠦⠖⠒⠐⠐⠒⠓⠋⠉⠈⠈
+	SpinnerDots6 SpinnerName = "dots6" // ⢀⠀ ⡀⠀ ⠄⠀ ⢂⠀ ⡂⠀ ⠅⠀ ⢃⠀ ⡃⠀ ⠍⠀ ⢋⠀ ⡋⠀ ⠍⠁ ⢋⠁ ⡋⠁ ⠍⠉ ⠋⠉ ⠋⠉ ⠉⠙ ⠉⠙ ⠉⠩ ⠈⢙ ⠈⡙ ⢈⠩ ⡀⢙ ⠄⡙ ⢂⠩
+	SpinnerDots7 SpinnerName = "dots7" // ⠁ ⠂ ⠃ ⠄ ⠅ ⠆ ⠇ ⡀ ⡁ ⡂ ⡃ ⡄ ⡅ ⡆ ⡇ ⠈ ⠉ ⠊ ⠋ ⠌ ⠍ ⠎ ⠏ ⡈ ⡉ ⡊ ⡋ ⡌ ⡍ ⡎ ⡏
 
-	SpinnerArrow  SpinnerName = "arrow"
-	SpinnerArrow2 SpinnerName = "arrow2"
-	SpinnerArrow3 SpinnerName = "arrow3"
-	SpinnerArrow4 SpinnerName = "arrow4"
-	SpinnerSweep  SpinnerName = "sweep"
+	SpinnerArrow  SpinnerName = "arrow"  // < << <<< - > >> >>>
+	SpinnerArrow2 SpinnerName = "arrow2" // >    >>   >>>  >>>>
+	SpinnerArrow3 SpinnerName = "arrow3" // ▹▹▹▹▹ ▸▹▹▹▹ ▹▸▹▹▹ ▹▹▸▹▹ ▹▹▹▸▹ ▹▹▹▹▸
+	SpinnerArrow4 SpinnerName = "arrow4" // ← ↖ ↑ ↗ → ↘ ↓ ↙
+	SpinnerSweep  SpinnerName = "sweep"  // ←──── ─←─── ──←── ───←─ ────← ───→─ ──→── ─→─── →────
 
-	SpinnerSlash     SpinnerName = "slash"
-	SpinnerBackslash SpinnerName = "backslash"
-	SpinnerPipe      SpinnerName = "pipe"
-	SpinnerPipe2     SpinnerName = "pipe2"
-	SpinnerLines     SpinnerName = "lines"
+	SpinnerSlash     SpinnerName = "slash"     // / // /// //// /////
+	SpinnerBackslash SpinnerName = "backslash" // \ \\ \\\ \\\\ \\\\\
+	SpinnerPipe      SpinnerName = "pipe"      // | / - \\
+	SpinnerPipe2     SpinnerName = "pipe2"     // ┤ ┘ ┴ └ ├ ┌ ┬ ┐
+	SpinnerLines     SpinnerName = "lines"     // ⠂ - – — – -
 
-	SpinnerBlock          SpinnerName = "block"
-	SpinnerBlockbar       SpinnerName = "blockbar"
-	SpinnerBlockbar2      SpinnerName = "blockbar2"
-	SpinnerBlockbar3      SpinnerName = "blockbar3"
-	SpinnerBlockbar4      SpinnerName = "blockbar4"
-	SpinnerBlockbar5      SpinnerName = "blockbar5"
-	SpinnerBlockbar6      SpinnerName = "blockbar6"
-	SpinnerBlockbar7      SpinnerName = "blockbar7"
-	SpinnerBlockbarPretty SpinnerName = "blockbarpretty"
-	SpinnerBoxFill        SpinnerName = "boxfill"
-	SpinnerBoxFillshort   SpinnerName = "boxfillshort"
-	SpinnerBoxBounce      SpinnerName = "boxbounce"
+	SpinnerBlock          SpinnerName = "block"          // ░ ▒ ▒ ░ ▓
+	SpinnerBlockbar       SpinnerName = "blockbar"       // █▒▒▒▒▒▒▒▒▒ ███▒▒▒▒▒▒▒ █████▒▒▒▒▒ ███████▒▒▒ ██████████
+	SpinnerBlockbar2      SpinnerName = "blockbar2"      // [|       ] [||      ] [|||     ] [||||    ] [|||||   ] ...
+	SpinnerBlockbar3      SpinnerName = "blockbar3"      // [=       ] [==      ] [===     ] [====    ] [=====   ] ...
+	SpinnerBlockbar4      SpinnerName = "blockbar4"      // | || ||| |||| ||||| |||||| ||||||| |||||||| ||||||| ...
+	SpinnerBlockbar5      SpinnerName = "blockbar5"      // [*-------] [-*------] [--*-----] [---*----] [----*---] ...
+	SpinnerBlockbar6      SpinnerName = "blockbar6"      // ·----- -·---- --·--- ---·-- ----·- -----· ----·- ---·- ...
+	SpinnerBlockbar7      SpinnerName = "blockbar7"      // ■      ■■     ■■■    ■■■■   ■■■■■  ■■■■■■
+	SpinnerBlockbarPretty SpinnerName = "blockbarpretty" //       
+	SpinnerBoxFill        SpinnerName = "boxfill"        // [          ] [■         ] [■■        ] [■■■       ] [■■■■      ] ...
+	SpinnerBoxFillshort   SpinnerName = "boxfillshort"   // [      ] [■     ] [■■    ] [■■■   ] [■■■■  ] [■■■■■ ] [■■■■■■]
+	SpinnerBoxBounce      SpinnerName = "boxbounce"      // ▌ ▀ ▐ ▄
 
-	SpinnerBounce     SpinnerName = "bounce"
-	SpinnerBounceball SpinnerName = "bounceball"
-	SpinnerPingpong   SpinnerName = "pingpong"
-	SpinnerPingpong2  SpinnerName = "pingpong2"
-	SpinnerRunner     SpinnerName = "runner"
-	SpinnerRunner1    SpinnerName = "runner1"
+	SpinnerBounce     SpinnerName = "bounce"     // [    ] [=   ] [==  ] [=== ] [ ===] [  ==] [   =]
+	SpinnerBounceball SpinnerName = "bounceball" // ( ●    ) (  ●   ) (   ●  ) (    ● ) (     ●)
+	SpinnerPingpong   SpinnerName = "pingpong"   // <     > <    > <   > <  > < > <>< < > <  > <   > <    >
+	SpinnerPingpong2  SpinnerName = "pingpong2"  // ▐⠂       ▌ ▐⠈       ▌ ▐ ⠂      ▌ ▐ ⠠      ▌ ▐  ⡀     ▌  ...
+	SpinnerRunner     SpinnerName = "runner"     // ▁▁▁▁▁ ▂▁▁▁▁ ▃▂▁▁▁ ▄▃▂▁▁ ▅▄▃▂▁ ▆▅▄▃▂ ▇▆▅▄▃ █▇▆▅▄
+	SpinnerRunner1    SpinnerName = "runner1"    // 🚶  🏃
 
-	SpinnerCircle  SpinnerName = "circle"
-	SpinnerCircle2 SpinnerName = "circle2"
-	SpinnerCircle3 SpinnerName = "circle3"
-	SpinnerCircle4 SpinnerName = "circle4"
-	SpinnerCircle5 SpinnerName = "circle5"
-	SpinnerCircle6 SpinnerName = "circle6"
-	SpinnerCircle7 SpinnerName = "circle7"
-	SpinnerCircle8 SpinnerName = "circle8"
-	SpinnerOrbit   SpinnerName = "orbit"
-	SpinnerMoon    SpinnerName = "moon"
-	SpinnerClock   SpinnerName = "clock"
+	SpinnerCircle  SpinnerName = "circle"  // o O @ *
+	SpinnerCircle2 SpinnerName = "circle2" //	. o O ° O o .
+	SpinnerCircle3 SpinnerName = "circle3" //	● ● ● ●
+	SpinnerCircle4 SpinnerName = "circle4" //	   
+	SpinnerCircle5 SpinnerName = "circle5" //	   
+	SpinnerCircle6 SpinnerName = "circle6" //	    
+	SpinnerCircle7 SpinnerName = "circle7" //	     
+	SpinnerCircle8 SpinnerName = "circle8" //	∙∙∙ ●∙∙ ∙●∙ ∙∙● ∙∙∙
+	SpinnerOrbit   SpinnerName = "orbit"   //	◐ ◓ ◑ ◒
+	SpinnerMoon    SpinnerName = "moon"    //	🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
+	SpinnerClock   SpinnerName = "clock"   //	🕛 🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚
 
-	SpinnerSquare    SpinnerName = "square"
-	SpinnerSquare2   SpinnerName = "square2"
-	SpinnerSquare3   SpinnerName = "square3"
-	SpinnerCubes     SpinnerName = "cubes"
-	SpinnerTriangles SpinnerName = "triangles"
-	SpinnerDiamond   SpinnerName = "diamond"
-	SpinnerDiamond2  SpinnerName = "diamond2"
-	SpinnerGeometric SpinnerName = "geometric"
+	SpinnerSquare    SpinnerName = "square"    //	▖ ▘ ▝ ▗
+	SpinnerSquare2   SpinnerName = "square2"   //	    
+	SpinnerSquare3   SpinnerName = "square3"   //	▰▱▱▱▱▱▱ ▰▰▱▱▱▱▱ ▰▰▰▱▱▱▱ ▰▰▰▰▱▱▱ ▰▰▰▰▰▱▱ ▰▰▰▰▰▰▱ ▰▰▰▰▰▰▰ ▰▱▱▱▱▱▱
+	SpinnerCubes     SpinnerName = "cubes"     //	▖ ▘ ▝ ▗
+	SpinnerTriangles SpinnerName = "triangles" //	▲ ▶ ▼ ◀
+	SpinnerDiamond   SpinnerName = "diamond"   //	◇ ◈ ⬟ ⬞
+	SpinnerDiamond2  SpinnerName = "diamond2"  //	   
+	SpinnerGeometric SpinnerName = "geometric" //	△ ◊ ◈ ◇ ○ ● ◐ ◑ ◒ ◓
 
-	SpinnerLoading    SpinnerName = "loading"
-	SpinnerEllipsis   SpinnerName = "ellipsis"
-	SpinnerQuestion   SpinnerName = "question"
-	SpinnerHexsymbols SpinnerName = "hexsymbols"
+	SpinnerLoading    SpinnerName = "loading"    //	loading....
+	SpinnerEllipsis   SpinnerName = "ellipsis"   //	".  " ".. " "..." " .." "  ." "   "
+	SpinnerQuestion   SpinnerName = "question"   //	? ?? ??? ???? ?????
+	SpinnerHexsymbols SpinnerName = "hexsymbols" //	0x0 0x1 0x2 0x3 0x4 0x5 0x6 0x7 0x8 0x9 0xA 0xB 0xC 0xD 0xE 0xF
 
-	SpinnerCurrency     SpinnerName = "currency"
-	SpinnerMathops      SpinnerName = "mathops"
-	SpinnerLogicsymbols SpinnerName = "logicsymbols"
-	SpinnerGreek        SpinnerName = "greek"
+	SpinnerCurrency     SpinnerName = "currency"     //	$ € £ ¥ ₿ ₹
+	SpinnerMathops      SpinnerName = "mathops"      //   - - × ÷ = ≠ ≈ ≤ ≥
+	SpinnerLogicsymbols SpinnerName = "logicsymbols" //	∀ ∃ ∈ ∉ ∋ ∌ ⊆ ⊂ ⊄ ⊇ ⊃ ⊅
+	SpinnerGreek        SpinnerName = "greek"        //	α β γ δ ε ζ η θ
 
-	SpinnerPacman SpinnerName = "pacman"
-	SpinnerSnail  SpinnerName = "snail"
-	SpinnerWorm   SpinnerName = "worm"
-	SpinnerWorm2  SpinnerName = "worm2"
+	SpinnerPacman SpinnerName = "pacman" //	󰮯··· ·󰮯·· ··󰮯· ···󰮯
+	SpinnerSnail  SpinnerName = "snail"  //	@ @- @-- @--- @---- @-----
+	SpinnerWorm   SpinnerName = "worm"   //	~ ~~ ~~~ ~~~~ ~~~~~ ~~~~ ~~~ ~~ ~
+	SpinnerWorm2  SpinnerName = "worm2"  //	~ ~~ ~~~ ~~~~ ~~~~~ ~~~~ ~~~ ~~ ~
 
-	SpinnerToggle      SpinnerName = "toggle"
-	SpinnerToggle2     SpinnerName = "toggle2"
-	SpinnerToggle3     SpinnerName = "toggle3"
-	SpinnerToggle4     SpinnerName = "toggle4"
-	SpinnerToggle5     SpinnerName = "toggle5"
-	SpinnerCursorBlink SpinnerName = "cursorBlink"
-	SpinnerPluscross   SpinnerName = "pluscross"
+	SpinnerToggle      SpinnerName = "toggle"      //	■ □ ▪ ▫
+	SpinnerToggle2     SpinnerName = "toggle2"     //	= * -
+	SpinnerToggle3     SpinnerName = "toggle3"     //	◉ ◎
+	SpinnerToggle4     SpinnerName = "toggle4"     //	㊂ ㊀ ㊁
+	SpinnerToggle5     SpinnerName = "toggle5"     //	☗ ☖
+	SpinnerCursorBlink SpinnerName = "cursorBlink" //	"_", " ", "_", " "
+	SpinnerPluscross   SpinnerName = "pluscross"   //   - x
 
-	SpinnerFade     SpinnerName = "fade"
-	SpinnerPulse    SpinnerName = "pulse"
-	SpinnerGrow     SpinnerName = "grow"
-	SpinnerGrowvert SpinnerName = "growvert"
-	SpinnerWave     SpinnerName = "wave"
+	SpinnerFade     SpinnerName = "fade"     //	█ ▓ ▒ ░   ░ ▒ ▓
+	SpinnerPulse    SpinnerName = "pulse"    //	░ ▒ ▓ █ ▓ ▒
+	SpinnerGrow     SpinnerName = "grow"     //	▉ ▊ ▋ ▌ ▍ ▎ ▏
+	SpinnerGrowvert SpinnerName = "growvert" //	▁ ▃ ▄ ▅ ▆ ▇ ▆ ▅ ▄ ▃
+	SpinnerWave     SpinnerName = "wave"     //	⢄ ⢂ ⢁ ⡀ ⠈ ⠘ ⠸
 
-	SpinnerMarquee SpinnerName = "marquee"
-	SpinnerMatrix  SpinnerName = "matrix"
-	SpinnerCorners SpinnerName = "corners"
+	SpinnerMarquee SpinnerName = "marquee" //	[          ] [ >        ] [  >       ] [   >      ] [    >     ]
+	SpinnerMatrix  SpinnerName = "matrix"  //	╔═══╗ ║▓▓▓║ ║░▓▓║ ║░░▓║ ║░░░║ ╚═══╝
+	SpinnerCorners SpinnerName = "corners" //	┌ ┐ └ ┘
 
-	SpinnerFlip       SpinnerName = "flip"
-	SpinnerMaterial   SpinnerName = "material"
-	SpinnerShark      SpinnerName = "shark"
-	SpinnerBetawave   SpinnerName = "betawave"
-	SpinnerFistbump   SpinnerName = "fistbump"
-	SpinnerFutbolHead SpinnerName = "futbolHead"
-	SpinnerMindblown  SpinnerName = "mindblown"
-	SpinnerSpeaker    SpinnerName = "speaker"
-	SpinnerStar       SpinnerName = "star"
+	SpinnerFlip       SpinnerName = "flip"       //	_ _ _ - ` ` ' ´ - _ _ _
+	SpinnerMaterial   SpinnerName = "material"   //	█▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ ██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ ███▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁...
+	SpinnerShark      SpinnerName = "shark"      //	▐________|\\____▌
+	SpinnerBetawave   SpinnerName = "betawave"   //	ρββββββ βρβββββ ββρββββ βββρβββ ββββρββ βββββρβ ββββββρ
+	SpinnerFistbump   SpinnerName = "fistbump"   //	🤜✨🤛
+	SpinnerFutbolHead SpinnerName = "futbolHead" //	🧑   ⚽️     🧑
+	SpinnerMindblown  SpinnerName = "mindblown"  //	😐  😐  😮  😮  😦  😦  😧  😧  🤯  💥  ✨
+	SpinnerSpeaker    SpinnerName = "speaker"    //	🔈 🔉  🔊  🔉
+	SpinnerStar       SpinnerName = "star"       // //	✶ ✸ ✹ ✺ ✹ ✷
 )
 
 type SpinnerGroup string

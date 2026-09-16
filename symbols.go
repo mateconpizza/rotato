@@ -367,6 +367,8 @@ func WithSymbolsPingPong() Option { return WithSpinnerStyle(SpinnerPingpong) }
 
 // WithSymbolsPingPong2 returns an option function that sets the spinner
 // animation with expanding and contracting brackets.
+//
+//	▐⠂       ▌ ▐⠈       ▌ ▐ ⠂      ▌ ▐ ⠠      ▌ ▐  ⡀     ▌ ▐  ⠠     ▌ ▐   ⠂ ...
 func WithSymbolsPingPong2() Option { return WithSpinnerStyle(SpinnerPingpong2) }
 
 // WithSymbolsMatrix returns an option function that sets the spinner
@@ -400,6 +402,10 @@ func WithSymbolsBoxFill() Option { return WithSpinnerStyle(SpinnerBoxFill) }
 //	[      ] [■     ] [■■    ] [■■■   ] [■■■■  ] [■■■■■ ] [■■■■■■]
 func WithSymbolsBoxFillShort() Option { return WithSpinnerStyle(SpinnerBoxFillshort) }
 
+// WithSymbolsBoxBounce returns an option function that sets the spinner
+// animation with progressively filling box.
+//
+//	▌ ▀ ▐ ▄
 func WithSymbolsBoxBounce() Option { return WithSpinnerStyle(SpinnerBoxBounce) }
 
 // WithSymbolsSnail returns an option function that sets the spinner
@@ -509,6 +515,48 @@ func WithSymbolsEllipsis() Option { return WithSpinnerStyle(SpinnerEllipsis) }
 //	⡀ ⡄ ⡆ ⡇ ⡏ ⡟ ⡿ ⣿ ⡿ ⡟ ⡏ ⡇ ⡆ ⡄
 func WithSymbolsBrailleWave() Option { return WithSpinnerStyle(SpinnerBrailleWave) }
 
+// WithSymbolsBraillePulse returns a option function that sets the spinner
+// unicode animation
+//
+//	⣀ ⣄ ⣤ ⣦ ⣶ ⣿ ⣷ ⣯ ⣟ ⣻ ⣽ ⣾ ⣿ ⣾ ⣽ ⣻ ⣟ ⣯ ⣷ ⣶ ⣦ ⣤ ⣄ ⣀
+func WithSymbolsBraillePulse() Option { return WithSpinnerStyle(SpinnerBraillePulse) }
+
+// WithSymbolsBrailleSpin returns a option function that sets the spinner
+// unicode animation
+//
+//	⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏ ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏
+func WithSymbolsBrailleSpin() Option { return WithSpinnerStyle(SpinnerBrailleSpin) }
+
+// WithSymbolsBrailleOrbit returns a option function that sets the spinner
+// unicode animation
+//
+//	⠋ ⠙ ⠚ ⠒ ⠂ ⠂ ⠒ ⠲ ⠴ ⠤ ⠄ ⠄ ⠤ ⠠ ⠠ ⠤ ⠦ ⠖ ⠒ ⠐ ⠐ ⠒ ⠓ ⠋
+func WithSymbolsBrailleOrbit() Option { return WithSpinnerStyle(SpinnerBrailleOrbit) }
+
+// WithSymbolsBrailleBounce returns a option function that sets the spinner
+// unicode animation
+//
+//	⠁ ⠂ ⠄ ⡀ ⢀ ⠠ ⠐ ⠈ ⠐ ⠠ ⢀ ⡀ ⠄ ⠂
+func WithSymbolsBrailleBounce() Option { return WithSpinnerStyle(SpinnerBrailleBounce) }
+
+// WithSymbolsBrailleScanner returns a option function that sets the spinner
+// unicode animation
+//
+//	⠁ ⠃ ⠉ ⠙ ⠚ ⠒ ⠂ ⠂ ⠒ ⠲ ⠴ ⠤ ⠄ ⠄ ⠤ ⠠ ⠠ ⠤ ⠦ ⠖ ⠒ ⠐ ⠐ ⠒ ⠓ ⠋ ⠉ ⠈
+func WithSymbolsBrailleScanner() Option { return WithSpinnerStyle(SpinnerBrailleScanner) }
+
+// WithSymbolsBrailleFire returns a option function that sets the spinner
+// unicode animation
+//
+//	⠁ ⠉ ⠋ ⠛ ⠫ ⠭ ⠮ ⠷ ⠿ ⡿ ⢿ ⣷ ⣶ ⣤ ⣀ ⣄ ⣤ ⣶ ⣷ ⢿ ⡿ ⠿ ⠷ ⠮ ⠭ ⠫ ⠛ ⠋ ⠉ ⠁
+func WithSymbolsBrailleFire() Option { return WithSpinnerStyle(SpinnerBrailleFire) }
+
+// WithSymbolsBrailleSpark returns a option function that sets the spinner
+// unicode animation
+//
+//	⠀ ⠁ ⠈ ⠐ ⠠ ⡀ ⢀ ⣀ ⣤ ⣶ ⣿ ⣷ ⣦ ⣄ ⢀ ⡀ ⠠ ⠐ ⠈ ⠁ ⠀
+func WithSymbolsBrailleSpark() Option { return WithSpinnerStyle(SpinnerBrailleSpark) }
+
 // WithSymbolsOrbit returns a option function that sets the spinner
 // unicode animation
 //
@@ -535,6 +583,8 @@ func WithSymbolsFlip() Option { return WithSpinnerStyle(SpinnerFlip) }
 
 // WithSymbolsMaterial returns a option function that sets the spinner
 // unicode animation.
+//
+//	█▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ ██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ ███▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁...
 func WithSymbolsMaterial() Option { return WithSpinnerStyle(SpinnerMaterial) }
 
 // WithSymbolsShark returns a option function that sets the spinner
@@ -576,5 +626,5 @@ func WithSymbolsSpeaker() Option { return WithSpinnerStyle(SpinnerSpeaker) }
 // WithSymbolsStar returns a option function that sets the spinner
 // unicode animation
 //
-//	🔈 🔉  🔊  🔉
+//	✶ ✸ ✹ ✺ ✹ ✷
 func WithSymbolsStar() Option { return WithSpinnerStyle(SpinnerStar) }
