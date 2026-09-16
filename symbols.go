@@ -191,6 +191,12 @@ func WithSymbolsSquare() Option { return WithSpinnerStyle(SpinnerSquare) }
 //	    
 func WithSymbolsSquare2() Option { return WithSpinnerStyle(SpinnerSquare2) }
 
+// WithSymbolsSquare3 returns an option function that sets the spinner unicode
+// animation with square segments.
+//
+//	▰▱▱▱▱▱▱ ▰▰▱▱▱▱▱ ▰▰▰▱▱▱▱ ▰▰▰▰▱▱▱ ▰▰▰▰▰▱▱ ▰▰▰▰▰▰▱ ▰▰▰▰▰▰▰ ▰▱▱▱▱▱▱
+func WithSymbolsSquare3() Option { return WithSpinnerStyle(SpinnerSquare3) }
+
 // WithSymbolsClock returns an option function that sets the spinner unicode
 // animation with clock symbols.
 //
@@ -281,6 +287,12 @@ func WithSymbolsCircles6() Option { return WithSpinnerStyle(SpinnerCircle6) }
 //	     
 func WithSymbolsCircles7() Option { return WithSpinnerStyle(SpinnerCircle7) }
 
+// WithSymbolsCircles8 returns an option function that sets the spinner unicode
+// animation with circles.
+//
+//	∙∙∙ ●∙∙ ∙●∙ ∙∙● ∙∙∙
+func WithSymbolsCircles8() Option { return WithSpinnerStyle(SpinnerCircle8) }
+
 // WithSymbolsBounce returns an option function that sets the spinner unicode
 // animation with circles.
 //
@@ -310,6 +322,18 @@ func WithSymbolsToggle2() Option { return WithSpinnerStyle(SpinnerToggle2) }
 //
 //	◉ ◎
 func WithSymbolsToggle3() Option { return WithSpinnerStyle(SpinnerToggle3) }
+
+// WithSymbolsToggle4 returns an option function that sets the spinner unicode
+// animation with toggle symbols.
+//
+//	㊂ ㊀ ㊁
+func WithSymbolsToggle4() Option { return WithSpinnerStyle(SpinnerToggle4) }
+
+// WithSymbolsToggle5 returns an option function that sets the spinner unicode
+// animation with toggle symbols.
+//
+//	☗ ☖
+func WithSymbolsToggle5() Option { return WithSpinnerStyle(SpinnerToggle5) }
 
 // WithSymbolsLoading returns an option function that sets the spinner unicode
 // animation with loading symbols.
@@ -461,6 +485,11 @@ func WithSymbolsGeometric() Option { return WithSpinnerStyle(SpinnerGeometric) }
 //
 //	▁▁▁▁▁ ▂▁▁▁▁ ▃▂▁▁▁ ▄▃▂▁▁ ▅▄▃▂▁ ▆▅▄▃▂ ▇▆▅▄▃ █▇▆▅▄
 func WithSymbolsRunner() Option { return WithSpinnerStyle(SpinnerRunner) }
+
+// WithSymbolsRunner1 returns an option function that sets the spinner unicode animation.
+//
+//	🚶  🏃
+func WithSymbolsRunner1() Option { return WithSpinnerStyle(SpinnerRunner1) }
 
 // WithSymbolsCursorBlink returns a option function that sets the spinner
 // unicode animation

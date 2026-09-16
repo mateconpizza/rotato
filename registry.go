@@ -53,6 +53,7 @@ const (
 	SpinnerPingpong   SpinnerName = "pingpong"
 	SpinnerPingpong2  SpinnerName = "pingpong2"
 	SpinnerRunner     SpinnerName = "runner"
+	SpinnerRunner1    SpinnerName = "runner1"
 
 	SpinnerCircle  SpinnerName = "circle"
 	SpinnerCircle2 SpinnerName = "circle2"
@@ -61,12 +62,14 @@ const (
 	SpinnerCircle5 SpinnerName = "circle5"
 	SpinnerCircle6 SpinnerName = "circle6"
 	SpinnerCircle7 SpinnerName = "circle7"
+	SpinnerCircle8 SpinnerName = "circle8"
 	SpinnerOrbit   SpinnerName = "orbit"
 	SpinnerMoon    SpinnerName = "moon"
 	SpinnerClock   SpinnerName = "clock"
 
 	SpinnerSquare    SpinnerName = "square"
 	SpinnerSquare2   SpinnerName = "square2"
+	SpinnerSquare3   SpinnerName = "square3"
 	SpinnerCubes     SpinnerName = "cubes"
 	SpinnerTriangles SpinnerName = "triangles"
 	SpinnerDiamond   SpinnerName = "diamond"
@@ -91,6 +94,8 @@ const (
 	SpinnerToggle      SpinnerName = "toggle"
 	SpinnerToggle2     SpinnerName = "toggle2"
 	SpinnerToggle3     SpinnerName = "toggle3"
+	SpinnerToggle4     SpinnerName = "toggle4"
+	SpinnerToggle5     SpinnerName = "toggle5"
 	SpinnerCursorBlink SpinnerName = "cursorBlink"
 	SpinnerPluscross   SpinnerName = "pluscross"
 
@@ -245,6 +250,7 @@ var (
 	pingpong   = []string{"<     >", "<    >", "<   >", "<  >", "< >", "<><", "< >", "<  >", "<   >", "<    >"}
 	pingpong2  = []string{"▐⠂       ▌", "▐⠈       ▌", "▐ ⠂      ▌", "▐ ⠠      ▌", "▐  ⡀     ▌", "▐  ⠠     ▌", "▐   ⠂    ▌", "▐   ⠈    ▌", "▐    ⠂   ▌", "▐    ⠠   ▌", "▐     ⡀  ▌", "▐     ⠠  ▌", "▐      ⠂ ▌", "▐      ⠈ ▌", "▐       ⠂▌", "▐       ⠠▌", "▐       ⡀▌", "▐      ⠠ ▌", "▐      ⠂ ▌", "▐     ⠈  ▌", "▐     ⠂  ▌", "▐    ⠠   ▌", "▐    ⡀   ▌", "▐   ⠠    ▌", "▐   ⠂    ▌", "▐  ⠈     ▌", "▐  ⠂     ▌", "▐ ⠠      ▌", "▐ ⡀      ▌", "▐⠠       ▌"}
 	runner     = []string{"▁▁▁▁▁", "▂▁▁▁▁", "▃▂▁▁▁", "▄▃▂▁▁", "▅▄▃▂▁", "▆▅▄▃▂", "▇▆▅▄▃", "█▇▆▅▄"}
+	runner1    = []string{"🚶 ", "🏃 "}
 
 	// circular and orbit spinners.
 	circle  = []string{"o", "O", "@", "*"}
@@ -254,6 +260,7 @@ var (
 	circle5 = []string{"", "", "", "", ""}
 	circle6 = []string{"", "", "", "", "", ""}
 	circle7 = []string{"", "", "", "", "", ""}
+	circle8 = []string{"∙∙∙", "●∙∙", "∙●∙", "∙∙●", "∙∙∙"}
 	orbit   = []string{"◐", "◓", "◑", "◒"}
 	moon    = []string{"🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"}
 	clock   = []string{"🕛", "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚"}
@@ -261,6 +268,7 @@ var (
 	// shape and geometric spinners.
 	square    = []string{"▖", "▘", "▝", "▗"}
 	square2   = []string{"", "", "", "", ""}
+	square3   = []string{"▰▱▱▱▱▱▱", "▰▰▱▱▱▱▱", "▰▰▰▱▱▱▱", "▰▰▰▰▱▱▱", "▰▰▰▰▰▱▱", "▰▰▰▰▰▰▱", "▰▰▰▰▰▰▰", "▰▱▱▱▱▱▱"}
 	cubes     = []string{"▖", "▘", "▝", "▗"}
 	triangles = []string{"▲", "▶", "▼", "◀"}
 	diamond   = []string{"◇", "◈", "⬟", "⬞"}
@@ -288,6 +296,8 @@ var (
 	toggle      = []string{"■", "□", "▪", "▫"}
 	toggle2     = []string{"=", "*", "-"}
 	toggle3     = []string{"◉", "◎"}
+	toggle4     = []string{"㊂", "㊀", "㊁"}
+	toggle5     = []string{"☗", "☖"}
 	cursorBlink = []string{"_", " ", "_", " "}
 	pluscross   = []string{"+", "x", "*"}
 
@@ -400,6 +410,7 @@ var registry = []SpinnerStyle{
 	{SpinnerPingpong, pingpong, GroupMotion, 120 * time.Millisecond},
 	{SpinnerPingpong2, pingpong2, GroupMotion, 80 * time.Millisecond},
 	{SpinnerRunner, runner, GroupMotion, 80 * time.Millisecond},
+	{SpinnerRunner1, runner1, GroupMotion, 140 * time.Millisecond},
 
 	// circular
 	{SpinnerCircle, circle, GroupCircular, 150 * time.Millisecond},
@@ -409,6 +420,7 @@ var registry = []SpinnerStyle{
 	{SpinnerCircle5, circle5, GroupCircular, 120 * time.Millisecond},
 	{SpinnerCircle6, circle6, GroupCircular, 120 * time.Millisecond},
 	{SpinnerCircle7, circle7, GroupCircular, 120 * time.Millisecond},
+	{SpinnerCircle8, circle8, GroupCircular, 125 * time.Millisecond},
 	{SpinnerOrbit, orbit, GroupCircular, 150 * time.Millisecond},
 	{SpinnerMoon, moon, GroupCircular, 150 * time.Millisecond},
 	{SpinnerClock, clock, GroupCircular, 200 * time.Millisecond},
@@ -416,6 +428,7 @@ var registry = []SpinnerStyle{
 	// shapes
 	{SpinnerSquare, square, GroupShapes, 150 * time.Millisecond},
 	{SpinnerSquare2, square2, GroupShapes, 120 * time.Millisecond},
+	{SpinnerSquare3, square3, GroupShapes, 125 * time.Millisecond},
 	{SpinnerCubes, cubes, GroupShapes, 150 * time.Millisecond},
 	{SpinnerTriangles, triangles, GroupShapes, 150 * time.Millisecond},
 	{SpinnerDiamond, diamond, GroupShapes, 150 * time.Millisecond},
@@ -445,6 +458,8 @@ var registry = []SpinnerStyle{
 	{SpinnerToggle, toggle, GroupMinimal, 200 * time.Millisecond},
 	{SpinnerToggle2, toggle2, GroupMinimal, 200 * time.Millisecond},
 	{SpinnerToggle3, toggle3, GroupMinimal, 250 * time.Millisecond},
+	{SpinnerToggle4, toggle4, GroupMinimal, 100 * time.Millisecond},
+	{SpinnerToggle5, toggle5, GroupMinimal, 120 * time.Millisecond},
 	{SpinnerCursorBlink, cursorBlink, GroupMinimal, 300 * time.Millisecond},
 	{SpinnerPluscross, pluscross, GroupMinimal, 200 * time.Millisecond},
 
