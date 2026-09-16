@@ -91,7 +91,7 @@ func WithMessage(s string) Option {
 // color.
 func WithMessageColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.colorize.message = NewColor(c...)
+		r.colorizer.message = NewColor(c...)
 	}
 }
 
@@ -114,7 +114,7 @@ func WithPrefix(prefix string) Option {
 // prefix.
 func WithPrefixColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.colorize.prefixMesg = NewColor(c...)
+		r.colorizer.prefixMesg = NewColor(c...)
 	}
 }
 
@@ -137,14 +137,14 @@ func WithDelimiter(s string) Option {
 // delimiter, only visible with `prefix`.
 func WithDelimiterColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.colorize.delimiter = NewColor(c...)
+		r.colorizer.delimiter = NewColor(c...)
 	}
 }
 
 // WithSpinnerColor returns an option function that sets the spinner color.
 func WithSpinnerColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.colorize.spinner = NewColor(c...)
+		r.colorizer.spinner = NewColor(c...)
 	}
 }
 
@@ -166,14 +166,14 @@ func WithDoneSymbol(symbol string) Option {
 // color.
 func WithDoneMessageColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.colorize.doneMessage = NewColor(c...)
+		r.colorizer.doneMessage = NewColor(c...)
 	}
 }
 
 // WithDoneSymbolColor sets the combined color(s) for the completion symbol.
 func WithDoneSymbolColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.colorize.doneSymbol = NewColor(c...)
+		r.colorizer.doneSymbol = NewColor(c...)
 	}
 }
 
@@ -188,7 +188,7 @@ func WithFailSymbol(symbol string) Option {
 // color.
 func WithFailMessageColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.colorize.failMessage = NewColor(c...)
+		r.colorizer.failMessage = NewColor(c...)
 	}
 }
 
@@ -196,7 +196,7 @@ func WithFailMessageColor(c ...Color) Option {
 // color.
 func WithFailSymbolColor(c ...Color) Option {
 	return func(r *Rotato) {
-		r.colorize.failSymbol = NewColor(c...)
+		r.colorizer.failSymbol = NewColor(c...)
 	}
 }
 
@@ -233,6 +233,12 @@ func WithNonInteractive() Option {
 func WithContextDoneHandler(handler func(*Rotato, error)) Option {
 	return func(r *Rotato) {
 		r.ctxDoneHandler = handler
+	}
+}
+
+func WithColor(b bool) Option {
+	return func(r *Rotato) {
+		r.colorizer.enabled = b
 	}
 }
 
@@ -295,9 +301,9 @@ type Rotato struct {
 	// term provides terminal control sequences and interactive-output detection.
 	term Term
 
-	// colorize defines the visual color scheme and handles conditional ANSI
+	// colorizer defines the visual color scheme and handles conditional ANSI
 	// formatting.
-	colorize *Colorizer
+	colorizer *Colorizer
 }
 
 // New returns a new spinner.
@@ -315,7 +321,7 @@ func New(opt ...Option) *Rotato {
 		symbols:    defaultSymbols,
 		writer:     os.Stdout,
 		term:       newTerm(),
-		colorize:   newColorizer(),
+		colorizer:  newColorizer(true),
 	}
 	for _, fn := range opt {
 		fn(r)
@@ -391,7 +397,9 @@ func (r *Rotato) Start(ctx context.Context) {
 func (r *Rotato) Done(mesg ...string) {
 	defer r.term.ShowCursor(r.writer)
 
-	r.stopSpinner()
+	if !r.stopSpinner() {
+		return
+	}
 
 	var finalMesg string
 	switch {
@@ -403,10 +411,8 @@ func (r *Rotato) Done(mesg ...string) {
 		r.display(r.term.ClearLine())
 		return
 	}
-
-	symbol := formatSymbol(r.doneSymbol, r.colorize.DoneSymbol)
-
-	r.displayMessage(symbol, r.colorize.DoneMsg, finalMesg)
+	symbol := formatSymbol(r.doneSymbol, r.colorizer.DoneSymbol)
+	r.displayMessage(symbol, r.colorizer.DoneMsg, finalMesg)
 }
 
 // Fail fails the spinner animation.
@@ -415,9 +421,9 @@ func (r *Rotato) Fail(mesg ...string) {
 	if len(mesg) == 0 {
 		mesg = append(mesg, "Failed")
 	}
-	symbol := formatSymbol(r.failSymbol, r.colorize.FailSymbol)
+	symbol := formatSymbol(r.failSymbol, r.colorizer.FailSymbol)
 
-	r.displayMessage(symbol, r.colorize.FailMsg, mesg...)
+	r.displayMessage(symbol, r.colorizer.FailMsg, mesg...)
 }
 
 // SetWriter updates the output destination safely.
@@ -472,7 +478,7 @@ func (r *Rotato) UpdateMesgf(format string, args ...any) {
 
 // UpdateMesgColor changes the color of the message.
 func (r *Rotato) UpdateMesgColor(c ...Color) {
-	r.colorize.message = NewColor(c...)
+	r.colorizer.message = NewColor(c...)
 }
 
 // UpdatePrefix changes the prefix shown next to the spinner.
@@ -488,7 +494,7 @@ func (r *Rotato) UpdatePrefixf(format string, args ...any) {
 
 // UpdatePrefixColor changes the color of the prefix.
 func (r *Rotato) UpdatePrefixColor(c ...Color) {
-	r.colorize.prefixMesg = NewColor(c...)
+	r.colorizer.prefixMesg = NewColor(c...)
 }
 
 // UpdateDoneSymbol changes the done symbol.
@@ -498,12 +504,12 @@ func (r *Rotato) UpdateDoneSymbol(s string) {
 
 // UpdateDoneMesgColor changes the done message shown next to the spinner.
 func (r *Rotato) UpdateDoneMesgColor(c ...Color) {
-	r.colorize.doneMessage = NewColor(c...)
+	r.colorizer.doneMessage = NewColor(c...)
 }
 
 // UpdateSpinnerColor changes the color of the spinner.
 func (r *Rotato) UpdateSpinnerColor(c ...Color) {
-	r.colorize.spinner = NewColor(c...)
+	r.colorizer.spinner = NewColor(c...)
 }
 
 // UpdateSymbols updates the spinner symbols.
@@ -551,7 +557,7 @@ func (r *Rotato) currentMessage() string {
 	r.messageUpdate.RLock()
 	defer r.messageUpdate.RUnlock()
 
-	return r.colorize.Message(r.message)
+	return r.colorizer.Message(r.message)
 }
 
 // currentFrame returns the spinner frame for the given iteration.
@@ -562,16 +568,16 @@ func (r *Rotato) currentFrame(i int) string {
 	r.frameIdx = i % len(r.symbols)
 	r.frame = r.symbols[r.frameIdx]
 
-	return r.colorize.Spinner(r.frame)
+	return r.colorizer.Spinner(r.frame)
 }
 
 // parsePrefix updates the spinner prefix.
 func (r *Rotato) parsePrefix(frame, mesg string) {
 	r.prefixMu.RLock()
 	defer r.prefixMu.RUnlock()
-	prefix := r.colorize.Prefix(r.prefixMesg)
+	prefix := r.colorizer.Prefix(r.prefixMesg)
 	prefix = decorate(prefix, r.prefixDecorators)
-	deli := r.colorize.Delimiter(r.delimiter)
+	deli := r.colorizer.Delimiter(r.delimiter)
 
 	r.display(fmt.Sprintf("%s%s%s %s", prefix, deli, frame, mesg))
 }
@@ -590,22 +596,22 @@ func (r *Rotato) display(s string) {
 }
 
 // stopSpinner handles the common logic for stopping the spinner.
-func (r *Rotato) stopSpinner() {
+// It reports whether the spinner was active and is now stopped.
+func (r *Rotato) stopSpinner() bool {
 	r.activeMu.Lock()
 	defer r.activeMu.Unlock()
-
 	if !r.isActive {
-		return
+		return false
 	}
 
 	r.isActive = false
-
 	if !isInteractive(r) && !r.forceInteractive {
-		return
+		return true
 	}
 
 	defer r.term.ShowCursor(r.writer)
 	r.doneChan <- struct{}{}
+	return true
 }
 
 // displayMessage formats and displays a message with optional prefix and color.
@@ -649,12 +655,12 @@ func (r *Rotato) buildPrefix(sb *strings.Builder, symbol string) {
 
 	// prefix
 	if r.prefixMesg != "" {
-		sb.WriteString(r.colorize.Prefix(r.prefixMesg))
+		sb.WriteString(r.colorizer.Prefix(r.prefixMesg))
 	}
 
 	// delimiter
 	if r.delimiter != "" {
-		sb.WriteString(r.colorize.Delimiter(r.delimiter))
+		sb.WriteString(r.colorizer.Delimiter(r.delimiter))
 	}
 
 	// symbol
@@ -687,13 +693,13 @@ func (r *Rotato) renderCurrentLocked() {
 	mesg := r.currentMessage()
 	mesg = decorate(mesg, r.messageDecorators)
 
-	frame := r.colorize.Spinner(r.frame)
+	frame := r.colorizer.Spinner(r.frame)
 
 	if r.prefixMesg != "" {
-		prefix := r.colorize.Prefix(r.prefixMesg)
+		prefix := r.colorizer.Prefix(r.prefixMesg)
 		prefix = decorate(prefix, r.prefixDecorators)
 
-		delimiter := r.colorize.Delimiter(r.delimiter)
+		delimiter := r.colorizer.Delimiter(r.delimiter)
 
 		_, _ = fmt.Fprintf(
 			r.writer,

@@ -137,6 +137,8 @@ func combine(codes ...Color) string {
 type colorFormatFunc func(s string) string
 
 type Colorizer struct {
+	enabled bool
+
 	spinner     Color
 	message     Color
 	prefixMesg  Color
@@ -145,16 +147,14 @@ type Colorizer struct {
 	doneSymbol  Color
 	failMessage Color
 	failSymbol  Color
-
-	Enabled bool
 }
 
-func newColorizer() *Colorizer {
-	return &Colorizer{Enabled: !isColorDisabled()}
+func newColorizer(enabled bool) *Colorizer {
+	return &Colorizer{enabled: !isColorDisabled() && enabled}
 }
 
 func (c *Colorizer) Format(color Color, text string) string {
-	if !c.Enabled || text == "" || color == "" {
+	if !c.enabled || text == "" || color == "" {
 		return text
 	}
 	return color.Sprint(text)

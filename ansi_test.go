@@ -31,9 +31,9 @@ func TestColorizerFormat(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := newColorizer()
+			p := newColorizer(true)
 			p.spinner = tt.c
-			p.Enabled = tt.enabled
+			p.enabled = tt.enabled
 
 			got := p.Format(tt.c, tt.text)
 			if got != tt.want {
@@ -67,9 +67,9 @@ func TestNewColorizer(t *testing.T) {
 				t.Setenv("NO_COLOR", "1")
 			}
 
-			p := newColorizer()
-			if p.Enabled != tt.wantEnabled {
-				t.Fatalf("newColorizer().Enabled = %v; want %v", p.Enabled, tt.wantEnabled)
+			p := newColorizer(true)
+			if p.enabled != tt.wantEnabled {
+				t.Fatalf("newColorizer().Enabled = %v; want %v", p.enabled, tt.wantEnabled)
 			}
 		})
 	}
@@ -79,7 +79,7 @@ func TestColorizer_Formatters(t *testing.T) {
 	t.Parallel()
 
 	p := Colorizer{
-		Enabled:     true,
+		enabled:     true,
 		spinner:     Color("c1"),
 		message:     Color("c2"),
 		prefixMesg:  Color("c3"),
