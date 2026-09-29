@@ -250,7 +250,7 @@ func withTerm(t Term) Option {
 }
 
 // MessageDecorator defines a function that transforms a message string.
-type MessageDecorator func(mesg string) string
+type MessageDecorator = func(mesg string) string
 
 // Option is an option function for the spinner.
 type Option func(*Rotato)
