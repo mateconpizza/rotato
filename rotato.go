@@ -89,9 +89,9 @@ func WithMessage(s string) Option {
 
 // WithMessageColor returns an option function that sets the spinner message
 // color.
-func WithMessageColor(c ...Color) Option {
+func WithMessageColor(c ColorFn) Option {
 	return func(r *Rotato) {
-		r.colorizer.message = NewColor(c...)
+		r.colorizer.message = c
 	}
 }
 
@@ -112,9 +112,9 @@ func WithPrefix(prefix string) Option {
 
 // WithPrefixColor returns an option function that sets the spinner color
 // prefix.
-func WithPrefixColor(c ...Color) Option {
+func WithPrefixColor(c ColorFn) Option {
 	return func(r *Rotato) {
-		r.colorizer.prefixMesg = NewColor(c...)
+		r.colorizer.prefixMesg = c
 	}
 }
 
@@ -135,16 +135,16 @@ func WithDelimiter(s string) Option {
 
 // WithDelimiterColor returns an option function that sets the spinner color
 // delimiter, only visible with `prefix`.
-func WithDelimiterColor(c ...Color) Option {
+func WithDelimiterColor(c ColorFn) Option {
 	return func(r *Rotato) {
-		r.colorizer.delimiter = NewColor(c...)
+		r.colorizer.delimiter = c
 	}
 }
 
 // WithSpinnerColor returns an option function that sets the spinner color.
-func WithSpinnerColor(c ...Color) Option {
+func WithSpinnerColor(c ColorFn) Option {
 	return func(r *Rotato) {
-		r.colorizer.spinner = NewColor(c...)
+		r.colorizer.spinner = c
 	}
 }
 
@@ -164,16 +164,16 @@ func WithDoneSymbol(symbol string) Option {
 
 // WithDoneMessageColor returns an option function that sets the done message
 // color.
-func WithDoneMessageColor(c ...Color) Option {
+func WithDoneMessageColor(c ColorFn) Option {
 	return func(r *Rotato) {
-		r.colorizer.doneMessage = NewColor(c...)
+		r.colorizer.doneMessage = c
 	}
 }
 
 // WithDoneSymbolColor sets the combined color(s) for the completion symbol.
-func WithDoneSymbolColor(c ...Color) Option {
+func WithDoneSymbolColor(c ColorFn) Option {
 	return func(r *Rotato) {
-		r.colorizer.doneSymbol = NewColor(c...)
+		r.colorizer.doneSymbol = c
 	}
 }
 
@@ -186,17 +186,17 @@ func WithFailSymbol(symbol string) Option {
 
 // WithFailMessageColor returns an option function that sets the fail message
 // color.
-func WithFailMessageColor(c ...Color) Option {
+func WithFailMessageColor(c ColorFn) Option {
 	return func(r *Rotato) {
-		r.colorizer.failMessage = NewColor(c...)
+		r.colorizer.failMessage = c
 	}
 }
 
 // WithFailSymbolColor returns an option function that sets the fail symbol
 // color.
-func WithFailSymbolColor(c ...Color) Option {
+func WithFailSymbolColor(c ColorFn) Option {
 	return func(r *Rotato) {
-		r.colorizer.failSymbol = NewColor(c...)
+		r.colorizer.failSymbol = c
 	}
 }
 
@@ -233,12 +233,6 @@ func WithNonInteractive() Option {
 func WithContextDoneHandler(handler func(*Rotato, error)) Option {
 	return func(r *Rotato) {
 		r.ctxDoneHandler = handler
-	}
-}
-
-func WithColor(b bool) Option {
-	return func(r *Rotato) {
-		r.colorizer.enabled = b
 	}
 }
 
@@ -321,7 +315,7 @@ func New(opt ...Option) *Rotato {
 		symbols:    defaultSymbols,
 		writer:     os.Stdout,
 		term:       newTerm(),
-		colorizer:  newColorizer(true),
+		colorizer:  newColorizer(),
 	}
 	for _, fn := range opt {
 		fn(r)
@@ -477,8 +471,8 @@ func (r *Rotato) UpdateMesgf(format string, args ...any) {
 }
 
 // UpdateMesgColor changes the color of the message.
-func (r *Rotato) UpdateMesgColor(c ...Color) {
-	r.colorizer.message = NewColor(c...)
+func (r *Rotato) UpdateMesgColor(c ColorFn) {
+	r.colorizer.message = c
 }
 
 // UpdatePrefix changes the prefix shown next to the spinner.
@@ -493,8 +487,8 @@ func (r *Rotato) UpdatePrefixf(format string, args ...any) {
 }
 
 // UpdatePrefixColor changes the color of the prefix.
-func (r *Rotato) UpdatePrefixColor(c ...Color) {
-	r.colorizer.prefixMesg = NewColor(c...)
+func (r *Rotato) UpdatePrefixColor(c ColorFn) {
+	r.colorizer.prefixMesg = c
 }
 
 // UpdateDoneSymbol changes the done symbol.
@@ -503,13 +497,13 @@ func (r *Rotato) UpdateDoneSymbol(s string) {
 }
 
 // UpdateDoneMesgColor changes the done message shown next to the spinner.
-func (r *Rotato) UpdateDoneMesgColor(c ...Color) {
-	r.colorizer.doneMessage = NewColor(c...)
+func (r *Rotato) UpdateDoneMesgColor(c ColorFn) {
+	r.colorizer.doneMessage = c
 }
 
 // UpdateSpinnerColor changes the color of the spinner.
-func (r *Rotato) UpdateSpinnerColor(c ...Color) {
-	r.colorizer.spinner = NewColor(c...)
+func (r *Rotato) UpdateSpinnerColor(c ColorFn) {
+	r.colorizer.spinner = c
 }
 
 // UpdateSymbols updates the spinner symbols.
@@ -615,7 +609,7 @@ func (r *Rotato) stopSpinner() bool {
 }
 
 // displayMessage formats and displays a message with optional prefix and color.
-func (r *Rotato) displayMessage(symbol string, colorFn colorFormatFunc, mesg ...string) {
+func (r *Rotato) displayMessage(symbol string, colorFn ColorFn, mesg ...string) {
 	if len(mesg) == 0 {
 		return
 	}
@@ -644,7 +638,7 @@ func (r *Rotato) displayMessage(symbol string, colorFn colorFormatFunc, mesg ...
 	sb.WriteByte('\n')
 
 	// single reset at end
-	sb.WriteString(ColorReset.String())
+	sb.WriteString("\x1b[0m")
 
 	r.display(sb.String())
 }
@@ -731,7 +725,7 @@ func decorate(s string, decorators []MessageDecorator) string {
 }
 
 // formatSymbol wraps a symbol with color codes if provided.
-func formatSymbol(symbol string, colorFn colorFormatFunc) string {
+func formatSymbol(symbol string, colorFn ColorFn) string {
 	if symbol == "" {
 		return ""
 	}
@@ -747,15 +741,22 @@ func CountdownDecorator(d time.Duration) string {
 
 // DimCountdownDecorator formats remaining duration as dimmed seconds text.
 // It displays remaining time in seconds (ss left).
-func DimCountdownDecorator(d time.Duration) string {
-	return StyleDim.With(StyleItalic).Sprintf("(%.0fs left)", d.Seconds())
+func DimCountdownDecorator(d time.Duration, c ColorFn) string {
+	if c == nil {
+		c = func(s string) string { return s }
+	}
+	return c(fmt.Sprintf("(%.0fs left)", d.Seconds()))
 }
 
 // DimElapsedDecorator formats elapsed duration as dimmed mm:ss.
-func DimElapsedDecorator(d time.Duration) string {
+func DimElapsedDecorator(d time.Duration, c ColorFn) string {
+	if c == nil {
+		c = func(s string) string { return s }
+	}
+
 	m := int(d.Minutes())
 	s := int(d.Seconds()) % 60
-	return StyleDim.Sprintf("+%02d:%02d", m, s)
+	return c(fmt.Sprintf("+%02d:%02d", m, s))
 }
 
 // ElapsedDecorator formats elapsed duration as mm:ss.

@@ -45,10 +45,60 @@ type Flags struct {
 //nolint:gosec // deterministic demo seed
 var rng = rand.New(rand.NewSource(42))
 
+// Color in a sequences for colors and text styles.
+type Color string
+
+func NewColor(codes ...Color) Color { return Color(combine(codes...)) }
+
+const (
+	ColorReset Color = "\x1b[0m" // Reset all attributes
+
+	FgBlue Color = "\x1b[34m"
+
+	FgBrightRed    Color = "\x1b[91m"
+	FgBrightGreen  Color = "\x1b[92m"
+	FgBrightYellow Color = "\x1b[93m"
+	FgBrightBlue   Color = "\x1b[94m"
+	FgBrightCyan   Color = "\x1b[96m"
+
+	FgGray   Color = "\x1b[90m"       // Alias for bright black
+	FgOrange Color = "\x1b[38;5;214m" // 256-color orange
+
+	StyleBold   Color = "\x1b[1m" // Bold or increased intensity
+	StyleDim    Color = "\x1b[2m" // Faint or dim
+	StyleItalic Color = "\x1b[3m" // Italic
+	StyleBlink  Color = "\x1b[5m" // Slow blink
+)
+
+func (c Color) Wrap(text string, styles ...Color) string {
+	return string(c) + combine(styles...) + text + ColorReset.String()
+}
+func (c Color) With(styles ...Color) Color        { return Color(string(c) + combine(styles...)) }
+func (c Color) Sprint(a ...any) string            { return c.Wrap(fmt.Sprint(a...)) }
+func (c Color) Sprintf(f string, a ...any) string { return c.Wrap(fmt.Sprintf(f, a...)) }
+func (c Color) ColorFn(s string) string           { return c.Sprint(s) }
+func (c Color) String() string                    { return string(c) }
+
+// combine merges multiple Color codes into a single string.
+func combine(codes ...Color) string {
+	if len(codes) == 0 {
+		return ""
+	}
+	if len(codes) == 1 {
+		return string(codes[0])
+	}
+
+	var sb strings.Builder
+	for _, code := range codes {
+		sb.WriteString(code.String())
+	}
+	return sb.String()
+}
+
 // Colors.
 var (
-	greenBold   = rotato.NewColor(rotato.StyleBold, rotato.FgBrightGreen)
-	greenItalic = rotato.NewColor(rotato.FgBrightGreen, rotato.StyleItalic)
+	greenBold   = NewColor(StyleBold, FgBrightGreen)
+	greenItalic = NewColor(FgBrightGreen, StyleItalic)
 	hint        = "(ctrl+c to exit · %s)"
 )
 
@@ -160,9 +210,9 @@ func (d *Demo) ByName(ctx context.Context, s string) {
 // List pretty format spinner's groups by name.
 func (d *Demo) List() {
 	var (
-		dim    = rotato.StyleDim.Sprint
-		bold   = rotato.StyleBold.Sprint
-		header = rotato.FgBrightYellow.Wrap("rotato", rotato.StyleBold)
+		dim    = StyleDim.Sprint
+		bold   = StyleBold.Sprint
+		header = FgBrightYellow.Wrap("rotato", StyleBold)
 	)
 
 	fmt.Printf(
@@ -225,9 +275,9 @@ func (d *Demo) Usage() {
 func (d *Demo) sceneSimple(ctx context.Context) {
 	r := rotato.New(d.opts(
 		rotato.WithPrefix("Fetching config"),
-		rotato.WithPrefixColor(rotato.StyleItalic),
-		rotato.WithSpinnerColor(rotato.FgBrightCyan),
-		rotato.WithDoneMessageColor(greenItalic),
+		rotato.WithPrefixColor(StyleItalic.ColorFn),
+		rotato.WithSpinnerColor(FgBrightCyan.ColorFn),
+		rotato.WithDoneMessageColor(greenItalic.ColorFn),
 	)...)
 	r.Start(ctx)
 
@@ -243,11 +293,11 @@ func (d *Demo) sceneSimple(ctx context.Context) {
 func (d *Demo) sceneMultiStep(ctx context.Context) {
 	r := rotato.New(d.opts(
 		rotato.WithSymbolsCircles6(),
-		rotato.WithSpinnerColor(rotato.FgOrange),
+		rotato.WithSpinnerColor(FgOrange.ColorFn),
 		rotato.WithPrefix("S3 backup"),
-		rotato.WithPrefixColor(rotato.StyleBold),
+		rotato.WithPrefixColor(StyleBold.ColorFn),
 		rotato.WithMessage("connecting..."),
-		rotato.WithDoneMessageColor(rotato.StyleBold),
+		rotato.WithDoneMessageColor(StyleBold.ColorFn),
 	)...)
 	r.Start(ctx)
 
@@ -259,7 +309,7 @@ func (d *Demo) sceneMultiStep(ctx context.Context) {
 
 	// Phase 2 - confirm connection with a static check mark
 	r.UpdateSymbols(rotato.WithSymbols(greenBold.Sprint("✓")))
-	r.UpdateMesgColor(greenBold)
+	r.UpdateMesgColor(greenBold.ColorFn)
 	r.UpdateMesg("connected")
 	if err := pause(ctx, 800*time.Millisecond); err != nil {
 		r.Fail("aborted after connect")
@@ -268,7 +318,7 @@ func (d *Demo) sceneMultiStep(ctx context.Context) {
 
 	// Phase 3 - transfer files
 	r.UpdateSymbols(rotato.WithSymbolsBarBlock())
-	r.UpdateMesgColor(rotato.FgGray)
+	r.UpdateMesgColor(FgGray.ColorFn)
 	r.UpdatePrefix("S3 uploading")
 	for i := 1; i <= 15; i++ {
 		r.UpdateMesg(fmt.Sprintf("[%d/15] %s", i, randFilename()))
@@ -287,7 +337,7 @@ func (d *Demo) sceneError(ctx context.Context) {
 	r := rotato.New(d.opts(
 		rotato.WithPrefix("AWS Health Check"),
 		rotato.WithSymbolsPipe(),
-		rotato.WithSpinnerColor(rotato.FgBlue.With(rotato.StyleBold)),
+		rotato.WithSpinnerColor(FgBlue.With(StyleBold).ColorFn),
 		rotato.WithMessage("pinging us-east-1..."),
 	)...)
 	r.Start(ctx)
@@ -311,14 +361,14 @@ func (d *Demo) sceneElapse(ctx context.Context) {
 	t := time.Now()
 	formatter := func(mesg string) string {
 		d := time.Since(t).Round(time.Second)
-		return mesg + " " + rotato.DimElapsedDecorator(d)
+		return mesg + " " + rotato.DimElapsedDecorator(d, StyleDim.ColorFn)
 	}
 
 	// Step 1: Download
 	download := rotato.New(d.opts(
-		rotato.WithSpinnerColor(rotato.FgBrightGreen),
+		rotato.WithSpinnerColor(FgBrightGreen.ColorFn),
 		rotato.WithDoneSymbol("\u203A"),
-		rotato.WithDoneSymbolColor(rotato.FgBrightCyan),
+		rotato.WithDoneSymbolColor(FgBrightCyan.ColorFn),
 		rotato.WithSymbolsBarBlock7(),
 		rotato.WithPrefix(task),
 		rotato.WithPrefixDecorator(formatter), // elapsed
@@ -334,9 +384,9 @@ func (d *Demo) sceneElapse(ctx context.Context) {
 	// Step 2: Verify
 	verify := rotato.New(d.opts(
 		rotato.WithDoneSymbol("\u203A"),
-		rotato.WithDoneSymbolColor(rotato.FgBrightYellow),
+		rotato.WithDoneSymbolColor(FgBrightYellow.ColorFn),
 		rotato.WithSymbolsCircles7(),
-		rotato.WithSpinnerColor(rotato.FgBrightCyan),
+		rotato.WithSpinnerColor(FgBrightCyan.ColorFn),
 		rotato.WithFrequency(110*time.Millisecond),
 		rotato.WithPrefix(task),
 		rotato.WithPrefixDecorator(formatter), // elapsed
@@ -354,7 +404,7 @@ func (d *Demo) sceneElapse(ctx context.Context) {
 	// Step 3: Extract
 	extract := rotato.New(d.opts(
 		rotato.WithSpinnerStyle("growvert"),
-		rotato.WithSpinnerColor(greenBold),
+		rotato.WithSpinnerColor(greenBold.ColorFn),
 		rotato.WithFrequency(140*time.Millisecond),
 		rotato.WithPrefix(task),
 		rotato.WithPrefixDecorator(formatter), // elapsed
@@ -372,18 +422,18 @@ func (d *Demo) sceneLog(ctx context.Context) {
 	sp := rotato.New(d.opts(
 		rotato.WithPrefix("Processing items"),
 		rotato.WithMessage("starting"),
-		rotato.WithMessageColor(rotato.FgBrightBlue.With(rotato.StyleItalic)),
-		rotato.WithPrefixColor(rotato.StyleDim),
-		rotato.WithSpinnerColor(rotato.FgBrightYellow.With(rotato.StyleBold)),
+		rotato.WithMessageColor(FgBrightBlue.With(StyleItalic).ColorFn),
+		rotato.WithPrefixColor(StyleDim.ColorFn),
+		rotato.WithSpinnerColor(FgBrightYellow.With(StyleBold).ColorFn),
 	)...)
 
 	sp.Start(ctx)
 
 	items := []Item{
-		{"item #1", d.Flags.Duration, "processed successfully", "✓", rotato.FgBrightGreen.With(rotato.StyleBold)},
-		{"item #2", d.Flags.Duration, "requires manual review", "✗", rotato.FgBrightRed.With(rotato.StyleBold)},
-		{"item #3", d.Flags.Duration, "processed successfully", "✓", rotato.FgBrightGreen.With(rotato.StyleBold)},
-		{"item #4", d.Flags.Duration, "requires manual review", "!", rotato.FgBrightYellow.With(rotato.StyleBold)},
+		{"item #1", d.Flags.Duration, "processed successfully", "✓", FgBrightGreen.With(StyleBold)},
+		{"item #2", d.Flags.Duration, "requires manual review", "✗", FgBrightRed.With(StyleBold)},
+		{"item #3", d.Flags.Duration, "processed successfully", "✓", FgBrightGreen.With(StyleBold)},
+		{"item #4", d.Flags.Duration, "requires manual review", "!", FgBrightYellow.With(StyleBold)},
 	}
 
 	var (
@@ -393,7 +443,7 @@ func (d *Demo) sceneLog(ctx context.Context) {
 
 	sp.AddPrefixDecorator(func(prefix string) string {
 		progress := fmt.Sprintf("[%d/%d] ", current, total)
-		return rotato.FgBrightCyan.With(rotato.StyleBold).Sprint(progress) + prefix
+		return FgBrightCyan.With(StyleBold).Sprint(progress) + prefix
 	})
 
 	for _, item := range items {
@@ -415,18 +465,17 @@ func (d *Demo) sceneLog(ctx context.Context) {
 // sceneCountdown demonstrates a countdown: a graceful shutdown that shows
 // remaining time using the library's own formatting helpers.
 func (d *Demo) sceneCountdown(ctx context.Context) {
-	var color rotato.Color
+	var color Color
 	ctx, cancel := context.WithTimeout(ctx, d.Flags.Duration)
 	defer cancel()
 
 	r := rotato.New(d.opts(
 		rotato.WithPrefix("Shutting Down"),
-		rotato.WithPrefixColor(rotato.StyleBold),
+		rotato.WithPrefixColor(StyleBold.ColorFn),
 		rotato.WithMessage("in"),
-		rotato.WithMessageColor(),
 		rotato.WithSymbolsBlockPretty(),
-		rotato.WithDoneMessageColor(rotato.StyleBlink, greenBold),
-		rotato.WithDoneSymbolColor(rotato.StyleBlink, greenBold),
+		rotato.WithDoneMessageColor(StyleBlink.With(greenBold).ColorFn),
+		rotato.WithDoneSymbolColor(StyleBlink.With(greenBold).ColorFn),
 		rotato.WithMessageDecorator(func(mesg string) string {
 			deadline, ok := ctx.Deadline()
 			if !ok {
@@ -435,14 +484,14 @@ func (d *Demo) sceneCountdown(ctx context.Context) {
 			remaining := max(time.Until(deadline), 0)
 			switch {
 			case remaining > 3*time.Second:
-				color = rotato.FgBrightGreen
+				color = FgBrightGreen
 			case remaining > time.Second:
-				color = rotato.FgOrange
+				color = FgOrange
 			default:
-				color = rotato.FgBrightRed
+				color = FgBrightRed
 			}
 
-			return color.With(rotato.StyleItalic).Sprintf(
+			return color.With(StyleItalic).Sprintf(
 				"in %s...",
 				formatDuration(remaining),
 			)
@@ -453,7 +502,7 @@ func (d *Demo) sceneCountdown(ctx context.Context) {
 	// Wait for the internal deadline; the spinner stops itself when ctx fires.
 	<-ctx.Done()
 	r.UpdatePrefix("Demo")
-	r.UpdatePrefixColor(rotato.StyleBold)
+	r.UpdatePrefixColor(StyleBold.ColorFn)
 	r.UpdateDoneSymbol("\u25A0")
 	r.Done("goodbye!")
 }
@@ -467,9 +516,9 @@ func (d *Demo) opts(extra ...rotato.Option) []rotato.Option {
 	// common
 	opts = append(
 		opts,
-		rotato.WithDoneSymbolColor(greenBold),
-		rotato.WithFailMessageColor(rotato.FgBrightRed),
-		rotato.WithFailSymbolColor(rotato.StyleBold, rotato.FgBrightRed),
+		rotato.WithDoneSymbolColor(greenBold.ColorFn),
+		rotato.WithFailMessageColor(FgBrightRed.ColorFn),
+		rotato.WithFailSymbolColor(StyleBold.With(FgBrightRed).ColorFn),
 	)
 
 	return append(opts, extra...)
@@ -538,7 +587,7 @@ func main() {
 var decorator = func(deadline time.Time) rotato.MessageDecorator {
 	return func(mesg string) string {
 		remaining := max(time.Until(deadline).Round(time.Second), 0)
-		return rotato.StyleDim.With(rotato.StyleItalic).Sprintf(mesg, remaining)
+		return StyleDim.With(StyleItalic).Sprintf(mesg, remaining)
 	}
 }
 
@@ -568,7 +617,7 @@ type Item struct {
 	pause  time.Duration
 	mesg   string
 	symbol string
-	color  rotato.Color
+	color  Color
 }
 
 func (t *Item) String() string {

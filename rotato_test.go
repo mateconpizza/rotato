@@ -110,56 +110,6 @@ func TestFailMesg(t *testing.T) {
 	}
 }
 
-func TestRemoveANSI(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name  string
-		input string
-		want  string
-	}{
-		{
-			name:  "Simple ANSI codes",
-			input: FgRed.With(StyleBold).Sprint("Hello"),
-			want:  "Hello",
-		},
-		{
-			name:  "No ANSI codes",
-			input: "No ANSI codes here",
-			want:  "No ANSI codes here",
-		},
-		{
-			name:  "Multiple ANSI sequences",
-			input: "Text " + FgRed.Sprint("Red") + " and " + FgGreen.Sprint("Green"),
-			want:  "Text Red and Green",
-		},
-		{
-			name:  "ANSI only",
-			input: FgBlue.With(StyleBold).Sprint("Blue Bold Text"),
-			want:  "Blue Bold Text",
-		},
-		{
-			name:  "Empty ANSI",
-			input: string(FgBlue),
-			want:  "",
-		},
-	}
-
-	term := Term{}
-
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			got := term.RemoveANSI(tt.input)
-			if got != tt.want {
-				t.Errorf("removeANSI(%q) = %q; want %q", tt.input, got, tt.want)
-			}
-		})
-	}
-}
-
 func TestContext(t *testing.T) {
 	t.Parallel()
 
@@ -281,7 +231,7 @@ func TestDisplayMessage(t *testing.T) {
 		name      string
 		symbol    string
 		delimiter string
-		color     Color
+		color     ColorFn
 		msg       []string
 		prefix    string
 		expected  string
@@ -289,28 +239,28 @@ func TestDisplayMessage(t *testing.T) {
 		{
 			name:     "symbol + message",
 			symbol:   "✓",
-			color:    "",
+			color:    func(s string) string { return "" + s },
 			msg:      []string{"done"},
 			expected: "✓ done\n",
 		},
 		{
 			name:     "color applied - ANSI stripped on redirect",
 			symbol:   "✓",
-			color:    "\x1b[32m",
+			color:    func(s string) string { return "\x1b[32m" + s },
 			msg:      []string{"ok"},
 			expected: "✓ ok\n",
 		},
 		{
 			name:      "no symbol",
 			delimiter: "--",
-			color:     "",
+			color:     func(s string) string { return "" + s },
 			msg:       []string{"hello"},
 			expected:  "hello\n",
 		},
 		{
 			name:      "prefix overrides symbol position",
 			symbol:    "✓",
-			color:     "",
+			color:     func(s string) string { return "" + s },
 			delimiter: NBSP,
 			msg:       []string{"done"},
 			prefix:    "step1",
@@ -334,7 +284,7 @@ func TestDisplayMessage(t *testing.T) {
 			)
 
 			r.displayMessage(tt.symbol, func(s string) string {
-				return tt.color.Sprint(s)
+				return tt.color(s)
 			}, tt.msg...)
 
 			got := buf.String()
@@ -1061,6 +1011,13 @@ func TestNew_WithSymbols(t *testing.T) {
 func TestBuildPrefix(t *testing.T) {
 	t.Parallel()
 
+	reset := "\x1b[0m"
+
+	fgRed := func(s string) string { return "\x1b[91m" + s + reset }
+	fgGreen := func(s string) string { return "\x1b[92m" + s + reset }
+	fgYellow := func(s string) string { return "\x1b[93m" + s + reset }
+	fgBlue := func(s string) string { return "\x1b[94m" + s + reset }
+
 	tests := []struct {
 		name   string
 		opts   []Option
@@ -1095,21 +1052,21 @@ func TestBuildPrefix(t *testing.T) {
 			name: "prefix_color_wraps_prefix",
 			opts: []Option{
 				WithPrefix("go"),
-				WithPrefixColor(FgGreen),
+				WithPrefixColor(fgGreen),
 				WithDelimiter(":"),
 			},
 			symbol: "",
-			want:   FgGreen.Sprint("go") + ":",
+			want:   fgGreen("go") + ":",
 		},
 		{
 			name: "delimiter_color_wraps_delimiter",
 			opts: []Option{
 				WithPrefix("go"),
 				WithDelimiter(":"),
-				WithDelimiterColor(FgRed),
+				WithDelimiterColor(fgRed),
 			},
 			symbol: "",
-			want:   "go" + FgRed.Sprint(":"),
+			want:   "go" + fgRed(":"),
 		},
 		{
 			name:   "default_delimiter_nbsp",
@@ -1130,12 +1087,12 @@ func TestBuildPrefix(t *testing.T) {
 			name: "prefix_and_delimiter_colors_combined",
 			opts: []Option{
 				WithPrefix("run"),
-				WithPrefixColor(FgBlue),
+				WithPrefixColor(fgBlue),
 				WithDelimiter(":"),
-				WithDelimiterColor(FgYellow),
+				WithDelimiterColor(fgYellow),
 			},
 			symbol: "!",
-			want:   FgBlue.Sprint("run") + FgYellow.Sprint(":") + "! ",
+			want:   fgBlue("run") + fgYellow(":") + "! ",
 		},
 	}
 
