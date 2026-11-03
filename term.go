@@ -8,8 +8,13 @@ import (
 	"syscall"
 )
 
+var re = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
 // NBSP represents a non-breaking space character.
 const NBSP = "\u00A0"
+
+// cursor control sequences for showing, hiding the cursor.
+type cursor string
 
 const (
 	cursorHide cursor = "\x1b[?25l"
@@ -46,7 +51,6 @@ func (t Term) ClearLine() string {
 
 // RemoveANSI removes ANSI codes from a given string.
 func (t Term) RemoveANSI(s string) string {
-	re := regexp.MustCompile(`\x1b\[[0-9;]*m`)
 	return re.ReplaceAllString(s, "")
 }
 
