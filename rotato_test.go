@@ -231,7 +231,7 @@ func TestDisplayMessage(t *testing.T) {
 		name      string
 		symbol    string
 		delimiter string
-		color     ColorFn
+		color     ColorFunc
 		msg       []string
 		prefix    string
 		expected  string

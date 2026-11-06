@@ -1,16 +1,16 @@
 package rotato
 
-type ColorFn func(s string) string
+type ColorFunc func(s string) string
 
 type Colorizer struct {
-	spinner     ColorFn
-	message     ColorFn
-	prefixMesg  ColorFn
-	delimiter   ColorFn
-	doneMessage ColorFn
-	doneSymbol  ColorFn
-	failMessage ColorFn
-	failSymbol  ColorFn
+	spinner     ColorFunc
+	message     ColorFunc
+	prefixMesg  ColorFunc
+	delimiter   ColorFunc
+	doneMessage ColorFunc
+	doneSymbol  ColorFunc
+	failMessage ColorFunc
+	failSymbol  ColorFunc
 }
 
 func newColorizer() *Colorizer { return &Colorizer{} }
@@ -24,7 +24,7 @@ func (c *Colorizer) DoneSymbol(s string) string { return c.format(c.doneSymbol, 
 func (c *Colorizer) FailMsg(s string) string    { return c.format(c.failMessage, s) } // Fail message color
 func (c *Colorizer) FailSymbol(s string) string { return c.format(c.failSymbol, s) }  // Fail symbol color
 
-func (c *Colorizer) format(color ColorFn, text string) string {
+func (c *Colorizer) format(color ColorFunc, text string) string {
 	if text == "" || color == nil {
 		return text
 	}
